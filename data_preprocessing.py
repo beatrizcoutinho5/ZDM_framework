@@ -26,8 +26,11 @@ initial_number_samples = len(df)
 print(f"Initial Number of Features: {initial_number_features}")
 print(f"Initial Number of Samples: {initial_number_samples}")
 
-# Remove row with Line Working? = -1
+# Remove rows with Line Working? = -1
 df = df[df["Line Working?"] != -1]
+
+# Remove rows Defect Code = -1
+df = df[df["Defect Code"] != -1]
 
 # Remove columns with irrelevant data for the framework
 columns_remove = ["Defect Group", "Defect Group Description", "Defect Description", "Pallet Code",
@@ -181,12 +184,11 @@ if autocorrelation_analysis == 1:
     # Calculate feature autocorrelation
     autocorr_results = numeric_columns.apply(lambda x: x.autocorr())
 
-    # Filter columns with autocorrelation greater than or equal to 0.8
-    high_autocorr_columns = autocorr_results[abs(autocorr_results) >= 0.8].index.tolist()
+    # Filter columns with autocorrelation greater than or equal to 0.55
+    high_autocorr_columns = autocorr_results[abs(autocorr_results) >= 0.55].index.tolist()
 
     if make_plots == 1:
-
-        print("Columns with autocorrelation greater than or equal to |0.8|:")
+        print("Columns with autocorrelation greater than or equal to |0.55|:")
         print(high_autocorr_columns)
 
     # ACF plots
@@ -212,9 +214,7 @@ if autocorrelation_analysis == 1:
 
         print("Autocorrelation plots saved.")
 
-
     for col in (high_autocorr_columns + ["Recording Date"]):
-
         # Create a new column that contains the feature values shifting the value by one (lag=1)
         df["{}-1".format(col)] = df[col].shift(1)
 
@@ -223,18 +223,21 @@ if autocorrelation_analysis == 1:
 
     # Calculate the rate of change (Delta) for each feature using the lagged values and the Delta Time between the,
     for col in high_autocorr_columns:
-        df["Delta_{}".format(col)] = (df[col] - df["{}-1".format(col)])/df["Delta Time"]
+        df["Delta_{}".format(col)] = (df[col] - df["{}-1".format(col)]) / df["Delta Time"]
 
     # Remove redundant features after the autocorrelation process
 
     for col in (high_autocorr_columns + ["Recording Date"]):
         df = df.drop("{}-1".format(col), axis=1)
 
+    df = df.dropna(axis=0)
     df.to_excel(
         r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\cleaned_data_with_deltavalues.xlsx',
         index=False)
 
-
 if autocorrelation_analysis == 0:
-    df.to_excel(r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\cleaned_data.xlsx', index=False)
 
+    df = df.dropna(axis=0)
+    df.to_excel(
+        r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\cleaned_data.xlsx',
+        index=False)
