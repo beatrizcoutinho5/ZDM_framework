@@ -3,10 +3,15 @@ from sklearn.model_selection import train_test_split
 import seaborn as sns
 import matplotlib.pyplot as plt
 from imblearn.over_sampling import SMOTE
+import os
 
 clean_data_delta_path = r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\cleaned_data_with_deltavalues.xlsx'
 
 df = pd.read_excel(clean_data_delta_path)
+
+# Directory to save the resulting plots
+plots_dir = "plots"
+os.makedirs(plots_dir, exist_ok=True)
 
 # Removing the date from the data
 
@@ -59,7 +64,10 @@ defect_count_without_zero_aug = y_train_aug[y_train_aug != 0].value_counts()
 
 # Plot the frequency of defects before and after data augmentation
 
-fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(12, 12))
+augmentation_subdirectory_path = os.path.join(plots_dir, 'augmentation')
+os.makedirs(augmentation_subdirectory_path, exist_ok=True)
+
+fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(16, 12))
 
 # Plot the bar plot with Defect Code = 0 in the original data
 sns.barplot(x=defect_count.index, y=defect_count.values, palette="magma", ax=axes[0, 0])
@@ -85,8 +93,12 @@ axes[1, 1].set_title("AUG - Quantity of the selected defect codes in TRAIN set (
 axes[1, 1].set_xlabel("Defect Code")
 axes[1, 1].set_ylabel("Quantity")
 
+output_path = os.path.join(augmentation_subdirectory_path, 'data_before_and_after_SMOTE.png')
+plt.savefig(output_path)
+
 plt.tight_layout()
 plt.show()
+
 
 
 
