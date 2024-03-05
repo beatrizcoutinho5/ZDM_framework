@@ -9,7 +9,9 @@ from statsmodels.graphics.tsaplots import plot_acf
 plots_dir = "plots"
 os.makedirs(plots_dir, exist_ok=True)
 
+dataset_2022_path = r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\dataset_jan_dec_2022_line410.xlsx'
 dataset_2023_path = r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\dataset_jan_may_2023_line410.xlsx'
+dataset_2024_path = r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\dataset_jan_feb_2024_line410.xlsx'
 
 df = pd.read_excel(dataset_2023_path)
 
@@ -92,7 +94,10 @@ columns_remove_correlated = ["Thickness.1", "Lower Valve Temperature", "Upper Va
                              "Liston 2 Speed.1", "Floor 1.1", "Floor 2.1", "Bridge Platform.1", "Floor 1 Blow Time.1",
                              "Floor 2 Blow Time.1", "Centering Table.1", "Finishing Down_cat", "Reference Down_cat"]
 
-df = df.drop(columns_remove_correlated, axis=1)
+# df = df.drop(columns_remove_correlated, axis=1)
+for col in columns_remove_correlated:
+    if col in df.columns:
+        df = df.drop(col, axis=1)
 
 ###################################
 # Data Analysis and Visualization #
@@ -147,6 +152,9 @@ for col in features_remove_zero:
     rows_to_remove = df[df[col] <= 0]
     rows_zero_removed_count += len(rows_to_remove)
 
+# Remove the rows with values less than or equal to 0 in any of the specified columns
+df = df.drop(rows_to_remove.index, axis=0)
+
 df = df[(df[features_remove_zero] > 0).all(axis=1)]
 
 # Print initial dataset characteristics
@@ -162,9 +170,6 @@ print(f"Final Number of Samples: {final_number_samples}")
 print()
 print(f"Removed {np.abs(final_number_features - initial_number_features)} features.")
 print(f"Removed {np.abs(final_number_samples - initial_number_samples)} samples.")
-
-# df.to_excel(r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\cleaned_data.xlsx', index=False)
-
 
 #####################################
 # Feature Auto-correlation Analysis #
@@ -214,7 +219,7 @@ if autocorrelation_analysis == 1:
 
         print("Autocorrelation plots saved.")
 
-    for col in (high_autocorr_columns + ["Recording Date"]):
+    for col in (high_autocorr_columns + ["Recording Date"] + ["Quantity"]):
         # Create a new column that contains the feature values shifting the value by one (lag=1)
         df["{}-1".format(col)] = df[col].shift(1)
 
@@ -227,16 +232,16 @@ if autocorrelation_analysis == 1:
 
     # Remove redundant features after the autocorrelation process
 
-    for col in (high_autocorr_columns + ["Recording Date"]):
+    for col in (high_autocorr_columns + ["Recording Date"] + ["Quantity"]):
         df = df.drop("{}-1".format(col), axis=1)
 
     df = df.dropna(axis=0)
     df.to_excel(
-        r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\cleaned_data_with_deltavalues.xlsx',
+        r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\cleaned_data_with_deltavalues2023.xlsx',
         index=False)
+    print("Saved clean data!")
 
 if autocorrelation_analysis == 0:
-
     df = df.dropna(axis=0)
     df.to_excel(
         r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\cleaned_data.xlsx',
