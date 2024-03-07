@@ -20,10 +20,10 @@ df2024 = pd.read_excel(dataset_2024_path)
 df = pd.concat([df2022, df2023, df2024], axis=0)
 
 # Make plots and prints?
-make_plots = 1
+make_plots = 0
 
 # Autocorrelation and Time Series Analysis?
-autocorrelation_analysis = 1
+autocorrelation_analysis = 0
 
 # Print initial dataset characteristics
 initial_number_features = len(df.columns)
@@ -243,10 +243,11 @@ if autocorrelation_analysis == 1:
     df.to_excel(
         r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\cleaned_data_with_deltavalues2022_2023_2024.xlsx',
         index=False)
-    print("Saved clean data!")
+    print("Saved clean data (with delta values)!")
 
 if autocorrelation_analysis == 0:
     df = df.dropna(axis=0)
     df.to_excel(
-        r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\cleaned_data.xlsx',
+        r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\cleaned_data2022_2023_2024.xlsx',
         index=False)
+    print("Saved clean data!")

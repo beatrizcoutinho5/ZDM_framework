@@ -1,25 +1,32 @@
+import os
+import json
+import logging
+import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-import numpy as np
-import os
 
-from sklearn import preprocessing
-from imblearn.over_sampling import SMOTE
-from xgboost import XGBClassifier
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
-from sklearn.metrics import recall_score, precision_score
-from sklearn.preprocessing import LabelEncoder
+from datetime import datetime
+from sklearn import preprocessing
+from xgboost import XGBClassifier
+from joblib import dump, load
 from catboost import CatBoostClassifier
+from imblearn.over_sampling import SMOTE
+from sklearn.preprocessing import LabelEncoder
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import recall_score, precision_score, confusion_matrix, ConfusionMatrixDisplay
 
-clean_data_delta_path = r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\cleaned_data_with_deltavalues2022_2023_2024.xlsx'
-
-df = pd.read_excel(clean_data_delta_path)
+timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 # Make plots and prints?
 make_plots = 0
+
+# Import test and train data?
+import_test_train_data = 1
+
+# Load models?
+load_models = 1
 
 # Final data arrays
 
@@ -28,258 +35,368 @@ final_x_test = pd.DataFrame()
 final_y_train = pd.Series(dtype='float64')
 final_y_test = pd.Series(dtype='float64')
 
-# Directory to save the resulting plots
-plots_dir = "plots"
-os.makedirs(plots_dir, exist_ok=True)
 
-# # Removing the date from the data
-#
-# df = df.drop("Recording Date", axis=1)
+clean_data_delta_paths = [
+    r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\cleaned_data2022_2023_2024.xlsx']
+    # r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\cleaned_data2022_2023_2024.xlsx']
 
-# The top 10 defects make up almost 80% of all defect occurrence
-# those defects are the only ones being considered in the classification process
-# since the rest of the defects have limited samples/instances
+if import_test_train_data == 1:
+    print(f'\nLoading test and train data...')
 
-defect_code_column = 'Defect Code'
-quantity_column = 'Quantity'
+    x_train_aug = pd.read_excel(
+        r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\without_delta_values\x_train_aug.xlsx')
 
-defect_quantity_dict = {}
+    y_train_aug = pd.read_excel(
+        r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\without_delta_values\y_train_aug.xlsx')['Defect Code']
 
-for index, row in df.iterrows():
-    code = row[defect_code_column]
-    quantity = row[quantity_column]
+    x_test = pd.read_excel(
+        r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\without_delta_values\x_test.xlsx')
 
-    defect_quantity_dict[code] = defect_quantity_dict.get(code, 0) + quantity
+    final_y_test = pd.read_excel(
+        r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\without_delta_values\y_test.xlsx')['Defect Code']
 
-# Sort by quantity
-sorted_defect_quantity = sorted(defect_quantity_dict.items(), key=lambda x: x[1], reverse=True)
+    print(f'Loaded test and train data!')
 
-# Save the top 10 defect codes
-top_defects = [code for code, quantity in sorted_defect_quantity[:11]]
 
-# Remove the instances of other defects from the dataframe
-df = df[df["Defect Code"].isin(top_defects)]
+for clean_data_delta_path in clean_data_delta_paths:
 
-# Split the df by year
+    # Configure logging file
+    logging.basicConfig(filename=f'prediction_model_metrics_log.txt', level=logging.INFO)
+    logging.info(f"\nTimestamp: {timestamp}")
+    file_name = os.path.splitext(os.path.basename(clean_data_delta_path))[0]
+    logging.info(f"\nFile: {file_name}")
 
-df["Recording Date"] = pd.to_datetime(df["Recording Date"], format="%d/%m/%Y %H:%M:%S")
+    df = pd.read_excel(clean_data_delta_path)
 
-# Separate the DataFrame into different DataFrames based on years
-years = df["Recording Date"].dt.year.unique()
+    if import_test_train_data == 0:
 
-dfs_by_year = {}
-for year in years:
-    dfs_by_year[year] = df[df["Recording Date"].dt.year == year]
+        # Directory to save the resulting plots
+        plots_dir = "plots"
+        os.makedirs(plots_dir, exist_ok=True)
 
-# Split train / test
+        # # Removing the date from the data
+        #
+        # df = df.drop("Recording Date", axis=1)
 
-for year in years:
-    dfs_by_year[year] = df[df["Recording Date"].dt.year == year]
+        # The top 10 defects make up almost 80% of all defect occurrence
+        # those defects are the only ones being considered in the classification process
+        # since the rest of the defects have limited samples/instances
 
-    split_index = int(0.8 * len(dfs_by_year[year]))
+        defect_code_column = 'Defect Code'
+        quantity_column = 'Quantity'
 
-    train_data = dfs_by_year[year].iloc[:split_index]
-    test_data = dfs_by_year[year].iloc[split_index:]
+        defect_quantity_dict = {}
 
-    y_train = train_data["Defect Code"]
-    x_train = train_data.drop("Defect Code", axis=1)
+        for index, row in df.iterrows():
+            code = row[defect_code_column]
+            quantity = row[quantity_column]
 
-    y_test = test_data["Defect Code"]
-    x_test = test_data.drop("Defect Code", axis=1)
+            defect_quantity_dict[code] = defect_quantity_dict.get(code, 0) + quantity
 
-    final_x_train = pd.concat([final_x_train, x_train])
-    final_y_train = pd.concat([final_y_train, y_train])
+        # Sort by quantity
+        sorted_defect_quantity = sorted(defect_quantity_dict.items(), key=lambda x: x[1], reverse=True)
 
-    final_x_test = pd.concat([final_x_test, x_test])
-    final_y_test = pd.concat([final_y_test, y_test])
+        # Save the top 10 defect codes
+        top_defects = [code for code, quantity in sorted_defect_quantity[:11]]
 
-# Removing the date from the data
+        # Remove the instances of other defects from the dataframe
+        df = df[df["Defect Code"].isin(top_defects)]
 
-final_x_train = final_x_train.drop("Recording Date", axis=1)
-final_x_test = final_x_test.drop("Recording Date", axis=1)
+        # Split the df by year
 
-# Calculate the quantity of each defect code in the train set
-defect_count = final_y_train.value_counts()
-defect_count_without_zero = final_y_train[final_y_train != 0].value_counts()
+        df["Recording Date"] = pd.to_datetime(df["Recording Date"], format="%d/%m/%Y %H:%M:%S")
 
-# Data Augmentation using SMOTE
+        # Separate the DataFrame into different DataFrames based on years
+        years = df["Recording Date"].dt.year.unique()
 
-x_train_aug, y_train_aug = SMOTE(random_state=42).fit_resample(final_x_train, final_y_train)
+        dfs_by_year = {}
+        for year in years:
+            dfs_by_year[year] = df[df["Recording Date"].dt.year == year]
 
-defect_count_aug = y_train_aug.value_counts()
-defect_count_without_zero_aug = y_train_aug[y_train_aug != 0].value_counts()
+        # Split train / test
 
-# Plot the frequency of defects before and after data augmentation
-if make_plots == 1:
-    augmentation_subdirectory_path = os.path.join(plots_dir, 'augmentation')
-    os.makedirs(augmentation_subdirectory_path, exist_ok=True)
+        for year in years:
+            dfs_by_year[year] = df[df["Recording Date"].dt.year == year]
 
-    fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(16, 12))
+            split_index = int(0.8 * len(dfs_by_year[year]))
 
-    # Plot the bar plot with Defect Code = 0 in the original data
-    sns.barplot(x=defect_count.index, y=defect_count.values, palette="magma", ax=axes[0, 0])
-    axes[0, 0].set_title("Original - Quantity of the selected defect codes in TRAIN set + No Defect")
-    axes[0, 0].set_xlabel("Defect Code")
-    axes[0, 0].set_ylabel("Quantity")
+            train_data = dfs_by_year[year].iloc[:split_index]
+            test_data = dfs_by_year[year].iloc[split_index:]
 
-    # Plot the bar plot with only defects (excluding Defect Code = 0) in the original data
-    sns.barplot(x=defect_count_without_zero.index, y=defect_count_without_zero.values, palette="viridis", ax=axes[0, 1])
-    axes[0, 1].set_title("Original - Quantity of the selected defect codes in TRAIN set (excluding code 0)")
-    axes[0, 1].set_xlabel("Defect Code")
-    axes[0, 1].set_ylabel("Quantity")
+            y_train = train_data["Defect Code"]
+            x_train = train_data.drop("Defect Code", axis=1)
 
-    # Plot the bar plot with Defect Code = 0 in the augmented data
-    sns.barplot(x=defect_count_aug.index, y=defect_count_aug.values, palette="magma", ax=axes[1, 0])
-    axes[1, 0].set_title("AUG - Quantity of the selected defect codes in TRAIN set + No Defect")
-    axes[1, 0].set_xlabel("Defect Code")
-    axes[1, 0].set_ylabel("Quantity")
+            y_test = test_data["Defect Code"]
+            x_test = test_data.drop("Defect Code", axis=1)
 
-    # Plot the bar plot with only defects (excluding Defect Code = 0) in the augmented data
-    sns.barplot(x=defect_count_without_zero_aug.index, y=defect_count_without_zero_aug.values, palette="viridis",
-                ax=axes[1, 1])
-    axes[1, 1].set_title("AUG - Quantity of the selected defect codes in TRAIN set (excluding code 0)")
-    axes[1, 1].set_xlabel("Defect Code")
-    axes[1, 1].set_ylabel("Quantity")
+            final_x_train = pd.concat([final_x_train, x_train])
+            final_y_train = pd.concat([final_y_train, y_train])
 
-    output_path = os.path.join(augmentation_subdirectory_path, 'data_before_and_after_SMOTE.png')
-    plt.savefig(output_path)
+            final_x_test = pd.concat([final_x_test, x_test])
+            final_y_test = pd.concat([final_y_test, y_test])
 
-    plt.tight_layout()
+        # Removing the date from the data
+
+        final_x_train = final_x_train.drop("Recording Date", axis=1)
+        final_x_test = final_x_test.drop("Recording Date", axis=1)
+
+        # Calculate the quantity of each defect code in the train set
+        defect_count = final_y_train.value_counts()
+        defect_count_without_zero = final_y_train[final_y_train != 0].value_counts()
+
+        # Data Augmentation using SMOTE
+
+        x_train_aug, y_train_aug = SMOTE(random_state=42).fit_resample(final_x_train, final_y_train)
+
+        defect_count_aug = y_train_aug.value_counts()
+        defect_count_without_zero_aug = y_train_aug[y_train_aug != 0].value_counts()
+
+        # Plot the frequency of defects before and after data augmentation
+        if make_plots == 1:
+            augmentation_subdirectory_path = os.path.join(plots_dir, 'augmentation')
+            os.makedirs(augmentation_subdirectory_path, exist_ok=True)
+
+            fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(16, 12))
+
+            # Plot the bar plot with Defect Code = 0 in the original data
+            sns.barplot(x=defect_count.index, y=defect_count.values, palette="magma", ax=axes[0, 0])
+            axes[0, 0].set_title("Original - Quantity of the selected defect codes in TRAIN set + No Defect")
+            axes[0, 0].set_xlabel("Defect Code")
+            axes[0, 0].set_ylabel("Quantity")
+
+            # Plot the bar plot with only defects (excluding Defect Code = 0) in the original data
+            sns.barplot(x=defect_count_without_zero.index, y=defect_count_without_zero.values, palette="viridis",
+                        ax=axes[0, 1])
+            axes[0, 1].set_title("Original - Quantity of the selected defect codes in TRAIN set (excluding code 0)")
+            axes[0, 1].set_xlabel("Defect Code")
+            axes[0, 1].set_ylabel("Quantity")
+
+            # Plot the bar plot with Defect Code = 0 in the augmented data
+            sns.barplot(x=defect_count_aug.index, y=defect_count_aug.values, palette="magma", ax=axes[1, 0])
+            axes[1, 0].set_title("AUG - Quantity of the selected defect codes in TRAIN set + No Defect")
+            axes[1, 0].set_xlabel("Defect Code")
+            axes[1, 0].set_ylabel("Quantity")
+
+            # Plot the bar plot with only defects (excluding Defect Code = 0) in the augmented data
+            sns.barplot(x=defect_count_without_zero_aug.index, y=defect_count_without_zero_aug.values,
+                        palette="viridis",
+                        ax=axes[1, 1])
+            axes[1, 1].set_title("AUG - Quantity of the selected defect codes in TRAIN set (excluding code 0)")
+            axes[1, 1].set_xlabel("Defect Code")
+            axes[1, 1].set_ylabel("Quantity")
+
+            output_path = os.path.join(augmentation_subdirectory_path, 'data_before_and_after_SMOTE.png')
+            plt.savefig(output_path)
+
+            plt.tight_layout()
+            plt.show()
+
+        # Normalize X values
+
+        min_max_scaler = preprocessing.MinMaxScaler()
+
+        x_train_aug = min_max_scaler.fit_transform(x_train_aug)
+        x_test = min_max_scaler.transform(final_x_test)
+
+        # Save test and train data
+        print(f'\nSaving test and train data...')
+
+        pd.DataFrame(x_train_aug, columns=final_x_train.columns).to_excel(
+            r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\without_delta_values\x_train_aug.xlsx',
+            index=False)
+
+        pd.Series(y_train_aug, name='Defect Code').to_excel(
+            r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\without_delta_values\y_train_aug.xlsx',
+            index=False)
+
+        pd.DataFrame(x_test, columns=final_x_test.columns).to_excel(
+            r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\without_delta_values\x_test.xlsx',
+            index=False)
+
+        pd.Series(final_y_test, name='Defect Code').to_excel(
+            r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\without_delta_values\y_test.xlsx',
+            index=False)
+
+        print(f'\nSaved train and test data!')
+
+    print("-------------- Modelling --------------")
+
+
+    #################
+    # Random Forest #
+    #################
+
+    print(f'\nStarting Random Forest...')
+
+    # Model Fit
+
+    rndforest = RandomForestClassifier(random_state=42)
+
+    if load_models == 1:
+        rndforest = load(r'models\without_delta_values\random_forest_model.pkl')
+    else:
+        rndforest.fit(x_train_aug, y_train_aug)
+
+    # Prediction
+    y_pred_rf = rndforest.predict(x_test)
+
+    # Evaluation
+
+    confusion_matrix_rf = confusion_matrix(final_y_test, y_pred_rf)
+    disp_rf = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_rf, display_labels=rndforest.classes_)
+    disp_rf.plot()
+    plt.title('RF Confusion Matrix - with "Defect Class"')
     plt.show()
 
-# Normalize X values
+    # Display the confusion matrix without class '0' -> no defect
+    labels_rf = np.unique(final_y_test)[1:]
+    confusion_matrix_xgb = confusion_matrix(final_y_test, y_pred_rf, labels=labels_rf)
+    disp_xgb = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_xgb, display_labels=labels_rf)
+    disp_xgb.plot()
+    plt.title('RF Confusion Matrix - without "Defect Class"')
+    plt.show()
 
-min_max_scaler = preprocessing.MinMaxScaler()
+    recall_score_rf = recall_score(final_y_test, y_pred_rf, average='weighted', zero_division=1)
+    print(f'Recall: {recall_score_rf:.6f}')
 
-x_train_aug = min_max_scaler.fit_transform(x_train_aug)
-x_test = min_max_scaler.transform(final_x_test)
+    precision_score_rf = precision_score(final_y_test, y_pred_rf, average='weighted', zero_division=1)
+    print(f'Precision: {precision_score_rf:.6f}')
 
-#################
-# Random Forest #
-#################
+    logging.info("\nRandomForest Metrics:")
+    logging.info(f"Recall: {recall_score_rf:.6f}")
+    logging.info(f"Precision: {precision_score_rf:.6f}")
 
-print(f'\nStarting Random Forest...')
+    # Save
+    if load_models == 0:
+        dump(rndforest, r'models\without_delta_values\random_forest_model.pkl')
 
-# Model Fit
+    ###########
+    # XGBOOST #
+    ###########
 
-rndforest = RandomForestClassifier(random_state=42)
-rndforest.fit(x_train_aug, y_train_aug)
+    # Label Encoding for XGBoost
 
-# Prediction
-y_pred_rf = rndforest.predict(x_test)
+    label_encoder = LabelEncoder()
 
-# Evaluation
+    y_concatenated = pd.concat([y_train_aug, final_y_test])
+    y_concatenated_encoded = label_encoder.fit_transform(y_concatenated)
 
-confusion_matrix_rf = confusion_matrix(final_y_test, y_pred_rf)
-disp_rf = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_rf, display_labels=rndforest.classes_)
-disp_rf.plot()
-plt.title('RF Confusion Matrix - with "Defect Class"')
-plt.show()
+    y_train_aug_encoded = y_concatenated_encoded[:len(y_train_aug)]
+    y_test_encoded = y_concatenated_encoded[len(y_train_aug):]
 
-# Display the confusion matrix without class '0' -> no defect
-labels_rf = np.unique(final_y_test)[1:]
-confusion_matrix_xgb = confusion_matrix(final_y_test, y_pred_rf, labels=labels_rf)
-disp_xgb = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_xgb, display_labels=labels_rf)
-disp_xgb.plot()
-plt.title('RF Confusion Matrix - without "Defect Class"')
-plt.show()
+    # Model Fit
+    print(f'\nStarting XGBoost...')
 
-recall_score_rf = recall_score(final_y_test, y_pred_rf, average='weighted', zero_division=1)
-print(f'Recall: {recall_score_rf:.6f}')
+    xgb_model = XGBClassifier(random_state=42)
 
-precision_score_rf = precision_score(final_y_test, y_pred_rf, average='weighted', zero_division=1)
-print(f'Precision: {precision_score_rf:.6f}')
+    if load_models == 1:
+        xgb_model.load_model(r'models\without_delta_values\xgb_model.model')
+    else:
+        xgb_model.fit(x_train_aug, y_train_aug_encoded)
 
-###########
-# XGBOOST #
-###########
+    # Predict
+    y_pred_encoded = xgb_model.predict(x_test)
 
-# Label Encoding for XGBoost
+    # Decode the predictions back to the original class labels
+    y_pred_xgb = label_encoder.inverse_transform(y_pred_encoded)
 
-label_encoder = LabelEncoder()
+    # Evaluation
 
-y_concatenated = pd.concat([y_train_aug, final_y_test])
-y_concatenated_encoded = label_encoder.fit_transform(y_concatenated)
+    # Display the confusion matrix
+    confusion_matrix_xgb = confusion_matrix(final_y_test, y_pred_xgb)
+    disp_xgb = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_xgb, display_labels=xgb_model.classes_)
+    disp_xgb.plot()
+    plt.title('XGBoost Confusion Matrix')
+    plt.show()
 
-y_train_aug_encoded = y_concatenated_encoded[:len(y_train_aug)]
-y_test_encoded = y_concatenated_encoded[len(y_train_aug):]
+    # Display the confusion matrix without class '0' -> no defect
+    labels_xgb = np.unique(final_y_test)[1:]
+    confusion_matrix_xgb = confusion_matrix(final_y_test, y_pred_xgb, labels=labels_xgb)
+    disp_xgb = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_xgb, display_labels=labels_xgb)
+    disp_xgb.plot()
+    plt.title('XGBoost Confusion Matrix - without "Defect Class"')
+    plt.show()
 
-# Model Fit
-print(f'\nStarting XGBoost...')
+    recall_score_xgb = recall_score(final_y_test, y_pred_xgb, average='weighted', zero_division=1)
+    print(f'Recall: {recall_score_xgb:.6f}')
 
-xgb_model = XGBClassifier(random_state=42)
-xgb_model.fit(x_train_aug, y_train_aug_encoded)
+    precision_score_xgb = precision_score(final_y_test, y_pred_xgb, average='weighted', zero_division=1)
+    print(f'Precision: {precision_score_xgb:.6f}')
 
-# Predict
-y_pred_encoded = xgb_model.predict(x_test)
+    logging.info("XGBoost Metrics:")
+    logging.info(f"Recall: {recall_score_xgb:.6f}")
+    logging.info(f"Precision: {precision_score_xgb:.6f}")
 
-# Decode the predictions back to the original class labels
-y_pred_xgb = label_encoder.inverse_transform(y_pred_encoded)
+    # Save
+    if load_models == 0:
+        xgb_model.save_model('models/without_delta_values/xgb_model.json')
 
-# Evaluation
+    #######
+    # SVM #
+    #######
 
-# Display the confusion matrix
-confusion_matrix_xgb = confusion_matrix(final_y_test, y_pred_xgb)
-disp_xgb = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_xgb, display_labels=xgb_model.classes_)
-disp_xgb.plot()
-plt.title('XGBoost Confusion Matrix')
-plt.show()
+    print(f'\nStarting SVM...')
 
-# Display the confusion matrix without class '0' -> no defect
-labels_xgb = np.unique(final_y_test)[1:]
-confusion_matrix_xgb = confusion_matrix(final_y_test, y_pred_xgb, labels=labels_xgb)
-disp_xgb = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_xgb, display_labels=labels_xgb)
-disp_xgb.plot()
-plt.title('XGBoost Confusion Matrix - without "Defect Class"')
-plt.show()
+    svm_model = SVC(random_state=42)
 
-recall_score_xgb = recall_score(final_y_test, y_pred_xgb, average='weighted', zero_division=1)
-print(f'Recall: {recall_score_xgb:.6f}')
+    if load_models == 1:
+        svm_model = load(r'models\without_delta_values\svm_model.pkl')
+    else:
+        svm_model.fit(x_train_aug, y_train_aug)
 
-precision_score_xgb = precision_score(final_y_test, y_pred_xgb, average='weighted', zero_division=1)
-print(f'Precision: {precision_score_xgb:.6f}')
+    # Predict
+    y_pred_svm = svm_model.predict(x_test)
 
-#######
-# SVM #
-#######
+    # Evaluation
 
-print(f'\nStarting SVM...')
+    confusion_matrix_svm = confusion_matrix(final_y_test, y_pred_svm)
+    disp_svm = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_svm, display_labels=svm_model.classes_)
+    disp_svm.plot()
+    plt.title('SVM Confusion Matrix')
+    plt.show()
 
-svm_model = SVC(random_state=42)
-svm_model.fit(x_train_aug, y_train_aug)
+    recall_score_svm = recall_score(final_y_test, y_pred_svm, average='weighted', zero_division=1)
+    print(f'Recall: {recall_score_svm:.6f}')
 
-# Predict
-y_pred_svm = svm_model.predict(x_test)
+    precision_score_svm = precision_score(final_y_test, y_pred_svm, average='weighted', zero_division=1)
+    print(f'Precision: {precision_score_svm:.6f}')
 
-# Evaluation
+    logging.info("\nSVM Metrics:")
+    logging.info(f"Recall: {recall_score_svm:.6f}")
+    logging.info(f"Precision: {precision_score_svm:.6f}")
 
-confusion_matrix_svm = confusion_matrix(final_y_test, y_pred_svm)
-disp_svm = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_svm, display_labels=svm_model.classes_)
-disp_svm.plot()
-plt.title('SVM Confusion Matrix')
-plt.show()
+    # Save
+    if load_models == 0:
+        dump(svm_model, r'models\without_delta_values\svm_model.pkl')
 
-recall_score_svm = recall_score(final_y_test, y_pred_svm, average='weighted', zero_division=1)
-print(f'Recall: {recall_score_svm:.6f}')
+    ############
+    # CATBOOST #
+    ############
 
-precision_score_svm = precision_score(final_y_test, y_pred_svm, average='weighted', zero_division=1)
-print(f'Precision: {precision_score_svm:.6f}')
+    print(f'\nStarting CatBoost...')
 
-############
-# CATBOOST #
-############
+    catboost_model = CatBoostClassifier(loss_function='MultiClass', verbose=False)
 
-print(f'\nStarting CatBoost...')
+    if load_models == 1:
+        catboost_model = CatBoostClassifier(loss_function='MultiClass', verbose=False)
+        catboost_model.load_model(r'models\without_delta_values\catboost_model.cbm')
+    else:
+        catboost_model.fit(x_train_aug, y_train_aug)
 
-catboost_model = CatBoostClassifier(loss_function='MultiClass', verbose=False)
-catboost_model.fit(x_train_aug, y_train_aug)
+    # Predict
+    y_pred_cat = catboost_model.predict(x_test)
 
-# Predict
-y_pred_cat = catboost_model.predict(x_test)
+    # Evaluation
+    recall_score_cat = recall_score(final_y_test, y_pred_cat, average='weighted', zero_division=1)
+    print(f'Recall: {recall_score_cat:.6f}')
 
-# Evaluation
-recall_score_cat = recall_score(final_y_test, y_pred_cat, average='weighted', zero_division=1)
-print(f'Recall: {recall_score_cat:.6f}')
+    precision_score_cat = precision_score(final_y_test, y_pred_cat, average='weighted', zero_division=1)
+    print(f'Precision: {precision_score_cat:.6f}')
 
-precision_score_cat = precision_score(final_y_test, y_pred_cat, average='weighted', zero_division=1)
-print(f'Precision: {precision_score_cat:.6f}')
+    logging.info("\nCatBoost Metrics:")
+    logging.info(f"Recall: {recall_score_cat:.6f}")
+    logging.info(f"Precision: {precision_score_cat:.6f}")
+
+    # Save
+    if load_models == 0:
+        catboost_model.save_model(r'models\without_delta_values\catboost_model.cbm')

@@ -1,0 +1,80 @@
+INFO:root:
+Timestamp: 2024-03-07 17:13:06
+INFO:root:
+File: cleaned_data_with_deltavalues2022_2023_2024
+INFO:root:
+Timestamp: 2024-03-07 17:14:07
+INFO:root:
+File: cleaned_data_with_deltavalues2022_2023_2024
+INFO:root:
+Timestamp: 2024-03-07 17:16:56
+INFO:root:
+File: cleaned_data_with_deltavalues2022_2023_2024
+INFO:root:
+RandomForest Metrics:
+INFO:root:Recall: 0.840965
+INFO:root:Precision: 0.838766
+INFO:root:XGBoost Metrics:
+INFO:root:Recall: 0.826525
+INFO:root:Precision: 0.818518
+INFO:root:
+Timestamp: 2024-03-07 17:32:25
+INFO:root:
+File: cleaned_data_with_deltavalues2022_2023_2024
+INFO:root:
+Timestamp: 2024-03-07 17:36:34
+INFO:root:
+File: cleaned_data_with_deltavalues2022_2023_2024
+INFO:root:
+RandomForest Metrics:
+INFO:root:Recall: 0.840965
+INFO:root:Precision: 0.838766
+INFO:root:XGBoost Metrics:
+INFO:root:Recall: 0.826525
+INFO:root:Precision: 0.818518
+INFO:root:
+Timestamp: 2024-03-07 18:10:34
+INFO:root:
+File: cleaned_data_with_deltavalues2022_2023_2024
+INFO:root:
+RandomForest Metrics:
+INFO:root:Recall: 0.840965
+INFO:root:Precision: 0.838766
+INFO:root:
+Timestamp: 2024-03-07 18:18:09
+INFO:root:
+File: cleaned_data_with_deltavalues2022_2023_2024
+INFO:root:
+RandomForest Metrics:
+INFO:root:Recall: 0.840965
+INFO:root:Precision: 0.838766
+INFO:root:XGBoost Metrics:
+INFO:root:Recall: 0.826525
+INFO:root:Precision: 0.818518
+INFO:root:
+SVM Metrics:
+INFO:root:Recall: 0.796504
+INFO:root:Precision: 0.814372
+INFO:root:
+CatBoost Metrics:
+INFO:root:Recall: 0.831085
+INFO:root:Precision: 0.821743
+INFO:root:
+Timestamp: 2024-03-07 19:11:52
+INFO:root:
+File: cleaned_data2022_2023_2024
+INFO:root:
+RandomForest Metrics:
+INFO:root:Recall: 0.841216
+INFO:root:Precision: 0.857228
+INFO:root:XGBoost Metrics:
+INFO:root:Recall: 0.831529
+INFO:root:Precision: 0.826950
+INFO:root:
+SVM Metrics:
+INFO:root:Recall: 0.795442
+INFO:root:Precision: 0.816079
+INFO:root:
+CatBoost Metrics:
+INFO:root:Recall: 0.833428
+INFO:root:Precision: 0.828707
