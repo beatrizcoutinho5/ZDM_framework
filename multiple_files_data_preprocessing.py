@@ -15,8 +15,9 @@ dataset_2024_path = r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MES
 
 df2022 = pd.read_excel(dataset_2022_path)
 df2023 = pd.read_excel(dataset_2023_path)
+df2024 = pd.read_excel(dataset_2024_path)
 
-df = pd.concat([df2022, df2023], axis=0)
+df = pd.concat([df2022, df2023, df2024], axis=0)
 
 # Make plots and prints?
 make_plots = 1
@@ -240,7 +241,7 @@ if autocorrelation_analysis == 1:
 
     df = df.dropna(axis=0)
     df.to_excel(
-        r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\cleaned_data_with_deltavalues2022_2023.xlsx',
+        r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\cleaned_data_with_deltavalues2022_2023_2024.xlsx',
         index=False)
     print("Saved clean data!")
 

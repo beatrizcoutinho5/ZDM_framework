@@ -14,7 +14,7 @@ from sklearn.metrics import recall_score, precision_score
 from sklearn.preprocessing import LabelEncoder
 from catboost import CatBoostClassifier
 
-clean_data_delta_path = r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\cleaned_data_with_deltavalues2022_2023.xlsx'
+clean_data_delta_path = r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\cleaned_data_with_deltavalues2022_2023_2024.xlsx'
 
 df = pd.read_excel(clean_data_delta_path)
 
