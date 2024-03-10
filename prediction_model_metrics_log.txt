@@ -1,46 +1,4 @@
 INFO:root:
-Timestamp: 2024-03-07 17:13:06
-INFO:root:
-File: cleaned_data_with_deltavalues2022_2023_2024
-INFO:root:
-Timestamp: 2024-03-07 17:14:07
-INFO:root:
-File: cleaned_data_with_deltavalues2022_2023_2024
-INFO:root:
-Timestamp: 2024-03-07 17:16:56
-INFO:root:
-File: cleaned_data_with_deltavalues2022_2023_2024
-INFO:root:
-RandomForest Metrics:
-INFO:root:Recall: 0.840965
-INFO:root:Precision: 0.838766
-INFO:root:XGBoost Metrics:
-INFO:root:Recall: 0.826525
-INFO:root:Precision: 0.818518
-INFO:root:
-Timestamp: 2024-03-07 17:32:25
-INFO:root:
-File: cleaned_data_with_deltavalues2022_2023_2024
-INFO:root:
-Timestamp: 2024-03-07 17:36:34
-INFO:root:
-File: cleaned_data_with_deltavalues2022_2023_2024
-INFO:root:
-RandomForest Metrics:
-INFO:root:Recall: 0.840965
-INFO:root:Precision: 0.838766
-INFO:root:XGBoost Metrics:
-INFO:root:Recall: 0.826525
-INFO:root:Precision: 0.818518
-INFO:root:
-Timestamp: 2024-03-07 18:10:34
-INFO:root:
-File: cleaned_data_with_deltavalues2022_2023_2024
-INFO:root:
-RandomForest Metrics:
-INFO:root:Recall: 0.840965
-INFO:root:Precision: 0.838766
-INFO:root:
 Timestamp: 2024-03-07 18:18:09
 INFO:root:
 File: cleaned_data_with_deltavalues2022_2023_2024
@@ -78,3 +36,19 @@ INFO:root:
 CatBoost Metrics:
 INFO:root:Recall: 0.833428
 INFO:root:Precision: 0.828707
+INFO:root:
+Timestamp: 2024-03-09 18:57:01
+INFO:root:
+File: cleaned_data_with_delta_values2022_2023_2024
+INFO:root:
+Timestamp: 2024-03-09 19:01:10
+INFO:root:
+File: cleaned_data_with_deltavalues2022_2023_2024
+INFO:root:
+Timestamp: 2024-03-09 19:05:56
+INFO:root:
+File: cleaned_data_with_deltavalues2022_2023_2024
+INFO:root:
+Timestamp: 2024-03-09 21:16:44
+INFO:root:
+File: cleaned_data_with_deltavalues2022_2023_2024

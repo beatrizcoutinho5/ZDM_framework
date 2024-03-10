@@ -20,12 +20,14 @@ from sklearn.metrics import recall_score, precision_score, confusion_matrix, Con
 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 # Make plots and prints?
-make_plots = 0
+make_plots = 1
 
 # Import test and train data?
-import_test_train_data = 1
+import_test_train_data = 0
 
 # Load models?
+# 0 -> train the models
+# 1 -> import trained models for metrics
 load_models = 0
 
 # Final data arrays
@@ -38,22 +40,22 @@ final_y_test = pd.Series(dtype='float64')
 
 clean_data_delta_paths = [
     r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\cleaned_data_with_deltavalues2022_2023_2024.xlsx']
-    # r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\cleaned_data2022_2023_2024.xlsx']
+
 
 if import_test_train_data == 1:
     print(f'\nLoading test and train data...')
 
     x_train_aug = pd.read_excel(
-        r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\with_delta_values\x_train_aug.xlsx')
+        r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\with_delta_values\binary_x_train_aug.xlsx')
 
     y_train_aug = pd.read_excel(
-        r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\with_delta_values\y_train_aug.xlsx')['Defect Code']
+        r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\with_delta_values\binary_y_train_aug.xlsx')['Defect Code']
 
     x_test = pd.read_excel(
-        r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\with_delta_values\x_test.xlsx')
+        r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\with_delta_values\binary_x_test.xlsx')
 
     final_y_test = pd.read_excel(
-        r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\with_delta_values\y_test.xlsx')['Defect Code']
+        r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\with_delta_values\binary_y_test.xlsx')['Defect Code']
 
     print(f'Loaded test and train data!')
 
@@ -61,7 +63,7 @@ if import_test_train_data == 1:
 for clean_data_delta_path in clean_data_delta_paths:
 
     # Configure logging file
-    logging.basicConfig(filename=f'prediction_model_metrics_log.txt', level=logging.INFO)
+    logging.basicConfig(filename=f'binary_prediction_model_metrics_log.txt', level=logging.INFO)
     logging.info(f"\nTimestamp: {timestamp}")
     file_name = os.path.splitext(os.path.basename(clean_data_delta_path))[0]
     logging.info(f"\nFile: {file_name}")
@@ -74,36 +76,11 @@ for clean_data_delta_path in clean_data_delta_paths:
         plots_dir = "plots"
         os.makedirs(plots_dir, exist_ok=True)
 
-        # # Removing the date from the data
-        #
-        # df = df.drop("Recording Date", axis=1)
-
-        # The top 10 defects make up almost 80% of all defect occurrence
-        # those defects are the only ones being considered in the classification process
-        # since the rest of the defects have limited samples/instances
-
-        defect_code_column = 'Defect Code'
-        quantity_column = 'Quantity'
-
-        defect_quantity_dict = {}
-
-        for index, row in df.iterrows():
-            code = row[defect_code_column]
-            quantity = row[quantity_column]
-
-            defect_quantity_dict[code] = defect_quantity_dict.get(code, 0) + quantity
-
-        # Sort by quantity
-        sorted_defect_quantity = sorted(defect_quantity_dict.items(), key=lambda x: x[1], reverse=True)
-
-        # Save the top 10 defect codes
-        top_defects = [code for code, quantity in sorted_defect_quantity[:11]]
-
-        # Remove the instances of other defects from the dataframe
-        df = df[df["Defect Code"].isin(top_defects)]
+        # For binary classification
+        # new column where '0' is one class (no defect) and any other code is the second class (defect)
+        df['Binary Defect Code'] = np.where(df['Defect Code'] == 0, 0, 1)
 
         # Split the df by year
-
         df["Recording Date"] = pd.to_datetime(df["Recording Date"], format="%d/%m/%Y %H:%M:%S")
 
         # Separate the DataFrame into different DataFrames based on years
@@ -123,11 +100,11 @@ for clean_data_delta_path in clean_data_delta_paths:
             train_data = dfs_by_year[year].iloc[:split_index]
             test_data = dfs_by_year[year].iloc[split_index:]
 
-            y_train = train_data["Defect Code"]
-            x_train = train_data.drop("Defect Code", axis=1)
+            y_train = train_data["Binary Defect Code"]
+            x_train = train_data.drop("Binary Defect Code", axis=1)
 
-            y_test = test_data["Defect Code"]
-            x_test = test_data.drop("Defect Code", axis=1)
+            y_test = test_data["Binary Defect Code"]
+            x_test = test_data.drop("Binary Defect Code", axis=1)
 
             final_x_train = pd.concat([final_x_train, x_train])
             final_y_train = pd.concat([final_y_train, y_train])
@@ -146,50 +123,8 @@ for clean_data_delta_path in clean_data_delta_paths:
 
         # Data Augmentation using SMOTE
 
-        x_train_aug, y_train_aug = SMOTE(random_state=42).fit_resample(final_x_train, final_y_train)
-
-        defect_count_aug = y_train_aug.value_counts()
-        defect_count_without_zero_aug = y_train_aug[y_train_aug != 0].value_counts()
-
-        # Plot the frequency of defects before and after data augmentation
-        if make_plots == 1:
-            augmentation_subdirectory_path = os.path.join(plots_dir, 'augmentation')
-            os.makedirs(augmentation_subdirectory_path, exist_ok=True)
-
-            fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(16, 12))
-
-            # Plot the bar plot with Defect Code = 0 in the original data
-            sns.barplot(x=defect_count.index, y=defect_count.values, palette="magma", ax=axes[0, 0])
-            axes[0, 0].set_title("Original - Quantity of the selected defect codes in TRAIN set + No Defect")
-            axes[0, 0].set_xlabel("Defect Code")
-            axes[0, 0].set_ylabel("Quantity")
-
-            # Plot the bar plot with only defects (excluding Defect Code = 0) in the original data
-            sns.barplot(x=defect_count_without_zero.index, y=defect_count_without_zero.values, palette="viridis",
-                        ax=axes[0, 1])
-            axes[0, 1].set_title("Original - Quantity of the selected defect codes in TRAIN set (excluding code 0)")
-            axes[0, 1].set_xlabel("Defect Code")
-            axes[0, 1].set_ylabel("Quantity")
-
-            # Plot the bar plot with Defect Code = 0 in the augmented data
-            sns.barplot(x=defect_count_aug.index, y=defect_count_aug.values, palette="magma", ax=axes[1, 0])
-            axes[1, 0].set_title("AUG - Quantity of the selected defect codes in TRAIN set + No Defect")
-            axes[1, 0].set_xlabel("Defect Code")
-            axes[1, 0].set_ylabel("Quantity")
-
-            # Plot the bar plot with only defects (excluding Defect Code = 0) in the augmented data
-            sns.barplot(x=defect_count_without_zero_aug.index, y=defect_count_without_zero_aug.values,
-                        palette="viridis",
-                        ax=axes[1, 1])
-            axes[1, 1].set_title("AUG - Quantity of the selected defect codes in TRAIN set (excluding code 0)")
-            axes[1, 1].set_xlabel("Defect Code")
-            axes[1, 1].set_ylabel("Quantity")
-
-            output_path = os.path.join(augmentation_subdirectory_path, 'data_before_and_after_SMOTE.png')
-            plt.savefig(output_path)
-
-            plt.tight_layout()
-            plt.show()
+        x_train_aug, y_train_aug = final_x_train, final_y_train
+        y_train_aug = final_y_train
 
         # Normalize X values
 
@@ -202,19 +137,19 @@ for clean_data_delta_path in clean_data_delta_paths:
         print(f'\nSaving test and train data...')
 
         pd.DataFrame(x_train_aug, columns=final_x_train.columns).to_excel(
-            r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\with_delta_values\x_train_aug.xlsx',
+            r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\with_delta_values\binary_x_train_aug.xlsx',
             index=False)
 
         pd.Series(y_train_aug, name='Defect Code').to_excel(
-            r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\with_delta_values\y_train_aug.xlsx',
+            r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\with_delta_values\binary_y_train_aug.xlsx',
             index=False)
 
         pd.DataFrame(x_test, columns=final_x_test.columns).to_excel(
-            r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\with_delta_values\x_test.xlsx',
+            r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\with_delta_values\binary_x_test.xlsx',
             index=False)
 
         pd.Series(final_y_test, name='Defect Code').to_excel(
-            r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\with_delta_values\y_test.xlsx',
+            r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\with_delta_values\binary_y_test.xlsx',
             index=False)
 
         print(f'\nSaved train and test data!')
@@ -232,7 +167,7 @@ for clean_data_delta_path in clean_data_delta_paths:
     rndforest = RandomForestClassifier(random_state=42)
 
     if load_models == 1:
-        rndforest = load(r'models\without_delta_values\random_forest_model.pkl')
+        rndforest = load(r'models\with_delta_values\binary_random_forest_model.pkl')
     else:
         rndforest.fit(x_train_aug, y_train_aug)
 
@@ -247,14 +182,6 @@ for clean_data_delta_path in clean_data_delta_paths:
     plt.title('RF Confusion Matrix - with "Defect Class"')
     plt.show()
 
-    # Display the confusion matrix without class '0' -> no defect
-    labels_rf = np.unique(final_y_test)[1:]
-    confusion_matrix_xgb = confusion_matrix(final_y_test, y_pred_rf, labels=labels_rf)
-    disp_xgb = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_xgb, display_labels=labels_rf)
-    disp_xgb.plot()
-    plt.title('RF Confusion Matrix - without "Defect Class"')
-    plt.show()
-
     recall_score_rf = recall_score(final_y_test, y_pred_rf, average='weighted', zero_division=1)
     print(f'Recall: {recall_score_rf:.6f}')
 
@@ -267,7 +194,7 @@ for clean_data_delta_path in clean_data_delta_paths:
 
     # Save
     if load_models == 0:
-        dump(rndforest, r'models\without_delta_values\random_forest_model.pkl')
+        dump(rndforest, r'models\with_delta_values\binary_random_forest_model.pkl')
 
     ###########
     # XGBOOST #
@@ -289,7 +216,7 @@ for clean_data_delta_path in clean_data_delta_paths:
     xgb_model = XGBClassifier(random_state=42)
 
     if load_models == 1:
-        xgb_model.load_model(r'models\without_delta_values\xgb_model.model')
+        xgb_model.load_model(r'models\with_delta_values\binary_xgb_model.model')
     else:
         xgb_model.fit(x_train_aug, y_train_aug_encoded)
 
@@ -300,21 +227,6 @@ for clean_data_delta_path in clean_data_delta_paths:
     y_pred_xgb = label_encoder.inverse_transform(y_pred_encoded)
 
     # Evaluation
-
-    # Display the confusion matrix
-    confusion_matrix_xgb = confusion_matrix(final_y_test, y_pred_xgb)
-    disp_xgb = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_xgb, display_labels=xgb_model.classes_)
-    disp_xgb.plot()
-    plt.title('XGBoost Confusion Matrix')
-    plt.show()
-
-    # Display the confusion matrix without class '0' -> no defect
-    labels_xgb = np.unique(final_y_test)[1:]
-    confusion_matrix_xgb = confusion_matrix(final_y_test, y_pred_xgb, labels=labels_xgb)
-    disp_xgb = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_xgb, display_labels=labels_xgb)
-    disp_xgb.plot()
-    plt.title('XGBoost Confusion Matrix - without "Defect Class"')
-    plt.show()
 
     recall_score_xgb = recall_score(final_y_test, y_pred_xgb, average='weighted', zero_division=1)
     print(f'Recall: {recall_score_xgb:.6f}')
@@ -328,7 +240,7 @@ for clean_data_delta_path in clean_data_delta_paths:
 
     # Save
     if load_models == 0:
-        xgb_model.save_model('models/without_delta_values/xgb_model.json')
+        xgb_model.save_model('models/with_delta_values/binary_xgb_model.json')
 
     #######
     # SVM #
@@ -339,21 +251,14 @@ for clean_data_delta_path in clean_data_delta_paths:
     svm_model = SVC(random_state=42, probability=True)
 
     if load_models == 1:
-        svm_model = load(r'models\without_delta_values\svm_model.pkl')
+        svm_model = load(r'models\with_delta_values\binary_svm_model.pkl')
     else:
         svm_model.fit(x_train_aug, y_train_aug)
 
-    print("Start SVM prediction...")
     # Predict
     y_pred_svm = svm_model.predict(x_test)
 
     # Evaluation
-
-    confusion_matrix_svm = confusion_matrix(final_y_test, y_pred_svm)
-    disp_svm = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_svm, display_labels=svm_model.classes_)
-    disp_svm.plot()
-    plt.title('SVM Confusion Matrix')
-    plt.show()
 
     recall_score_svm = recall_score(final_y_test, y_pred_svm, average='weighted', zero_division=1)
     print(f'Recall: {recall_score_svm:.6f}')
@@ -367,9 +272,8 @@ for clean_data_delta_path in clean_data_delta_paths:
 
     # Save
     if load_models == 0:
-        print("Saving SVM...")
-        dump(svm_model, r'models\with_delta_values\svm_model.pkl')
-        print("Saved!")
+        dump(svm_model, r'models\with_delta_values\binary_svm_model.pkl')
+
 
     ############
     # CATBOOST #
@@ -377,11 +281,11 @@ for clean_data_delta_path in clean_data_delta_paths:
 
     print(f'\nStarting CatBoost...')
 
-    catboost_model = CatBoostClassifier(loss_function='MultiClass', verbose=False)
+    catboost_model = CatBoostClassifier(loss_function='Logloss', verbose=False)
 
     if load_models == 1:
         catboost_model = CatBoostClassifier(loss_function='MultiClass', verbose=False)
-        catboost_model.load_model(r'models\without_delta_values\catboost_model.cbm')
+        catboost_model.load_model(r'models\with_delta_values\binary_catboost_model.cbm')
     else:
         catboost_model.fit(x_train_aug, y_train_aug)
 
@@ -401,4 +305,4 @@ for clean_data_delta_path in clean_data_delta_paths:
 
     # Save
     if load_models == 0:
-        catboost_model.save_model(r'models\without_delta_values\catboost_model.cbm')
+        catboost_model.save_model(r'models\with_delta_values\binary_catboost_model.cbm')
