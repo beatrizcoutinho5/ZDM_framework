@@ -231,3 +231,30 @@ INFO:root:
 CatBoost Metrics:
 INFO:root:Recall: 1.000000
 INFO:root:Precision: 1.000000
+INFO:root:
+Timestamp: 2024-03-14 19:07:05
+INFO:root:
+File: cleaned_data_with_deltavalues2022_2023_2024
+INFO:root:
+Timestamp: 2024-03-14 19:07:47
+INFO:root:
+File: cleaned_data_with_deltavalues2022_2023_2024
+INFO:root:
+Timestamp: 2024-03-14 19:09:25
+INFO:root:
+File: cleaned_data_with_deltavalues2022_2023_2024
+INFO:root:
+RandomForest Metrics:
+INFO:root:Recall: 1.000000
+INFO:root:Precision: 1.000000
+INFO:root:XGBoost Metrics:
+INFO:root:Recall: 1.000000
+INFO:root:Precision: 1.000000
+INFO:root:
+SVM Metrics:
+INFO:root:Recall: 0.381375
+INFO:root:Precision: 0.663029
+INFO:root:
+CatBoost Metrics:
+INFO:root:Recall: 1.000000
+INFO:root:Precision: 1.000000

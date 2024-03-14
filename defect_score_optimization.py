@@ -18,20 +18,22 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import recall_score, precision_score, confusion_matrix, ConfusionMatrixDisplay
 
-rf_model_path = r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\models\with_delta_values\NOTNORM_binary_random_forest_model.pkl'
-xgb_model_path = r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\models\with_delta_values\NOTNORM_binary_xgb_model.json'
-svm_model_path = r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\models\with_delta_values\NOTNORM_binary_svm_model.pkl'
-catboost_model_path = r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\models\with_delta_values\NOTNORM_binary_catboost_model.cbm'
-
+rf_model_path = r'models\with_delta_values\binary\NOTNORM_binary_random_forest_model.pkl'
+xgb_model_path = r'models\with_delta_values\binary\NOTNORM_binary_xgb_model.json'
+svm_model_path = r'models\with_delta_values\binary\NOTNORM_binary_svm_model.pkl'
+catboost_model_path = r'models\with_delta_values\binary\NOTNORM_binary_catboost_model.cbm'
 
 # Load train and test data
 
-x_train = pd.read_excel(r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\with_delta_values\NOTNORM_binary_x_test.xlsx')
-y_train = pd.read_excel(r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\with_delta_values\NOTNORM_binary_y_test.xlsx')
+x_train = pd.read_excel(
+    r'data\split_train_test_data\with_delta_values\binary_data\NOTNORM_binary_x_test.xlsx')
+y_train = pd.read_excel(
+    r'data\split_train_test_data\with_delta_values\binary_data\NOTNORM_binary_y_test.xlsx')
 
-
-x_test = pd.read_excel(r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\with_delta_values\NOTNORM_binary_x_test.xlsx')
-y_test = pd.read_excel(r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\with_delta_values\NOTNORM_binary_y_test.xlsx')
+x_test = pd.read_excel(
+    r'data\split_train_test_data\with_delta_values\binary_data\NOTNORM_binary_x_test.xlsx')
+y_test = pd.read_excel(
+    r'data\split_train_test_data\with_delta_values\binary_data\NOTNORM_binary_y_test.xlsx')
 
 # Load trained models
 print("loaded data")
@@ -86,10 +88,8 @@ for feature_name in x_test.columns:
     if feature_name not in ['Thermal Cycle Time', 'Pressure', 'Lower Plate Temperature', 'Upper Plate Temperature']:
         features_space.append([feature_name, None])
 
-
 print(features_space)
+
 
 def fitness_function(y_target, y_predicted):
     return (y_target - y_predicted) ** 2
-
-

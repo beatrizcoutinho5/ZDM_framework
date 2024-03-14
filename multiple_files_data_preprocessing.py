@@ -9,9 +9,9 @@ from statsmodels.graphics.tsaplots import plot_acf
 plots_dir = "plots"
 os.makedirs(plots_dir, exist_ok=True)
 
-dataset_2022_path = r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\dataset_jan_dec_2022_line410.xlsx'
-dataset_2023_path = r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\dataset_jan_may_2023_line410.xlsx'
-dataset_2024_path = r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\dataset_jan_feb_2024_line410.xlsx'
+dataset_2022_path = r'data\dataset_jan_dec_2022_line410.xlsx'
+dataset_2023_path = r'data\dataset_jan_may_2023_line410.xlsx'
+dataset_2024_path = r'data\dataset_jan_feb_2024_line410.xlsx'
 
 df2022 = pd.read_excel(dataset_2022_path)
 df2023 = pd.read_excel(dataset_2023_path)
@@ -237,13 +237,13 @@ if autocorrelation_analysis == 1:
 
     df = df.dropna(axis=0)
     df.to_excel(
-        r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\cleaned_data_with_deltavalues2022_2023_2024.xlsx',
+        r'data\clean_data\cleaned_data_with_deltavalues2022_2023_2024.xlsx',
         index=False)
     print("Saved clean data (with delta values)!")
 
 if autocorrelation_analysis == 0:
     df = df.dropna(axis=0)
     df.to_excel(
-        r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\cleaned_data2022_2023_2024.xlsx',
+        r'data\clean_data\cleaned_data2022_2023_2024.xlsx',
         index=False)
     print("Saved clean data!")

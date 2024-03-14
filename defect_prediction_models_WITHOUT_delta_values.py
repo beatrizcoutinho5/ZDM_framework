@@ -21,7 +21,7 @@ from sklearn.metrics import recall_score, precision_score, confusion_matrix, Con
 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 # Make plots and prints?
-make_plots = 0
+make_plots = 1
 
 # Import test and train data?
 import_test_train_data = 1
@@ -39,37 +39,37 @@ final_x_test = pd.DataFrame()
 final_y_train = pd.Series(dtype='float64')
 final_y_test = pd.Series(dtype='float64')
 
-
-clean_data_delta_paths = [
-    r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\cleaned_data_with_deltavalues2022_2023_2024.xlsx']
+clean_data_paths = [
+    r'data\clean_data\cleaned_data2022_2023_2024.xlsx']
 
 if import_test_train_data == 1:
     print(f'\nLoading test and train data...')
 
     x_train_aug = pd.read_excel(
-        r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\with_delta_values\x_train_aug.xlsx')
+        r'data\split_train_test_data\without_delta_values\x_train_aug.xlsx')
 
     y_train_aug = pd.read_excel(
-        r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\with_delta_values\y_train_aug.xlsx')['Defect Code']
+        r'data\split_train_test_data\without_delta_values\y_train_aug.xlsx')[
+        'Defect Code']
 
     x_test = pd.read_excel(
-        r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\with_delta_values\x_test.xlsx')
+        r'data\split_train_test_data\without_delta_values\x_test.xlsx')
 
     final_y_test = pd.read_excel(
-        r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\with_delta_values\y_test.xlsx')['Defect Code']
+        r'data\split_train_test_data\without_delta_values\y_test.xlsx')[
+        'Defect Code']
 
     print(f'Loaded test and train data!')
 
-
-for clean_data_delta_path in clean_data_delta_paths:
+for clean_data_path in clean_data_paths:
 
     # Configure logging file
     logging.basicConfig(filename=f'prediction_model_metrics_log.txt', level=logging.INFO)
     logging.info(f"\nTimestamp: {timestamp}")
-    file_name = os.path.splitext(os.path.basename(clean_data_delta_path))[0]
+    file_name = os.path.splitext(os.path.basename(clean_data_path))[0]
     logging.info(f"\nFile: {file_name}")
 
-    df = pd.read_excel(clean_data_delta_path)
+    df = pd.read_excel(clean_data_path)
 
     if import_test_train_data == 0:
 
@@ -201,30 +201,31 @@ for clean_data_delta_path in clean_data_delta_paths:
         print(f'\nSaving test and train data...')
 
         pd.DataFrame(x_train_aug, columns=final_x_train.columns).to_excel(
-            r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\with_delta_values\x_train_aug.xlsx',
+            r'data\split_train_test_data\without_delta_values\x_train_aug.xlsx',
             index=False)
 
         pd.Series(y_train_aug, name='Defect Code').to_excel(
-            r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\with_delta_values\y_train_aug.xlsx',
+            r'data\split_train_test_data\without_delta_values\y_train_aug.xlsx',
             index=False)
 
         pd.DataFrame(x_test, columns=final_x_test.columns).to_excel(
-            r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\with_delta_values\x_test.xlsx',
+            r'data\split_train_test_data\without_delta_values\x_test.xlsx',
             index=False)
 
         pd.Series(final_y_test, name='Defect Code').to_excel(
-            r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\with_delta_values\y_test.xlsx',
+            r'data\split_train_test_data\without_delta_values\y_test.xlsx',
             index=False)
 
         print(f'\nSaved train and test data!')
 
     print(f'\n-------------- ML MODELS --------------')
 
+
     def multiclass_recall_score(y_true, y_pred):
         return recall_score(y_true, y_pred, average='weighted')
 
-    scorer = make_scorer(multiclass_recall_score)
 
+    scorer = make_scorer(multiclass_recall_score)
 
     #################
     # Random Forest #
@@ -234,10 +235,9 @@ for clean_data_delta_path in clean_data_delta_paths:
 
     # Model Fit
 
-    rndforest = RandomForestClassifier(random_state=42, max_depth= 20, min_samples_split= 5, n_estimators= 200)
+    rndforest = RandomForestClassifier(random_state=42, max_depth=20, min_samples_split=5, n_estimators=200)
 
     if grid_search == 1:
-
         param_grid_rf = {
             'n_estimators': [200, 300],
             'max_depth': [10, 20],
@@ -254,7 +254,7 @@ for clean_data_delta_path in clean_data_delta_paths:
         print("Best recall for Random Forest:", best_recall_rf)
 
     if load_models == 1:
-        rndforest = load(r'models\with_delta_values\random_forest_model.pkl')
+        rndforest = load(r'models\without_delta_values\multiclass\random_forest_model.pkl')
     else:
         rndforest.fit(x_train_aug, y_train_aug)
 
@@ -267,7 +267,7 @@ for clean_data_delta_path in clean_data_delta_paths:
     disp_rf = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_rf, display_labels=rndforest.classes_)
     disp_rf.plot()
     plt.title('RF Confusion Matrix - with "Defect Class"')
-    plt.savefig(r'plots\confusion_matrix\with_delta_values\rf.png')
+    plt.savefig(r'plots\confusion_matrix\without_delta_values\rf.png')
     plt.show()
 
     # Display the confusion matrix without class '0' -> no defect
@@ -276,7 +276,7 @@ for clean_data_delta_path in clean_data_delta_paths:
     disp_xgb = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_xgb, display_labels=labels_rf)
     disp_xgb.plot()
     plt.title('RF Confusion Matrix - without "Defect Class"')
-    plt.savefig(r'plots\confusion_matrix\with_delta_values\rf_defects.png')
+    plt.savefig(r'plots\confusion_matrix\without_delta_values\rf_defects.png')
     plt.show()
 
     recall_score_rf = recall_score(final_y_test, y_pred_rf, average='weighted', zero_division=1)
@@ -291,7 +291,7 @@ for clean_data_delta_path in clean_data_delta_paths:
 
     # Save
     if load_models == 0:
-        dump(rndforest, r'models\with_delta_values\random_forest_model.pkl')
+        dump(rndforest, r'models\without_delta_values\multiclass\random_forest_model.pkl')
 
     ###########
     # XGBOOST #
@@ -314,7 +314,6 @@ for clean_data_delta_path in clean_data_delta_paths:
     xgb_model = XGBClassifier(random_state=42)
 
     if grid_search == 1:
-
         param_grid_xgb = {
             'learning_rate': [0.01, 0.1],
             'max_depth': [6, 9],
@@ -330,7 +329,7 @@ for clean_data_delta_path in clean_data_delta_paths:
         print("Best recall for XGBoost:", best_recall_xgb)
 
     if load_models == 1:
-        xgb_model.load_model(r'models\with_delta_values\xgb_model.json')
+        xgb_model.load_model(r'models\without_delta_values\multiclass\xgb_model.json')
     else:
         xgb_model.fit(x_train_aug, y_train_aug_encoded)
 
@@ -347,7 +346,7 @@ for clean_data_delta_path in clean_data_delta_paths:
     disp_xgb = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_xgb, display_labels=xgb_model.classes_)
     disp_xgb.plot()
     plt.title('XGBoost Confusion Matrix')
-    plt.savefig(r'plots\confusion_matrix\with_delta_values\xgboost.png')
+    plt.savefig(r'plots\confusion_matrix\without_delta_values\xgboost.png')
     plt.show()
 
     # Display the confusion matrix without class '0' -> no defect
@@ -356,7 +355,7 @@ for clean_data_delta_path in clean_data_delta_paths:
     disp_xgb = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_xgb, display_labels=labels_xgb)
     disp_xgb.plot()
     plt.title('XGBoost Confusion Matrix - without "Defect Class"')
-    plt.savefig(r'plots\confusion_matrix\with_delta_values\xgboost_defects.png')
+    plt.savefig(r'plots\confusion_matrix\without_delta_values\xgboost_defects.png')
     plt.show()
 
     recall_score_xgb = recall_score(final_y_test, y_pred_xgb, average='weighted', zero_division=1)
@@ -371,7 +370,7 @@ for clean_data_delta_path in clean_data_delta_paths:
 
     # Save
     if load_models == 0:
-        xgb_model.save_model('models/with_delta_values/xgb_model.json')
+        xgb_model.save_model('models/without_delta_values/xgb_model.json')
 
     #######
     # SVM #
@@ -382,7 +381,6 @@ for clean_data_delta_path in clean_data_delta_paths:
     svm_model = SVC(random_state=42, probability=True)
 
     if grid_search == 1:
-
         param_grid_svm = {
             'kernel': ['linear', 'poly'],
             'gamma': ['scale', 'auto']
@@ -396,9 +394,9 @@ for clean_data_delta_path in clean_data_delta_paths:
         print("Best recall for SVM:", best_recall_svm)
 
     if load_models == 1:
-        svm_model = load(r'models\with_delta_values\svm_model.pkl')
+        svm_model = load(r'models\without_delta_values\multiclass\svm_model.pkl')
     else:
-        svm_model.fit(x_train_aug, y_train_aug)
+        svm_model.fit(x_train_aug.values, y_train_aug)
 
     # Predict
     y_pred_svm = svm_model.predict(x_test)
@@ -409,7 +407,7 @@ for clean_data_delta_path in clean_data_delta_paths:
     disp_svm = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_svm, display_labels=svm_model.classes_)
     disp_svm.plot()
     plt.title('SVM Confusion Matrix')
-    plt.savefig(r'plots\confusion_matrix\with_delta_values\svm.png')
+    plt.savefig(r'plots\confusion_matrix\without_delta_values\svm.png')
     plt.show()
 
     # Display the confusion matrix without class '0' -> no defect
@@ -418,7 +416,7 @@ for clean_data_delta_path in clean_data_delta_paths:
     disp_svm = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_svm, display_labels=labels_svm)
     disp_svm.plot()
     plt.title('SVM Confusion Matrix - without "Defect Class"')
-    plt.savefig(r'plots\confusion_matrix\with_delta_values\svm_defects.png')
+    plt.savefig(r'plots\confusion_matrix\without_delta_values\svm_defects.png')
     plt.show()
 
     recall_score_svm = recall_score(final_y_test, y_pred_svm, average='weighted', zero_division=1)
@@ -434,7 +432,7 @@ for clean_data_delta_path in clean_data_delta_paths:
     # Save
     if load_models == 0:
         print("Saving SVM...")
-        dump(svm_model, r'models\with_delta_values\svm_model.pkl')
+        dump(svm_model, r'models\without_delta_values\multiclass\svm_model.pkl')
         print("Saved!")
 
     ############
@@ -446,7 +444,6 @@ for clean_data_delta_path in clean_data_delta_paths:
     catboost_model = CatBoostClassifier(loss_function='MultiClass', verbose=False)
 
     if grid_search == 1:
-
         param_grid_cat = {
             'learning_rate': [0.01, 0.1],
             'depth': [4, 6],
@@ -462,7 +459,7 @@ for clean_data_delta_path in clean_data_delta_paths:
 
     if load_models == 1:
         catboost_model = CatBoostClassifier(loss_function='MultiClass', verbose=False)
-        catboost_model.load_model(r'models\with_delta_values\catboost_model.cbm')
+        catboost_model.load_model(r'models\without_delta_values\multiclass\catboost_model.cbm')
     else:
         catboost_model.fit(x_train_aug, y_train_aug)
 
@@ -475,7 +472,7 @@ for clean_data_delta_path in clean_data_delta_paths:
     disp_cat = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_cat, display_labels=catboost_model.classes_)
     disp_cat.plot()
     plt.title('CATBOOST Confusion Matrix')
-    plt.savefig(r'plots\confusion_matrix\with_delta_values\catboost.png')
+    plt.savefig(r'plots\confusion_matrix\without_delta_values\catboost.png')
     plt.show()
 
     # Display the confusion matrix without class '0' -> no defect
@@ -484,7 +481,7 @@ for clean_data_delta_path in clean_data_delta_paths:
     disp_cat = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_cat, display_labels=labels_cat)
     disp_cat.plot()
     plt.title('CATBOOST Confusion Matrix - without "Defect Class"')
-    plt.savefig(r'plots\confusion_matrix\with_delta_values\catboost_defects.png')
+    plt.savefig(r'plots\confusion_matrix\without_delta_values\catboost_defects.png')
     plt.show()
 
     recall_score_cat = recall_score(final_y_test, y_pred_cat, average='weighted', zero_division=1)
@@ -499,4 +496,4 @@ for clean_data_delta_path in clean_data_delta_paths:
 
     # Save
     if load_models == 0:
-        catboost_model.save_model(r'models\with_delta_values\catboost_model.cbm')
+        catboost_model.save_model(r'models\without_delta_values\multiclass\catboost_model.cbm')

@@ -192,3 +192,14 @@ INFO:root:Precision: 0.846111
 INFO:root:XGBoost Metrics:
 INFO:root:Recall: 0.831529
 INFO:root:Precision: 0.826950
+INFO:root:
+Timestamp: 2024-03-14 21:04:08
+INFO:root:
+File: cleaned_data_with_deltavalues2022_2023_2024
+INFO:root:
+RandomForest Metrics:
+INFO:root:Recall: 0.843625
+INFO:root:Precision: 0.843682
+INFO:root:XGBoost Metrics:
+INFO:root:Recall: 0.826525
+INFO:root:Precision: 0.818518
