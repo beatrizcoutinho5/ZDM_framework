@@ -66,3 +66,168 @@ INFO:root:
 CatBoost Metrics:
 INFO:root:Recall: 1.000000
 INFO:root:Precision: 1.000000
+INFO:root:
+Timestamp: 2024-03-11 11:01:22
+INFO:root:
+File: cleaned_data_with_deltavalues2022_2023_2024
+INFO:root:
+RandomForest Metrics:
+INFO:root:Recall: 1.000000
+INFO:root:Precision: 1.000000
+INFO:root:XGBoost Metrics:
+INFO:root:Recall: 1.000000
+INFO:root:Precision: 1.000000
+INFO:root:
+SVM Metrics:
+INFO:root:Recall: 0.988402
+INFO:root:Precision: 0.988780
+INFO:root:
+CatBoost Metrics:
+INFO:root:Recall: 1.000000
+INFO:root:Precision: 1.000000
+INFO:root:
+Timestamp: 2024-03-11 11:24:23
+INFO:root:
+File: cleaned_data_with_deltavalues2022_2023_2024
+INFO:root:
+Timestamp: 2024-03-11 11:28:37
+INFO:root:
+File: cleaned_data_with_deltavalues2022_2023_2024
+INFO:root:
+RandomForest Metrics:
+INFO:root:Recall: 1.000000
+INFO:root:Precision: 1.000000
+INFO:root:XGBoost Metrics:
+INFO:root:Recall: 1.000000
+INFO:root:Precision: 1.000000
+INFO:root:
+SVM Metrics:
+INFO:root:Recall: 0.988402
+INFO:root:Precision: 0.988780
+INFO:root:
+CatBoost Metrics:
+INFO:root:Recall: 1.000000
+INFO:root:Precision: 1.000000
+INFO:root:
+Timestamp: 2024-03-11 11:52:01
+INFO:root:
+File: cleaned_data_with_deltavalues2022_2023_2024
+INFO:root:
+RandomForest Metrics:
+INFO:root:Recall: 1.000000
+INFO:root:Precision: 1.000000
+INFO:root:XGBoost Metrics:
+INFO:root:Recall: 1.000000
+INFO:root:Precision: 1.000000
+INFO:root:
+SVM Metrics:
+INFO:root:Recall: 0.988402
+INFO:root:Precision: 0.988780
+INFO:root:
+CatBoost Metrics:
+INFO:root:Recall: 1.000000
+INFO:root:Precision: 1.000000
+INFO:root:
+Timestamp: 2024-03-11 12:04:15
+INFO:root:
+File: cleaned_data_with_deltavalues2022_2023_2024
+INFO:root:
+Timestamp: 2024-03-11 12:08:15
+INFO:root:
+File: cleaned_data_with_deltavalues2022_2023_2024
+INFO:root:
+RandomForest Metrics:
+INFO:root:Recall: 1.000000
+INFO:root:Precision: 1.000000
+INFO:root:XGBoost Metrics:
+INFO:root:Recall: 1.000000
+INFO:root:Precision: 1.000000
+INFO:root:
+SVM Metrics:
+INFO:root:Recall: 0.988402
+INFO:root:Precision: 0.988780
+INFO:root:
+CatBoost Metrics:
+INFO:root:Recall: 1.000000
+INFO:root:Precision: 1.000000
+INFO:root:
+Timestamp: 2024-03-11 12:16:54
+INFO:root:
+File: cleaned_data_with_deltavalues2022_2023_2024
+INFO:root:
+Timestamp: 2024-03-11 12:21:54
+INFO:root:
+File: cleaned_data_with_deltavalues2022_2023_2024
+INFO:root:
+Timestamp: 2024-03-11 12:24:00
+INFO:root:
+File: cleaned_data_with_deltavalues2022_2023_2024
+INFO:root:
+Timestamp: 2024-03-11 12:25:02
+INFO:root:
+File: cleaned_data_with_deltavalues2022_2023_2024
+INFO:root:
+Timestamp: 2024-03-11 12:27:13
+INFO:root:
+File: cleaned_data_with_deltavalues2022_2023_2024
+INFO:root:
+RandomForest Metrics:
+INFO:root:Recall: 1.000000
+INFO:root:Precision: 1.000000
+INFO:root:XGBoost Metrics:
+INFO:root:Recall: 1.000000
+INFO:root:Precision: 1.000000
+INFO:root:
+SVM Metrics:
+INFO:root:Recall: 0.988402
+INFO:root:Precision: 0.988780
+INFO:root:
+CatBoost Metrics:
+INFO:root:Recall: 1.000000
+INFO:root:Precision: 1.000000
+INFO:root:
+Timestamp: 2024-03-11 12:31:20
+INFO:root:
+File: cleaned_data_with_deltavalues2022_2023_2024
+INFO:root:
+Timestamp: 2024-03-11 13:45:48
+INFO:root:
+File: cleaned_data_with_deltavalues2022_2023_2024
+INFO:root:
+Timestamp: 2024-03-11 13:48:03
+INFO:root:
+File: cleaned_data_with_deltavalues2022_2023_2024
+INFO:root:
+RandomForest Metrics:
+INFO:root:Recall: 1.000000
+INFO:root:Precision: 1.000000
+INFO:root:XGBoost Metrics:
+INFO:root:Recall: 1.000000
+INFO:root:Precision: 1.000000
+INFO:root:
+SVM Metrics:
+INFO:root:Recall: 0.655978
+INFO:root:Precision: 0.774329
+INFO:root:
+CatBoost Metrics:
+INFO:root:Recall: 1.000000
+INFO:root:Precision: 1.000000
+INFO:root:
+Timestamp: 2024-03-11 14:02:13
+INFO:root:
+File: cleaned_data_with_deltavalues2022_2023_2024
+INFO:root:
+RandomForest Metrics:
+INFO:root:Recall: 1.000000
+INFO:root:Precision: 1.000000
+INFO:root:XGBoost Metrics:
+INFO:root:Recall: 1.000000
+INFO:root:Precision: 1.000000
+INFO:root:
+SVM Metrics:
+INFO:root:Recall: 0.655978
+INFO:root:Precision: 0.774329
+INFO:root:
+CatBoost Metrics:
+INFO:root:Recall: 1.000000
+INFO:root:Precision: 1.000000

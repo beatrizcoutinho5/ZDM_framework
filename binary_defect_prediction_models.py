@@ -20,7 +20,7 @@ from sklearn.metrics import recall_score, precision_score, confusion_matrix, Con
 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 # Make plots and prints?
-make_plots = 1
+make_plots = 0
 
 # Import test and train data?
 import_test_train_data = 0
@@ -123,33 +123,54 @@ for clean_data_delta_path in clean_data_delta_paths:
 
         # Data Augmentation using SMOTE
 
-        x_train_aug, y_train_aug = final_x_train, final_y_train
+        x_train_aug = final_x_train
         y_train_aug = final_y_train
+        x_test = final_x_test # comentar esta qnd fizer a norm
 
-        # Normalize X values
+        print("x_train_aug['Delta Time']:")
+        print(x_train_aug['Delta Time'])
 
-        min_max_scaler = preprocessing.MinMaxScaler()
+        print("x_test['Delta Time']:")
+        print(x_test['Delta Time'])
 
-        x_train_aug = min_max_scaler.fit_transform(x_train_aug)
-        x_test = min_max_scaler.transform(final_x_test)
+        # # Normalize X values
+        #
+        # min_max_scaler = preprocessing.MinMaxScaler()
+        # min_max_scaler.fit(x_train_aug)
+        #
+        # x_train_aug = min_max_scaler.transform(x_train_aug)
+        # x_test = min_max_scaler.transform(final_x_test)
+        #
+        # # Save scaling parameters
+        #
+        # scaling_params = pd.DataFrame({
+        #     'feature': df_x_train_aug.columns,
+        #     'min': min_max_scaler.data_min_,
+        #     'scale': min_max_scaler.scale_
+        #
+        # })
+        #
+        # scaling_params.to_excel(
+        #     r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\with_delta_values\binary_scaling_param.xlsx',
+        #     index=False)
 
         # Save test and train data
         print(f'\nSaving test and train data...')
 
-        pd.DataFrame(x_train_aug, columns=final_x_train.columns).to_excel(
-            r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\with_delta_values\binary_x_train_aug.xlsx',
+        pd.DataFrame(x_train_aug, columns=x_train_aug.columns).to_excel(
+            r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\with_delta_values\NOTNORM_binary_x_train_aug.xlsx',
             index=False)
 
         pd.Series(y_train_aug, name='Defect Code').to_excel(
-            r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\with_delta_values\binary_y_train_aug.xlsx',
+            r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\with_delta_values\NOTNORM_binary_y_train_aug.xlsx',
             index=False)
 
-        pd.DataFrame(x_test, columns=final_x_test.columns).to_excel(
-            r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\with_delta_values\binary_x_test.xlsx',
+        pd.DataFrame(x_test, columns=x_test.columns).to_excel(
+            r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\with_delta_values\NOTNORM_binary_x_test.xlsx',
             index=False)
 
         pd.Series(final_y_test, name='Defect Code').to_excel(
-            r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\with_delta_values\binary_y_test.xlsx',
+            r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\data\split_train_test_data\with_delta_values\NOTNORM_binary_y_test.xlsx',
             index=False)
 
         print(f'\nSaved train and test data!')
@@ -167,7 +188,7 @@ for clean_data_delta_path in clean_data_delta_paths:
     rndforest = RandomForestClassifier(random_state=42)
 
     if load_models == 1:
-        rndforest = load(r'models\with_delta_values\binary_random_forest_model.pkl')
+        rndforest = load(r'models\with_delta_values\NOTNORM_binary_random_forest_model.pkl')
     else:
         rndforest.fit(x_train_aug, y_train_aug)
 
@@ -194,7 +215,7 @@ for clean_data_delta_path in clean_data_delta_paths:
 
     # Save
     if load_models == 0:
-        dump(rndforest, r'models\with_delta_values\binary_random_forest_model.pkl')
+        dump(rndforest, r'models\with_delta_values\NOTNORM_binary_random_forest_model.pkl')
 
     ###########
     # XGBOOST #
@@ -216,7 +237,7 @@ for clean_data_delta_path in clean_data_delta_paths:
     xgb_model = XGBClassifier(random_state=42)
 
     if load_models == 1:
-        xgb_model.load_model(r'models\with_delta_values\binary_xgb_model.model')
+        xgb_model.load_model(r'models\with_delta_values\NOTNORM_xgb_model.model')
     else:
         xgb_model.fit(x_train_aug, y_train_aug_encoded)
 
@@ -240,7 +261,7 @@ for clean_data_delta_path in clean_data_delta_paths:
 
     # Save
     if load_models == 0:
-        xgb_model.save_model('models/with_delta_values/binary_xgb_model.json')
+        xgb_model.save_model('models/with_delta_values/NOTNORM_binary_xgb_model.json')
 
     #######
     # SVM #
@@ -251,7 +272,7 @@ for clean_data_delta_path in clean_data_delta_paths:
     svm_model = SVC(random_state=42, probability=True)
 
     if load_models == 1:
-        svm_model = load(r'models\with_delta_values\binary_svm_model.pkl')
+        svm_model = load(r'models\with_delta_values\NOTNORM_binary_svm_model.pkl')
     else:
         svm_model.fit(x_train_aug, y_train_aug)
 
@@ -272,7 +293,7 @@ for clean_data_delta_path in clean_data_delta_paths:
 
     # Save
     if load_models == 0:
-        dump(svm_model, r'models\with_delta_values\binary_svm_model.pkl')
+        dump(svm_model, r'models\with_delta_values\NOTNORM_binary_svm_model.pkl')
 
 
     ############
@@ -285,7 +306,7 @@ for clean_data_delta_path in clean_data_delta_paths:
 
     if load_models == 1:
         catboost_model = CatBoostClassifier(loss_function='MultiClass', verbose=False)
-        catboost_model.load_model(r'models\with_delta_values\binary_catboost_model.cbm')
+        catboost_model.load_model(r'models\with_delta_values\NOTNORM_binary_catboost_model.cbm')
     else:
         catboost_model.fit(x_train_aug, y_train_aug)
 
@@ -305,4 +326,4 @@ for clean_data_delta_path in clean_data_delta_paths:
 
     # Save
     if load_models == 0:
-        catboost_model.save_model(r'models\with_delta_values\binary_catboost_model.cbm')
+        catboost_model.save_model(r'models\with_delta_values\NOTNORM_binary_catboost_model.cbm')

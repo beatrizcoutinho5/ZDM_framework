@@ -48,7 +48,6 @@ columns_remove = ["Defect Group", "Defect Group Description", "Defect Descriptio
 df = df.drop(columns_remove, axis=1)
 
 # Transform categorical features into numerical representation
-
 # features with few unique value were considered as categorical
 columns_cat = ["GFFTT", "Finishing Top", "Finishing Down", "Reference Top", "Reference Down"]
 
@@ -163,16 +162,13 @@ df = df[(df[features_remove_zero] > 0).all(axis=1)]
 
 # Print initial dataset characteristics
 
-print()
-
 final_number_features = len(df.columns)
 final_number_samples = len(df)
 
-print(f"Final Number of Features: {final_number_features}")
+print(f"\nFinal Number of Features: {final_number_features}")
 print(f"Final Number of Samples: {final_number_samples}")
 
-print()
-print(f"Removed {np.abs(final_number_features - initial_number_features)} features.")
+print(f"\nRemoved {np.abs(final_number_features - initial_number_features)} features.")
 print(f"Removed {np.abs(final_number_samples - initial_number_samples)} samples.")
 
 #####################################
