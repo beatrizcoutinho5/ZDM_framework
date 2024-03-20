@@ -9,11 +9,9 @@ from statsmodels.graphics.tsaplots import plot_acf
 plots_dir = "plots"
 os.makedirs(plots_dir, exist_ok=True)
 
-dataset_2022_path = r'data\dataset_jan_dec_2022_line410.xlsx'
-dataset_2023_path = r'data\dataset_jan_may_2023_line410.xlsx'
-dataset_2024_path = r'data\dataset_jan_feb_2024_line410.xlsx'
+dataset_path = r'data\dataset_jan_dec_2022_line409.xlsx'
 
-df = pd.read_excel(dataset_2023_path)
+df = pd.read_excel(dataset_path)
 
 # Make plots and prints?
 make_plots = 0
@@ -44,7 +42,6 @@ columns_remove = ["Defect Group", "Defect Group Description", "Defect Descriptio
 df = df.drop(columns_remove, axis=1)
 
 # Transform categorical features into numerical representation
-
 # features with few unique value were considered as categorical
 columns_cat = ["GFFTT", "Finishing Top", "Finishing Down", "Reference Top", "Reference Down"]
 
@@ -59,8 +56,8 @@ df = df.drop(columns_cat, axis=1)
 # Remove rows with any missing values
 df = df.dropna(how='any', axis=0)
 
-# Remove feature with only one unique value
-df = df.loc[:, df.apply(pd.Series.nunique) > 1]
+# # Remove feature with only one unique value
+# df = df.loc[:, df.apply(pd.Series.nunique) > 1]
 
 # Pearson Correlation factor
 
@@ -77,7 +74,7 @@ if make_plots == 1:
     pearson_subdirectory_path = os.path.join(plots_dir, 'pearson_correlation')
     os.makedirs(pearson_subdirectory_path, exist_ok=True)
 
-    output_path = os.path.join(pearson_subdirectory_path, 'pearson_correlation_matrix.png')
+    output_path = os.path.join(pearson_subdirectory_path, 'pearson_correlation_matrix_line409.png')
     plt.savefig(output_path, bbox_inches='tight')
 
 threshold = 0.9
@@ -133,7 +130,7 @@ if make_plots == 1:
         plt.xlabel(feature)
         plt.ylabel('Values')
 
-        output_path = os.path.join(boxplot_subdirectory_path, f'{feature}_box_plot.png')
+        output_path = os.path.join(boxplot_subdirectory_path, f'{feature}_box_plot_line409.png')
         plt.savefig(output_path, bbox_inches='tight')
 
         plt.close()
@@ -157,19 +154,6 @@ df = df.drop(rows_to_remove.index, axis=0)
 
 df = df[(df[features_remove_zero] > 0).all(axis=1)]
 
-# Print initial dataset characteristics
-
-print()
-
-final_number_features = len(df.columns)
-final_number_samples = len(df)
-
-print(f"Final Number of Features: {final_number_features}")
-print(f"Final Number of Samples: {final_number_samples}")
-
-print()
-print(f"Removed {np.abs(final_number_features - initial_number_features)} features.")
-print(f"Removed {np.abs(final_number_samples - initial_number_samples)} samples.")
 
 #####################################
 # Feature Auto-correlation Analysis #
@@ -192,6 +176,12 @@ if autocorrelation_analysis == 1:
     # Filter columns with autocorrelation greater than or equal to 0.55
     high_autocorr_columns = autocorr_results[abs(autocorr_results) >= 0.55].index.tolist()
 
+    high_autocorr_columns = ['Length', 'Width', 'Thickness', 'Lot Size', 'Thermal Cycle Time', 'Lower Plate Temperature',
+                             'Upper Plate Temperature', 'Pressure', 'Liston 1 Speed', 'Liston 2 Speed', 'Floor 1', 'Floor 2',
+                             'Bridge Platform', 'Floor 1 Blow Time', 'Floor 2 Blow Time', 'Centering Table', 'Right Jaw Discharge',
+                             'Left Jaw Discharge', 'Simultaneous Jaw Discharge', 'Carriage Speed', 'Take-off Path', 'Lowering Time',
+                             'Take-off Time', 'Press Input Table Speed', 'Scraping Cycle', 'Paper RC', 'Paper VC', 'Paper Shelf Life']
+
     if make_plots == 1:
         print("Columns with autocorrelation greater than or equal to |0.55|:")
         print(high_autocorr_columns)
@@ -212,7 +202,7 @@ if autocorrelation_analysis == 1:
             ax = plot_acf(df[c], title=c)
             plt.ylabel(c)
 
-            output_path = os.path.join(acf_subdirectory_path, f'{c}_acf_plot.png')
+            output_path = os.path.join(acf_subdirectory_path, f'{c}_acf_plot_line409.png')
             plt.savefig(output_path, bbox_inches='tight')
 
             plt.close('all')
@@ -235,14 +225,42 @@ if autocorrelation_analysis == 1:
     for col in (high_autocorr_columns + ["Recording Date"] + ["Quantity"]):
         df = df.drop("{}-1".format(col), axis=1)
 
+    # removing the quantity feature as a defect always has quantity = 1
+    df = df.drop("Quantity", axis=1)
     df = df.dropna(axis=0)
+
+    # Print final dataset characteristics
+
+    final_number_features = len(df.columns)
+    final_number_samples = len(df)
+
+    print("WITH AUTO-CORRELATION ANALYSIS:")
+    print(f"\nFinal Number of Features: {final_number_features}")
+    print(f"Final Number of Samples: {final_number_samples}")
+
+    print(f"\nRemoved {np.abs(final_number_features - initial_number_features)} features.")
+    print(f"Removed {np.abs(final_number_samples - initial_number_samples)} samples.")
+
     df.to_excel(
-        r'data\cleaned_data_with_deltavalues2023.xlsx',
+        r'data\clean_data\cleaned_data_with_deltavalues2022_line409.xlsx',
         index=False)
-    print("Saved clean data!")
+    print("Saved clean data (with delta values)!")
 
 if autocorrelation_analysis == 0:
     df = df.dropna(axis=0)
+
+    # Print final dataset characteristics
+
+    final_number_features = len(df.columns)
+    final_number_samples = len(df)
+
+    print(f"\nFinal Number of Features: {final_number_features}")
+    print(f"Final Number of Samples: {final_number_samples}")
+
+    print(f"\nRemoved {np.abs(final_number_features - initial_number_features)} features.")
+    print(f"Removed {np.abs(final_number_samples - initial_number_samples)} samples.")
+
     df.to_excel(
-        r'data\cleaned_data.xlsx',
+        r'data\clean_data\cleaned_data_2022_line409.xlsx',
         index=False)
+    print("Saved clean data!")

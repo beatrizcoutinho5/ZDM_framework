@@ -20,10 +20,10 @@ df2024 = pd.read_excel(dataset_2024_path)
 df = pd.concat([df2022, df2023, df2024], axis=0)
 
 # Make plots and prints?
-make_plots = 0
+make_plots = 1
 
 # Autocorrelation and Time Series Analysis?
-autocorrelation_analysis = 0
+autocorrelation_analysis = 1
 
 # Print initial dataset characteristics
 initial_number_features = len(df.columns)
@@ -62,8 +62,8 @@ df = df.drop(columns_cat, axis=1)
 # Remove rows with any missing values
 df = df.dropna(how='any', axis=0)
 
-# Remove feature with only one unique value
-df = df.loc[:, df.apply(pd.Series.nunique) > 1]
+# # Remove feature with only one unique value
+# df = df.loc[:, df.apply(pd.Series.nunique) > 1]
 
 # Pearson Correlation factor
 
@@ -160,17 +160,6 @@ df = df.drop(rows_to_remove.index, axis=0)
 
 df = df[(df[features_remove_zero] > 0).all(axis=1)]
 
-# Print initial dataset characteristics
-
-final_number_features = len(df.columns)
-final_number_samples = len(df)
-
-print(f"\nFinal Number of Features: {final_number_features}")
-print(f"Final Number of Samples: {final_number_samples}")
-
-print(f"\nRemoved {np.abs(final_number_features - initial_number_features)} features.")
-print(f"Removed {np.abs(final_number_samples - initial_number_samples)} samples.")
-
 #####################################
 # Feature Auto-correlation Analysis #
 #####################################
@@ -235,7 +224,23 @@ if autocorrelation_analysis == 1:
     for col in (high_autocorr_columns + ["Recording Date"] + ["Quantity"]):
         df = df.drop("{}-1".format(col), axis=1)
 
+    # removing the quantity feature as a defect always has quantity = 1
+    df = df.drop("Quantity", axis=1)
     df = df.dropna(axis=0)
+
+    # Print initial dataset characteristics
+
+    final_number_features = len(df.columns)
+    final_number_samples = len(df)
+
+    print("WITH AUTO-CORRELATION ANALYSIS:")
+    print(f"\nFinal Number of Features: {final_number_features}")
+    print(f"Final Number of Samples: {final_number_samples}")
+
+    print(f"\nRemoved {np.abs(final_number_features - initial_number_features)} features.")
+    print(f"Removed {np.abs(final_number_samples - initial_number_samples)} samples.")
+
+
     df.to_excel(
         r'data\clean_data\cleaned_data_with_deltavalues2022_2023_2024.xlsx',
         index=False)
@@ -243,6 +248,18 @@ if autocorrelation_analysis == 1:
 
 if autocorrelation_analysis == 0:
     df = df.dropna(axis=0)
+
+    # Print initial dataset characteristics
+
+    final_number_features = len(df.columns)
+    final_number_samples = len(df)
+
+    print(f"\nFinal Number of Features: {final_number_features}")
+    print(f"Final Number of Samples: {final_number_samples}")
+
+    # print(f"\nRemoved {np.abs(final_number_features - initial_number_features)} features.")
+    print(f"Removed {np.abs(final_number_samples - initial_number_samples)} samples.")
+
     df.to_excel(
         r'data\clean_data\cleaned_data2022_2023_2024.xlsx',
         index=False)
