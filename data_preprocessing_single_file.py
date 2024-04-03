@@ -9,7 +9,9 @@ from statsmodels.graphics.tsaplots import plot_acf
 plots_dir = "plots"
 os.makedirs(plots_dir, exist_ok=True)
 
-dataset_path = r'data\dataset_jan_dec_2022_line409.xlsx'
+dataset_path = r'data\dataset_jan_dec_2022_line410.xlsx'
+# dataset_path = r'data\dataset_jan_may_2023_line410.xlsx'
+# dataset_path = r'data\dataset_jan_feb_2024_line410.xlsx'
 
 df = pd.read_excel(dataset_path)
 
@@ -31,6 +33,61 @@ df = df[df["Line Working?"] != -1]
 
 # Remove rows Defect Code = -1
 df = df[df["Defect Code"] != -1]
+
+# Remove rows with defects that don't have enough samples and that don't belong to a defect group
+defect_codes_to_remove = [506, 524, 400, 512, 537, 143, 147, 521]
+df = df[~df["Defect Code"].isin(defect_codes_to_remove)]
+
+# Treating duplicated defects (they are the same but have different codes)
+defect_code_mapping = {
+    500: 113,
+    504: 29,
+    501: 105,
+    502: 136,
+    503: 125,
+    140: 147,
+    535: 124,
+    505: 109,
+    522: 138,
+    513: 106,
+    508: 134,
+    509: 131,
+    104: 510,
+    139: 512,
+    202: 512,
+    527: 14,
+    116: 1,
+    530: 1,
+    517: 132,
+    110: 520,
+    515: 112,
+    519: 144
+}
+
+df["Defect Code"].replace(defect_code_mapping, inplace=True)
+
+# Creating defect groups
+
+def get_group(defect_code):
+    if defect_code in [27, 134, 106, 510, 102, 132, 23, 301, 131, 117, 300, 107, 135, 144, 511, 133, 518, 36]:
+        return "Erro Papel"
+    elif defect_code in [29, 136]:
+        return "Erro Prensa"
+    elif defect_code in [14, 119, 1, 15, 12, 128, 116, 11, 201, 129, 121, 13, 145, 130, 141, 527, 531]:
+        return "Erro Tablero"
+    elif defect_code in [4, 109, 115, 108, 120, 114, 142]:
+        return "Manchas e Marcas"
+    elif defect_code in [126, 122, 534, 450, 123]:
+        return "Pruebas"
+    elif defect_code in [32, 118, 516]:
+        return "Puntos"
+    elif defect_code in [0]:
+        return "Sem Defeito"
+    else:
+        return "Outros"
+
+# Add a new column "Group" based on the custom function
+df["Group"] = df["Defect Code"].apply(get_group)
 
 # Remove columns with irrelevant data for the framework
 columns_remove = ["Defect Group", "Defect Group Description", "Defect Description", "Pallet Code",
@@ -242,8 +299,14 @@ if autocorrelation_analysis == 1:
     print(f"Removed {np.abs(final_number_samples - initial_number_samples)} samples.")
 
     df.to_excel(
-        r'data\clean_data\cleaned_data_with_deltavalues2022_line409.xlsx',
+        r'data\clean_data\cleaned_data_with_deltavalues_2022_line410.xlsx',
         index=False)
+    # df.to_excel(
+    #     r'data\clean_data\cleaned_data_with_deltavalues_2023_line410.xlsx',
+    #     index=False)
+    # df.to_excel(
+    #     r'data\clean_data\cleaned_data_with_deltavalues_2024_line410.xlsx',
+    #     index=False)
     print("Saved clean data (with delta values)!")
 
 if autocorrelation_analysis == 0:

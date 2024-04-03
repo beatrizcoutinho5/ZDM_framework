@@ -95,36 +95,46 @@ for clean_data_delta_path in clean_data_delta_paths:
 
         # Split the df by year
 
-        df["Recording Date"] = pd.to_datetime(df["Recording Date"], format="%d/%m/%Y %H:%M:%S")
+        # df["Recording Date"] = pd.to_datetime(df["Recording Date"], format="%d/%m/%Y %H:%M:%S")
+        #
+        # # Separate the DataFrame into different DataFrames based on years
+        # years = df["Recording Date"].dt.year.unique()
+        #
+        # dfs_by_year = {}
+        # for year in years:
+        #     dfs_by_year[year] = df[df["Recording Date"].dt.year == year]
+        #
+        # # Split train / test
+        #
+        # for year in years:
+        #     dfs_by_year[year] = df[df["Recording Date"].dt.year == year]
+        #
+        #     split_index = int(0.8 * len(dfs_by_year[year]))
+        #
+        #     train_data = dfs_by_year[year].iloc[:split_index]
+        #     test_data = dfs_by_year[year].iloc[split_index:]
+        #
+        #     y_train = train_data["Defect Code"]
+        #     x_train = train_data.drop("Defect Code", axis=1)
+        #
+        #     y_test = test_data["Defect Code"]
+        #     x_test = test_data.drop("Defect Code", axis=1)
+        #
+        #     final_x_train = pd.concat([final_x_train, x_train])
+        #     final_y_train = pd.concat([final_y_train, y_train])
+        #
+        #     final_x_test = pd.concat([final_x_test, x_test])
+        #     final_y_test = pd.concat([final_y_test, y_test])
 
-        # Separate the DataFrame into different DataFrames based on years
-        years = df["Recording Date"].dt.year.unique()
+        # # treino com a linha 410 e teste com a linha 409
 
-        dfs_by_year = {}
-        for year in years:
-            dfs_by_year[year] = df[df["Recording Date"].dt.year == year]
+        final_y_train = df["Defect Code"]
+        final_x_train = df.drop("Defect Code", axis=1)
 
-        # Split train / test
-
-        for year in years:
-            dfs_by_year[year] = df[df["Recording Date"].dt.year == year]
-
-            split_index = int(0.8 * len(dfs_by_year[year]))
-
-            train_data = dfs_by_year[year].iloc[:split_index]
-            test_data = dfs_by_year[year].iloc[split_index:]
-
-            y_train = train_data["Defect Code"]
-            x_train = train_data.drop("Defect Code", axis=1)
-
-            y_test = test_data["Defect Code"]
-            x_test = test_data.drop("Defect Code", axis=1)
-
-            final_x_train = pd.concat([final_x_train, x_train])
-            final_y_train = pd.concat([final_y_train, y_train])
-
-            final_x_test = pd.concat([final_x_test, x_test])
-            final_y_test = pd.concat([final_y_test, y_test])
+        df_line409 = pd.read_excel(r'data\clean_data\cleaned_data_with_deltavalues2022_line409.xlsx')
+        df_line409 = df_line409[df_line409["Defect Code"].isin(top_defects)]
+        final_y_test = df_line409["Defect Code"]
+        final_x_test = df_line409.drop("Defect Code", axis=1)
 
         # Removing the date from the data
 
@@ -137,8 +147,8 @@ for clean_data_delta_path in clean_data_delta_paths:
 
         # Data Augmentation using SMOTE
 
-        # x_train_aug, y_train_aug = SMOTE(random_state=42).fit_resample(final_x_train, final_y_train)
-        x_train_aug, y_train_aug = final_x_train, final_y_train
+        x_train_aug, y_train_aug = SMOTE(random_state=42).fit_resample(final_x_train, final_y_train)
+        #x_train_aug, y_train_aug = final_x_train, final_y_train
 
         defect_count_aug = y_train_aug.value_counts()
         defect_count_without_zero_aug = y_train_aug[y_train_aug != 0].value_counts()
@@ -337,62 +347,62 @@ for clean_data_delta_path in clean_data_delta_paths:
 
     # Save
     if load_models == 0:
-        xgb_model.save_model('models/with_delta_values/JUST_DEFECTS_xgb_model.json')
+        xgb_model.save_model(r'models\with_delta_values\multiclass\JUST_DEFECTS_xgb_model.json')
 
-    #######
-    # SVM #
-    #######
-
-    print(f'\nStarting SVM...')
-
-    svm_model = SVC(random_state=42, probability=True)
-
-    if grid_search == 1:
-        param_grid_svm = {
-            'kernel': ['linear', 'poly'],
-            'gamma': ['scale', 'auto']
-        }
-
-        grid_search_svm = GridSearchCV(svm_model, param_grid_svm, cv=5, scoring=scorer, verbose=4)
-        grid_search_svm.fit(x_train_aug, y_train_aug)
-        best_params_svm = grid_search_svm.best_params_
-        best_recall_svm = grid_search_svm.best_score_
-        print("Best parameters for SVM:", best_params_svm)
-        print("Best recall for SVM:", best_recall_svm)
-
-        logging.info("\nSVM GRID SEARCH:")
-        logging.info(f"Best parameters: {best_params_svm}")
-
-    if load_models == 1:
-        svm_model = load(r'models\with_delta_values\multiclass\JUST_DEFECTS_svm_model.pkl')
-    else:
-        svm_model.fit(x_train_aug, y_train_aug)
-
-    # Predict
-    y_pred_svm = svm_model.predict(x_test)
-
-    # Evaluation
-
-    confusion_matrix_svm = confusion_matrix(final_y_test, y_pred_svm)
-    disp_svm = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_svm, display_labels=svm_model.classes_)
-    disp_svm.plot()
-    plt.title('SVM Confusion Matrix')
-    plt.savefig(r'plots\confusion_matrix\with_delta_values\JUST_DEFECTS_svm.png')
-    plt.show()
-
-    recall_score_svm = recall_score(final_y_test, y_pred_svm, average='weighted', zero_division=1)
-    print(f'Recall: {recall_score_svm:.6f}')
-
-    precision_score_svm = precision_score(final_y_test, y_pred_svm, average='weighted', zero_division=1)
-    print(f'Precision: {precision_score_svm:.6f}')
-
-    logging.info("\nSVM Metrics:")
-    logging.info(f"Recall: {recall_score_svm:.6f}")
-    logging.info(f"Precision: {precision_score_svm:.6f}")
-
-    # Save
-    if load_models == 0:
-        dump(svm_model, r'models\with_delta_values\multiclass\JUST_DEFECTS_svm_model.pkl')
+    # #######
+    # # SVM #
+    # #######
+    #
+    # print(f'\nStarting SVM...')
+    #
+    # svm_model = SVC(random_state=42, probability=True)
+    #
+    # if grid_search == 1:
+    #     param_grid_svm = {
+    #         'kernel': ['linear', 'poly'],
+    #         'gamma': ['scale', 'auto']
+    #     }
+    #
+    #     grid_search_svm = GridSearchCV(svm_model, param_grid_svm, cv=5, scoring=scorer, verbose=4)
+    #     grid_search_svm.fit(x_train_aug, y_train_aug)
+    #     best_params_svm = grid_search_svm.best_params_
+    #     best_recall_svm = grid_search_svm.best_score_
+    #     print("Best parameters for SVM:", best_params_svm)
+    #     print("Best recall for SVM:", best_recall_svm)
+    #
+    #     logging.info("\nSVM GRID SEARCH:")
+    #     logging.info(f"Best parameters: {best_params_svm}")
+    #
+    # if load_models == 1:
+    #     svm_model = load(r'models\with_delta_values\multiclass\JUST_DEFECTS_svm_model.pkl')
+    # else:
+    #     svm_model.fit(x_train_aug, y_train_aug)
+    #
+    # # Predict
+    # y_pred_svm = svm_model.predict(x_test)
+    #
+    # # Evaluation
+    #
+    # confusion_matrix_svm = confusion_matrix(final_y_test, y_pred_svm)
+    # disp_svm = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_svm, display_labels=svm_model.classes_)
+    # disp_svm.plot()
+    # plt.title('SVM Confusion Matrix')
+    # plt.savefig(r'plots\confusion_matrix\with_delta_values\JUST_DEFECTS_svm.png')
+    # plt.show()
+    #
+    # recall_score_svm = recall_score(final_y_test, y_pred_svm, average='weighted', zero_division=1)
+    # print(f'Recall: {recall_score_svm:.6f}')
+    #
+    # precision_score_svm = precision_score(final_y_test, y_pred_svm, average='weighted', zero_division=1)
+    # print(f'Precision: {precision_score_svm:.6f}')
+    #
+    # logging.info("\nSVM Metrics:")
+    # logging.info(f"Recall: {recall_score_svm:.6f}")
+    # logging.info(f"Precision: {precision_score_svm:.6f}")
+    #
+    # # Save
+    # if load_models == 0:
+    #     dump(svm_model, r'models\with_delta_values\multiclass\JUST_DEFECTS_svm_model.pkl')
 
     ############
     # CATBOOST #

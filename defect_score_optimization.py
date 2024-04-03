@@ -1,173 +1,172 @@
-import os
-import random
-import logging
 import numpy as np
 import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
 import joblib
+import warnings
 
 from scipy.optimize import dual_annealing
 from sklearn.metrics import mean_squared_error
-from sklearn.svm import SVC
-from datetime import datetime
-from sklearn import preprocessing
-from xgboost import XGBClassifier, DMatrix
-from joblib import dump, load
+from xgboost import XGBClassifier
 from catboost import CatBoostClassifier
-from imblearn.over_sampling import SMOTE
-from sklearn.preprocessing import LabelEncoder
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import recall_score, precision_score, confusion_matrix, ConfusionMatrixDisplay
+
+warnings.filterwarnings("ignore")
+
+data_path = r'data\clean_data\binary_cleaned_data_with_deltavalues_2022_2023_2024.xlsx'
+
+df = pd.read_excel(data_path)
+df = df.drop(["Recording Date", "Defect Code"], axis=1)
 
 rf_model_path = r'models\with_delta_values\binary\NOTNORM_binary_random_forest_model.pkl'
 xgb_model_path = r'models\with_delta_values\binary\NOTNORM_binary_xgb_model.json'
-svm_model_path = r'models\with_delta_values\binary\NOTNORM_binary_svm_model.pkl'
 catboost_model_path = r'models\with_delta_values\binary\NOTNORM_binary_catboost_model.cbm'
 
-# Load train and test data
-
-x_train = pd.read_excel(
-    r'data\split_train_test_data\with_delta_values\binary_data\NOTNORM_binary_x_train_aug.xlsx')
-y_train = pd.read_excel(
-    r'data\split_train_test_data\with_delta_values\binary_data\NOTNORM_binary_y_train_aug.xlsx')
-x_test = pd.read_excel(
-    r'data\split_train_test_data\with_delta_values\binary_data\NOTNORM_binary_x_test.xlsx')
-y_test = pd.read_excel(
-    r'data\split_train_test_data\with_delta_values\binary_data\NOTNORM_binary_y_test.xlsx')
-
-# Load trained models
-print("loaded data")
-
-# Random Forest
-
+# load models
 rf_model = joblib.load(rf_model_path)
-rf_prob = rf_model.predict_proba(x_test)
-print("rf done")
-# XGBoost
-
 xgb_model = XGBClassifier()
 xgb_model.load_model(xgb_model_path)
-xgb_prob = xgb_model.predict_proba(x_test)
-print("xgb done")
-# SVM
-
-svm_model = joblib.load(svm_model_path)
-svm_prob = svm_model.predict_proba(x_test)
-print("svm done")
-# CatBoost
-
 catboost_model = CatBoostClassifier()
 catboost_model.load_model(catboost_model_path)
-catboost_prob = catboost_model.predict_proba(x_test)
-print("catb done")
 
-avg_prob = np.mean([rf_prob, xgb_prob, svm_prob, catboost_prob], axis=0)
-avg_defect_score = avg_prob[:, 1]  # Using the probabilities of class 1 as defect score
 
-df_results = pd.DataFrame({
-    'Defect Code': y_test['Defect Code'],
-    'Avg Defect Score': avg_defect_score
-})
+# function to obtain the defect score
+def defect_score(x):
+    x = x.reshape(1, -1)
 
-df_results.to_excel(r'data\split_train_test_data\with_delta_values\binary_data\NOTNORM_binary_x_test_with_defect_scores.xlsx')
+    rf_prob = rf_model.predict_proba(x)
+    xgb_prob = xgb_model.predict_proba(x)
+    catboost_prob = catboost_model.predict_proba(x)
+
+    avg_defect_score = np.mean([rf_prob[:, 1], xgb_prob[:, 1], catboost_prob[:, 1]], axis=0)
+
+    return avg_defect_score
+
+
+def fitness_function(x, target_defect_score):
+    current_defect_score = defect_score(x)
+    # print(f'current_defect_score: {current_defect_score}')
+    return mean_squared_error([target_defect_score], [current_defect_score])
+
+
+# callback function
+def dual_annealing_callback(x, f, context):
+    real_time_param = {feature: value.round(2) for feature, value in zip(df.columns, x) if
+                       feature in ['Thermal Cycle Time', 'Pressure', 'Lower Plate Temperature',
+                                   'Upper Plate Temperature']}
+    print('\nReal-time adjustable params:', real_time_param)
+    print('Defect score:', f.round(3))
+
+
+def optimize_params(features_space, x0, target_defect_score, cb=dual_annealing_callback):
+    bounds = [bounds_tuple[1] for bounds_tuple in features_space if isinstance(bounds_tuple[1], tuple)]
+
+    result = dual_annealing(
+        func=fitness_function,
+        x0=x0,
+        bounds=bounds,
+        # args= [target_defect_score, features_space],  # depois confirmar se assim está correto
+        args=(target_defect_score,),
+        callback=cb,
+        maxfun=1e3,
+        seed=16
+    )
+
+    best_params = result.x
+    mse = result.fun
+
+    return best_params, mse
+
+
+# good sample for reference (no defect)
+x0 = df.iloc[20]
+
+# sample with defect to optimize
+sample = df.iloc[252]
+sample_array = np.array(sample)
+initial_defect_score = defect_score(sample_array)
+
+features_space = []
+
+# append to features space the features name and their respective value given the considered sample
+for column in df.columns:
+    features_space.append([column, sample[column]])
+
+# intervals for the features that can be adjusted in real-time
+intervals = {
+    'Thermal Cycle Time': (10, 150),
+    'Pressure': (250, 350),
+    'Lower Plate Temperature': (160, 210),
+    'Upper Plate Temperature': (160, 210)
+}
+
+# updates the values (bounds) for the real time features in the features_space
+for feature, value in features_space:
+    if feature in intervals:
+        features_space[features_space.index([feature, value])][1] = intervals[feature]
+
+# since the function requires a bound even though i want to keep some values "fixed",
+# i'm subtracting and adding a small value around the value to it creates a valid interval
+# without affecting
+
+aux = 0.0001
+
+for i, (feature, value) in enumerate(features_space):
+
+    if feature not in intervals:
+        bounds_min = max(0, value - aux)  # ensuring that the bounds are not negative
+        bounds_max = max(0, value + aux)
+        features_space[i][1] = (bounds_min, bounds_max)
+
+# indices of the real time features in the features_space (will be used for printing some values)
+thermal_cycle_time_index = [i for i, (feature, _) in enumerate(features_space) if feature == 'Thermal Cycle Time'][0]
+pressure_index = [i for i, (feature, _) in enumerate(features_space) if feature == 'Pressure'][0]
+lower_plate_temp_index = [i for i, (feature, _) in enumerate(features_space) if feature == 'Lower Plate Temperature'][0]
+upper_plate_temp_index = [i for i, (feature, _) in enumerate(features_space) if feature == 'Upper Plate Temperature'][0]
+
+indices = [thermal_cycle_time_index, pressure_index, lower_plate_temp_index, upper_plate_temp_index]
+
+print("\n---- Before Optimization ----")
+sample_values = df.iloc[252][['Thermal Cycle Time', 'Pressure', 'Lower Plate Temperature', 'Upper Plate Temperature']]
+# print(sample_values)
+print("\nInitial parameter values: ", sample_values.values.round(2))
+
+print(f"\nStarting optimization...")
+
+target_defect_score = 0.5
+
+best_params, mse = optimize_params(features_space, x0, target_defect_score)
+final_defect_score = defect_score(best_params)
+
+best_params_selected = best_params[indices]
+
+# results
+print('\n---- Optimization Results ----')
+print('\nTarget Defect Score:   ', target_defect_score)
+print('Best Parameters:    ', best_params_selected.round(2))
+print('Initial Defect Score:  ', initial_defect_score)
+print('Final Defect Score:    ', final_defect_score)
+print('MSE:                ', mse.round(3))
+
+# best_params = best_params.reshape(1, -1)
+# rf_prob = rf_model.predict_proba(best_params)
+# xgb_prob = xgb_model.predict_proba(best_params)
+# catboost_prob = catboost_model.predict_proba(best_params)
+# print("\nProbs")
+# print(rf_prob[:, 1])
+# print(xgb_prob[:, 1])
+# print(catboost_prob[:, 1])
+
+# compare params before and after optim to see if it changed any feature value besides the real-time ones
+
+# # best_parms --> numpy.ndarray
+# # sample --> class 'pandas.core.series.Series
+
+# sample_v = sample.values
+# num_elements = len(best_params[0])
 #
-# df_results = pd.concat([df_results, x_test], axis=1)
-#
-# # Filtering the data to find a good "reference" sample to test the optimization
-# filtered_results = df_results.query('`Defect Code` == 0 and `Avg Defect Score` < 0.15')
-# x0 = filtered_results.iloc[0]
-# print("X0 selected.")
-#
-# target_defect_score = 0.1
-#
-# # Features that can be "changed" in real time
-# real_time_features = ['Thermal Cycle Time', 'Pressure', 'Lower Plate Temperature',
-#                       'Upper Plate Temperature']
-#
-# # Search Space
-# # Defining the parameter boudaries for real time features
-# real_time_features_bounds = [
-#     ['Thermal Cycle Time', (10, 120)],
-#     ['Pressure', (280, 350)],
-#     ['Lower Plate Temperature', (165, 202)],
-#     ['Upper Plate Temperature', (169, 195)]
-# ]
-#
-# # Data to be optimized (test)
-# # to be faster i'm only using 10% of the original test data
-# num_samples = int(0.1 * len(x_test))
-# indices_optimize = np.random.choice(len(x_test), num_samples, replace=False)
-# x_optimize = x_test.iloc[indices_optimize]
-#
-#
-# # function to obtain the defect score
-# def defect_score(x):
-#
-#     print("Shape of x:", x.shape)  # Print the shape of x
-#
-#
-#
-#     rf_prob = rf_model.predict_proba(x)
-#     xgb_prob = xgb_model.predict_proba(x)
-#     svm_prob = svm_model.predict_proba(x)
-#     catboost_prob = catboost_model.predict_proba(x)
-#
-#     avg_defect_score = np.mean([rf_prob[:, 1], xgb_prob[:, 1], svm_prob[:, 1], catboost_prob[:, 1]], axis=0)
-#
-#     return avg_defect_score
-# def build_feature_array(x, real_time_features_bounds):
-#     x_concat = np.zeros(len(real_time_features_bounds))
-#     x_list = list(x)
-#     for i, v in enumerate(real_time_features_bounds):
-#         # appends the fixed feature values
-#         if type(v[1]) != tuple:
-#             x_concat[i] = v[1]
-#         # appends the non fixed feature values
-#         else:
-#             x_concat[i] = x_list.pop(0)
-#     # returns the results
-#     return x_concat
-#
-# def fitness_function(x, target_defect_score, real_time_features_bounds):
-#
-#     x_concat = build_feature_array(x, real_time_features_bounds)
-#
-#     current_defect_score = defect_score(x_concat)
-#     print(f'current_defect_score: {current_defect_score}')
-#     return mean_squared_error(current_defect_score, target_defect_score)
-#
-# # Define callback function for dual_annealing
-# def dual_annealing_callback(x, f, context):
-#     print('non-fixed params: {0}, defect score: {1}'.format(x.round(2), f.round(3)))
-#
-# # Modify optimize_params function to accept callback function
-# def optimize_params(real_time_features_bounds, x0, target_defect_score, cb=dual_annealing_callback):
-#
-#     bounds = [bounds_tuple[1] for bounds_tuple in real_time_features_bounds]
-#
-#     result = dual_annealing(
-#         func=fitness_function,
-#         bounds=bounds,
-#         args=(target_defect_score, real_time_features_bounds),
-#         callback=cb  # Pass the callback function here
-#     )
-#
-#     best_params = result.x
-#     mse = result.fun
-#     # returns the results
-#     return best_params, mse
-#
-#
-# # Adjust the call to optimize_params to pass necessary arguments
-# print("start optimization...")
-# best_params, mse = optimize_params(real_time_features_bounds, x0, target_defect_score)
-# final_defect_score = defect_score(best_params)
-#
-# # prints the results
-# print('\n** Optimization Results **')
-# print('Target Score:   ', target_defect_score)
-# print('Previous Parameters:', x0)
-# print('Best Parameters:    ', best_params.round(2))
-# print('Final Whiteness:    ', final_defect_score.round(2))
-# print('MSE:                ', mse.round(3))
+# for i in range(num_elements):
+#     if best_params[0][i] == sample_v[i]:
+#         print(f"Index {i}: Values are equal - Best Params: {best_params[0][i]}, Sample: {sample_v[i]}")
+#     else:
+#         print(f"Index {i}: Values are not equal - Best Params: {best_params[0][i]}, Sample: {sample_v[i]}")
+
+
+

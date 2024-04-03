@@ -10,6 +10,7 @@ from lightgbm import LGBMClassifier
 import lime
 
 from sklearn.svm import SVC
+from sklearn.naive_bayes import GaussianNB
 from datetime import datetime
 from sklearn import preprocessing
 from xgboost import XGBClassifier
@@ -42,7 +43,7 @@ final_x_test = pd.DataFrame()
 final_y_train = pd.Series(dtype='float64')
 final_y_test = pd.Series(dtype='float64')
 
-clean_data_delta_path = r'data\clean_data\cleaned_data_with_deltavalues2022_2023_2024.xlsx'
+clean_data_delta_path = r'data\clean_data\cleaned_data_with_deltavalues_2022_2023_2024.xlsx'
 
 if import_test_train_data == 1:
     print(f'\nLoading test and train data...')
@@ -143,10 +144,10 @@ if import_test_train_data == 0:
     final_y_train = df["Defect Code"]
     final_x_train = df.drop("Defect Code", axis=1)
 
-    df_line409 = pd.read_excel(r'data\clean_data\cleaned_data_with_deltavalues2022_line409.xlsx')
-    df_line409 = df_line409[df_line409["Defect Code"].isin(top_defects)]
-    final_y_test = df_line409["Defect Code"]
-    final_x_test = df_line409.drop("Defect Code", axis=1)
+    df_test = pd.read_excel(r'data\clean_data\cleaned_data_with_deltavalues_dataset_jan_dec_2022_line410.xlsx')
+    df_test = df_test[df_test["Defect Code"].isin(top_defects)]
+    final_y_test = df_test["Defect Code"]
+    final_x_test = df_test.drop("Defect Code", axis=1)
 
     # Removing the date from the data
 
@@ -198,10 +199,10 @@ if import_test_train_data == 0:
         axes[1, 1].set_xlabel("Defect Code")
         axes[1, 1].set_ylabel("Quantity")
 
-        # output_path = os.path.join(augmentation_subdirectory_path, 'data_before_and_after_SMOTE.png')
-        # plt.savefig(output_path)
-        #
-        # plt.tight_layout()
+        output_path = os.path.join(augmentation_subdirectory_path, 'data_before_and_after_SMOTE.png')
+        plt.savefig(output_path)
+
+        plt.tight_layout()
         plt.show()
 
     # Normalize X values
@@ -212,25 +213,29 @@ if import_test_train_data == 0:
     x_test = min_max_scaler.transform(final_x_test)
 
     # Save test and train data
-    # print(f'\nSaving test and train data...')
-    #
-    # pd.DataFrame(x_train_aug, columns=final_x_train.columns).to_excel(
-    #     r'data\split_train_test_data\with_delta_values\x_train_aug.xlsx',
-    #     index=False)
-    #
-    # pd.Series(y_train_aug, name='Defect Code').to_excel(
-    #     r'data\split_train_test_data\with_delta_values\y_train_aug.xlsx',
-    #     index=False)
-    #
-    # pd.DataFrame(x_test, columns=final_x_test.columns).to_excel(
-    #     r'data\split_train_test_data\with_delta_values\x_test.xlsx',
-    #     index=False)
-    #
-    # pd.Series(final_y_test, name='Defect Code').to_excel(
-    #     r'data\split_train_test_data\with_delta_values\y_test.xlsx',
-    #     index=False)
-    #
-    # print(f'\nSaved train and test data!')
+    print(f'\nSaving test and train data...')
+
+    pd.DataFrame(x_train_aug, columns=final_x_train.columns).to_excel(
+        r'data\split_train_test_data\with_delta_values\x_train_aug.xlsx',
+        index=False)
+    print("done")
+
+    pd.Series(y_train_aug, name='Defect Code').to_excel(
+        r'data\split_train_test_data\with_delta_values\y_train_aug.xlsx',
+        index=False)
+    print("done")
+
+    pd.DataFrame(x_test, columns=final_x_test.columns).to_excel(
+        r'data\split_train_test_data\with_delta_values\x_test.xlsx',
+        index=False)
+    print("done")
+
+    pd.Series(final_y_test, name='Defect Code').to_excel(
+        r'data\split_train_test_data\with_delta_values\y_test.xlsx',
+        index=False)
+    print("done")
+
+    print(f'\nSaved train and test data!')
 
 print(f'\n-------------- ML MODELS --------------')
 
@@ -284,7 +289,7 @@ confusion_matrix_rf = confusion_matrix(final_y_test, y_pred_rf)
 disp_rf = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_rf, display_labels=rndforest.classes_)
 disp_rf.plot()
 plt.title('RF Confusion Matrix - with "Defect Class"')
-#plt.savefig(r'plots\confusion_matrix\with_delta_values\rf.png')
+plt.savefig(r'plots\confusion_matrix\with_delta_values\multiclass\rf.png')
 plt.show()
 
 # Display the confusion matrix without class '0' -> no defect
@@ -293,7 +298,7 @@ confusion_matrix_xgb = confusion_matrix(final_y_test, y_pred_rf, labels=labels_r
 disp_xgb = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_xgb, display_labels=labels_rf)
 disp_xgb.plot()
 plt.title('RF Confusion Matrix - without "Defect Class"')
-#plt.savefig(r'plots\confusion_matrix\with_delta_values\rf_defects.png')
+plt.savefig(r'plots\confusion_matrix\with_delta_values\multiclass\rf_defects.png')
 plt.show()
 
 recall_score_rf = recall_score(final_y_test, y_pred_rf, average='weighted', zero_division=1)
@@ -307,8 +312,8 @@ logging.info(f"Recall: {recall_score_rf:.6f}")
 logging.info(f"Precision: {precision_score_rf:.6f}")
 
 # Save
-# if load_models == 0:
-#     dump(rndforest, r'models\with_delta_values\multiclass\random_forest_model.pkl')
+if load_models == 0:
+    dump(rndforest, r'models\with_delta_values\multiclass\random_forest_model.pkl')
 
 ###########
 # XGBOOST #
@@ -366,7 +371,7 @@ confusion_matrix_xgb = confusion_matrix(final_y_test, y_pred_xgb)
 disp_xgb = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_xgb, display_labels=xgb_model.classes_)
 disp_xgb.plot()
 plt.title('XGBoost Confusion Matrix')
-# plt.savefig(r'plots\confusion_matrix\with_delta_values\multiclass\xgboost.png')
+plt.savefig(r'plots\confusion_matrix\with_delta_values\multiclass\xgboost.png')
 plt.show()
 
 # Display the confusion matrix without class '0' -> no defect
@@ -375,7 +380,7 @@ confusion_matrix_xgb = confusion_matrix(final_y_test, y_pred_xgb, labels=labels_
 disp_xgb = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_xgb, display_labels=labels_xgb)
 disp_xgb.plot()
 plt.title('XGBoost Confusion Matrix - without "Defect Class"')
-#plt.savefig(r'plots\confusion_matrix\with_delta_values\xgboost_defects.png')
+plt.savefig(r'plots\confusion_matrix\with_delta_values\multiclass\xgboost_defects.png')
 plt.show()
 
 recall_score_xgb = recall_score(final_y_test, y_pred_xgb, average='weighted', zero_division=1)
@@ -389,74 +394,56 @@ logging.info(f"Recall: {recall_score_xgb:.6f}")
 logging.info(f"Precision: {precision_score_xgb:.6f}")
 
 # Save
-# if load_models == 0:
-#     xgb_model.save_model('models/with_delta_values/xgb_model.json')
+if load_models == 0:
+    xgb_model.save_model(r'models\with_delta_values\multiclass\xgb_model.json')
 
-#######
-# SVM #
-#######
+###############
+# Naive Bayes #
+###############
 
-print(f'\nStarting SVM...')
+print(f'\nStarting Naive Bayes...')
 
-svm_model = SVC(random_state=42, probability=True)
-
-if grid_search == 1:
-    param_grid_svm = {
-        'kernel': ['linear', 'poly'],
-        'gamma': ['scale', 'auto']
-    }
-
-    grid_search_svm = GridSearchCV(svm_model, param_grid_svm, cv=5, scoring=scorer, verbose=4)
-    grid_search_svm.fit(x_train_aug, y_train_aug)
-    best_params_svm = grid_search_svm.best_params_
-    best_recall_svm = grid_search_svm.best_score_
-    print("Best parameters for SVM:", best_params_svm)
-    print("Best recall for SVM:", best_recall_svm)
-
-    logging.info("\nSVM GRID SEARCH:")
-    logging.info(f"Best parameters: {best_params_svm}")
+nb_model = GaussianNB()
 
 if load_models == 1:
-    svm_model = load(r'models\with_delta_values\multiclass\svm_model.pkl')
+    nb_model = load(r'models\with_delta_values\multiclass\nb_model.pkl')
 else:
-    svm_model.fit(x_train_aug, y_train_aug)
+    nb_model.fit(x_train_aug, y_train_aug)
 
 # Predict
-y_pred_svm = svm_model.predict(x_test)
+y_pred_nb = nb_model.predict(x_test)
 
 # Evaluation
 
-confusion_matrix_svm = confusion_matrix(final_y_test, y_pred_svm)
-disp_svm = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_svm, display_labels=svm_model.classes_)
-disp_svm.plot()
-plt.title('SVM Confusion Matrix')
-#plt.savefig(r'plots\confusion_matrix\with_delta_values\svm.png')
+confusion_matrix_nb = confusion_matrix(final_y_test, y_pred_nb)
+disp_nb = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_nb, display_labels=nb_model.classes_)
+disp_nb.plot()
+plt.title('Naive Bayes Confusion Matrix')
+plt.savefig(r'plots\confusion_matrix\with_delta_values\multiclass\nb.png')
 plt.show()
 
 # Display the confusion matrix without class '0' -> no defect
-labels_svm = np.unique(final_y_test)[1:]
-confusion_matrix_svm = confusion_matrix(final_y_test, y_pred_rf, labels=labels_svm)
-disp_svm = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_svm, display_labels=labels_svm)
-disp_svm.plot()
-plt.title('SVM Confusion Matrix - without "Defect Class"')
-#plt.savefig(r'plots\confusion_matrix\with_delta_values\svm_defects.png')
+labels_nb = np.unique(final_y_test)[1:]
+confusion_matrix_nb = confusion_matrix(final_y_test, y_pred_nb, labels=labels_nb)
+disp_nb = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_nb, display_labels=labels_nb)
+disp_nb.plot()
+plt.title('Naive Bayes Confusion Matrix - without "Defect Class"')
+plt.savefig(r'plots\confusion_matrix\with_delta_values\multiclass\nb_defects.png')
 plt.show()
 
-recall_score_svm = recall_score(final_y_test, y_pred_svm, average='weighted', zero_division=1)
-print(f'Recall: {recall_score_svm:.6f}')
+recall_score_nb = recall_score(final_y_test, y_pred_nb, average='weighted', zero_division=1)
+print(f'Recall: {recall_score_nb:.6f}')
 
-precision_score_svm = precision_score(final_y_test, y_pred_svm, average='weighted', zero_division=1)
-print(f'Precision: {precision_score_svm:.6f}')
+precision_score_nb = precision_score(final_y_test, y_pred_nb, average='weighted', zero_division=1)
+print(f'Precision: {precision_score_nb:.6f}')
 
-logging.info("\nSVM Metrics:")
-logging.info(f"Recall: {recall_score_svm:.6f}")
-logging.info(f"Precision: {precision_score_svm:.6f}")
+logging.info("\nNaive Bayes Metrics:")
+logging.info(f"Recall: {recall_score_nb:.6f}")
+logging.info(f"Precision: {precision_score_nb:.6f}")
 
 # Save
 if load_models == 0:
-    print("Saving SVM...")
-    dump(svm_model, r'models\with_delta_values\multiclass\svm_model.pkl')
-    print("Saved!")
+    dump(nb_model, r'models\with_delta_values\multiclass\nb_model.pkl')
 
 ############
 # CATBOOST #
@@ -498,7 +485,7 @@ confusion_matrix_cat = confusion_matrix(final_y_test, y_pred_cat)
 disp_cat = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_cat, display_labels=catboost_model.classes_)
 disp_cat.plot()
 plt.title('CATBOOST Confusion Matrix')
-#plt.savefig(r'plots\confusion_matrix\with_delta_values\catboost.png')
+plt.savefig(r'plots\confusion_matrix\with_delta_values\multiclass\catboost.png')
 plt.show()
 
 # Display the confusion matrix without class '0' -> no defect
@@ -507,7 +494,7 @@ confusion_matrix_cat = confusion_matrix(final_y_test, y_pred_cat, labels=labels_
 disp_cat = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_cat, display_labels=labels_cat)
 disp_cat.plot()
 plt.title('CATBOOST Confusion Matrix - without "Defect Class"')
-#plt.savefig(r'plots\confusion_matrix\with_delta_values\catboost_defects.png')
+plt.savefig(r'plots\confusion_matrix\with_delta_values\multiclass\catboost_defects.png')
 plt.show()
 
 recall_score_cat = recall_score(final_y_test, y_pred_cat, average='weighted', zero_division=1)
@@ -521,77 +508,5 @@ logging.info(f"Recall: {recall_score_cat:.6f}")
 logging.info(f"Precision: {precision_score_cat:.6f}")
 
 # # Save
-# if load_models == 0:
-#     catboost_model.save_model(r'models\with_delta_values\multiclass\catboost_model.cbm')
-
-# ############
-# # LIGHTGBM #
-# ############
-#
-# print(f'\nStarting LightGBM...')
-#
-#
-# lgb_model = LGBMClassifier(objective='multiclass', num_class=11, class_weight='balanced')
-#
-# if grid_search == 1:
-#
-#     param_grid_lgb = {
-#
-#     }
-#
-#     grid_search_lgb = GridSearchCV(lgb_model, param_grid_lgb, cv=5, scoring=scorer, verbose=4)
-#     grid_search_lgb.fit(x_train_aug, y_train_aug)
-#     best_params_lgb = grid_search_lgb.best_params_
-#     best_recall_lgb = grid_search_lgb.best_score_
-#     print("Best parameters for LGBM:", best_params_lgb)
-#     print("Best recall for LGBM:", best_recall_lgb)
-#
-#     logging.info("\nLGBM GRID SEARCH:")
-#     logging.info(f"Best parameters: {best_params_lgb}")
-#
-#
-# if load_models == 1:
-#     lgb_model = lgb.Booster(model_file=r'models\with_delta_values\multiclass\lgb_model.txt')
-#
-# else:
-#     lgb_model.fit(x_train_aug, y_train_aug)
-#
-# # Predict
-#
-# y_pred_lgb = lgb_model.predict(x_test)
-#
-# # Evaluation
-#
-# # confusion_matrix_lgb = confusion_matrix(final_y_test, y_pred_classes)
-# # disp_lgb = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_lgb, display_labels=labels_cat.classes_)
-# # disp_lgb.plot()
-# # plt.title('LGBM Confusion Matrix')
-# # plt.savefig(r'plots\confusion_matrix\with_delta_values\lgb.png')
-# # plt.show()
-# #
-# # # Display the confusion matrix without class '0' -> no defect
-# # labels_lgb = np.unique(final_y_test)[1:]
-# # confusion_matrix_lgb = confusion_matrix(final_y_test, y_pred_lgb, labels=labels_lgb)
-# # disp_lgb = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_lgb, display_labels=labels_lgb)
-# # disp_lgb.plot()
-# # plt.title('LGBM Confusion Matrix - without "Defect Class"')
-# # plt.savefig(r'plots\confusion_matrix\with_delta_values\lgb_defects.png')
-# # plt.show()
-#
-# recall_score_lgb = recall_score(final_y_test, y_pred_lgb, average='weighted', zero_division=1)
-# print(f'Recall: {recall_score_lgb:.6f}')
-#
-# precision_score_lgb = precision_score(final_y_test, y_pred_lgb, average='weighted', zero_division=1)
-# print(f'Precision: {precision_score_lgb:.6f}')
-#
-# logging.info("\nLGBM Metrics:")
-# logging.info(f"Recall: {recall_score_lgb:.6f}")
-# logging.info(f"Precision: {precision_score_lgb:.6f}")
-#
-# # Save
-# if load_models == 0:
-#     booster = lgb_model.booster_
-#     booster.save_model(filename=r'models\with_delta_values\multiclass\lgb_model.txt')
-
-
-
+if load_models == 0:
+    catboost_model.save_model(r'models\with_delta_values\multiclass\catboost_model.cbm')
