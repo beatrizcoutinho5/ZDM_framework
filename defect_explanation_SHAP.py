@@ -22,7 +22,6 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import recall_score, precision_score, confusion_matrix, ConfusionMatrixDisplay
 
-# Suppress InconsistentVersionWarning
 warnings.filterwarnings("ignore", category=UserWarning)
 
 rf_model_path = r'models\with_delta_values\multiclass\random_forest_model.pkl'
