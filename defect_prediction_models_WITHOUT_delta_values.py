@@ -136,12 +136,12 @@ for clean_data_path in clean_data_paths:
         # # treino com a linha 410 e teste com a linha 409
 
         final_y_train = df["Defect Code"]
-        final_x_train = df.drop("Defect Code", axis=1)
+        final_x_train = df.drop(["Group", "Defect Code"], axis=1)
 
         df_line409 = pd.read_excel(r'data\clean_data\cleaned_data_2022_line409.xlsx')
         df_line409 = df_line409[df_line409["Defect Code"].isin(top_defects)]
         final_y_test = df_line409["Defect Code"]
-        final_x_test = df_line409.drop("Defect Code", axis=1)
+        final_x_test = df_line409.drop(["Group", "Defect Code"], axis=1)
 
         # Removing the date from the data
 

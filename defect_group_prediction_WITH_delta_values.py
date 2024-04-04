@@ -102,7 +102,7 @@ if import_test_train_data == 0:
         r'data\split_train_test_data\with_delta_values\defect_groups\x_train_aug.xlsx',
         index=False)
 
-    pd.Series(y_train_aug, name='Defect Code').to_excel(
+    pd.Series(y_train_aug, name='Group').to_excel(
         r'data\split_train_test_data\with_delta_values\defect_groups\y_train_aug.xlsx',
         index=False)
 
@@ -110,7 +110,7 @@ if import_test_train_data == 0:
         r'data\split_train_test_data\with_delta_values\defect_groups\x_test.xlsx',
         index=False)
 
-    pd.Series(final_y_test, name='Defect Code').to_excel(
+    pd.Series(final_y_test, name='Group').to_excel(
         r'data\split_train_test_data\with_delta_values\defect_groups\y_test.xlsx',
         index=False)
 

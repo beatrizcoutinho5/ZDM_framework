@@ -142,12 +142,12 @@ if import_test_train_data == 0:
     # # treino com a linha 410 e teste com a linha 409
 
     final_y_train = df["Defect Code"]
-    final_x_train = df.drop("Defect Code", axis=1)
+    final_x_train = df.drop(["Group", "Defect Code"], axis=1)
 
     df_test = pd.read_excel(r'data\clean_data\cleaned_data_with_deltavalues_dataset_jan_dec_2022_line410.xlsx')
     df_test = df_test[df_test["Defect Code"].isin(top_defects)]
     final_y_test = df_test["Defect Code"]
-    final_x_test = df_test.drop("Defect Code", axis=1)
+    final_x_test = df_test.drop(["Group", "Defect Code"], axis=1)
 
     # Removing the date from the data
 

@@ -112,8 +112,8 @@ if import_test_train_data == 0:
 
     # Removing the date from the data
 
-    final_x_train = df.drop(["Recording Date", "Defect Code", "Binary Defect Code"], axis=1)
-    final_x_test = df_line409.drop(["Recording Date", "Defect Code", "Binary Defect Code"], axis=1)
+    final_x_train = df.drop(["Recording Date", "Defect Code", "Binary Defect Code", "Group"], axis=1)
+    final_x_test = df_line409.drop(["Recording Date", "Defect Code", "Binary Defect Code", "Group"], axis=1)
 
     final_y_train = df["Binary Defect Code"]
     final_y_test = df_line409["Binary Defect Code"]
