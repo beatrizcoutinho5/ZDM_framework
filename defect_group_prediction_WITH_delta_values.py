@@ -20,10 +20,10 @@ timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 make_plots = 0
 
 # Import test and train data?
-import_test_train_data = 1
+import_test_train_data = 0
 
 # Load models?
-load_models = 1
+load_models = 0
 
 # Perfom Grid Search?
 grid_search = 0
@@ -46,14 +46,14 @@ if import_test_train_data == 1:
 
     y_train_aug = pd.read_excel(
         r'data\split_train_test_data\with_delta_values\defect_groups\y_train_aug.xlsx')[
-        'Defect Code']
+        'Group']
 
     x_test = pd.read_excel(
         r'data\split_train_test_data\with_delta_values\defect_groups\x_test.xlsx')
 
     final_y_test = pd.read_excel(
         r'data\split_train_test_data\with_delta_values\defect_groups\y_test.xlsx')[
-        'Defect Code']
+        'Group']
 
     print(f'Loaded test and train data!')
 
@@ -77,10 +77,10 @@ df_test = df_test[df_test["Defect Code"] != 0]
 if import_test_train_data == 0:
 
     final_y_train = df["Group"]
-    final_x_train = df.drop("Group", axis=1)
+    final_x_train = df.drop(["Group", "Defect Code"], axis=1)
 
     final_y_test = df_test["Group"]
-    final_x_test = df_test.drop("Group", axis=1)
+    final_x_test = df_test.drop(["Group", "Defect Code"], axis=1)
 
     # Removing the date from the data
     final_x_train = final_x_train.drop("Recording Date", axis=1)

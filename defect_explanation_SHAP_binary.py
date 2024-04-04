@@ -108,8 +108,6 @@ shap.summary_plot(mean_abs_shap_values_reshaped_rf, features=x_test, feature_nam
 ax.set_title("Mean Absolute SHAP Summary Plot for All Classes")
 plt.savefig(os.path.join(r'plots\shap\with_delta_values\binary\random_forest', "mean_abs_shap_summary_plot.png"), dpi=300, bbox_inches='tight')
 
-
-
 ###########
 # XGBoost #
 ###########
@@ -121,21 +119,6 @@ xgb_explainer = shap.TreeExplainer(xgb_model)
 xgb_shap_values = xgb_explainer.shap_values(x_test)
 
 print("Plotting and saving SHAP summary plots...")
-
-# for class_index, class_name in enumerate(class_names):
-#
-#     shap_values_for_class = xgb_shap_values[:, :, class_index]
-#     shap_values_for_class_reshaped = shap_values_for_class.reshape(len(xgb_shap_values), -1)
-#
-#     fig, ax = plt.subplots(figsize=fig_size)
-#     shap.summary_plot(shap_values_for_class_reshaped, features=x_test, feature_names=x_test.columns, plot_type='bar',
-#                       show=False)
-#
-#     # Add label indicating the class
-#     ax.set_title(f"SHAP Summary Plot for Class {class_names}")
-#     plt.savefig(
-#         os.path.join(r'plots\shap\with_delta_values\binary\xgboost', f"shap_summary_plot_class_{class_names}.png"),
-#         dpi=300, bbox_inches='tight')
 
 # Feature importance taking into account all the classes at the same time (their average values)
 # Aggregate the SHAP values across all classes and calculate their average
@@ -160,20 +143,6 @@ catboost_explainer = shap.TreeExplainer(catboost_model)
 catboost_shap_values = catboost_explainer.shap_values(x_test)
 
 print("Plotting and saving SHAP summary plots...")
-
-# for class_index, class_name in enumerate(class_names):
-#
-#     shap_values_for_class = catboost_shap_values[:, :, class_index]  # SHAP values for the specified class
-#     shap_values_for_class_reshaped = shap_values_for_class.reshape(len(catboost_shap_values), -1)
-#
-#     fig, ax = plt.subplots(figsize=fig_size)
-#     shap.summary_plot(shap_values_for_class_reshaped, features=x_test, feature_names=x_test.columns, plot_type='bar',
-#                       show=False)
-#
-#     ax.set_title(f"SHAP Summary Plot for Class {class_name}")
-#     plt.savefig(
-#         os.path.join(r'plots\shap\with_delta_values\binary\catboost', f"shap_summary_plot_class_{class_name}.png"),
-#         dpi=300, bbox_inches='tight')
 
 # Feature importance taking into account all the classes at the same time (their average values)
 # Aggregate the SHAP values across all classes and calculate their average
