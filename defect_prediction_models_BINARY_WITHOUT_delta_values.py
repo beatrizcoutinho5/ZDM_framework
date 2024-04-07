@@ -5,6 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from sklearn.svm import SVC
+from sklearn import preprocessing
 from datetime import datetime
 from xgboost import XGBClassifier
 from joblib import dump, load
@@ -40,22 +41,20 @@ if import_test_train_data == 1:
     print(f'\nLoading test and train data...')
 
     x_train_aug = pd.read_excel(
-        r'data\split_train_test_data\without_delta_values\binary_data\NOTNORM_binary_x_train_aug.xlsx')
+        r'data\split_train_test_data\without_delta_values\binary_data\binary_x_train_aug.xlsx')
 
     y_train_aug = pd.read_excel(
-        r'data\split_train_test_data\without_delta_values\binary_data\NOTNORM_binary_y_train_aug.xlsx')[
+        r'data\split_train_test_data\without_delta_values\binary_data\binary_y_train_aug.xlsx')[
         'Defect Code']
 
     x_test = pd.read_excel(
-        r'data\split_train_test_data\without_delta_values\binary_data\NOTNORM_binary_x_test.xlsx')
+        r'data\split_train_test_data\without_delta_values\binary_data\binary_x_test.xlsx')
 
     final_y_test = pd.read_excel(
-        r'data\split_train_test_data\without_delta_values\binary_data\NOTNORM_binary_y_test.xlsx')[
+        r'data\split_train_test_data\without_delta_values\binary_data\binary_y_test.xlsx')[
         'Defect Code']
 
     print(f'Loaded test and train data!')
-
-
 
 # Configure logging file
 logging.basicConfig(filename=f'binary_prediction_model_metrics_log.txt', level=logging.INFO)
@@ -75,8 +74,8 @@ if import_test_train_data == 0:
     # new column where '0' is one class (no defect) and any other code is the second class (defect)
     df['Binary Defect Code'] = np.where(df['Defect Code'] == 0, 0, 1)
 
-    df_line409 = pd.read_excel(r'data\clean_data\cleaned_data_2022_line409.xlsx')
-    df_line409['Binary Defect Code'] = np.where(df_line409['Defect Code'] == 0, 0, 1)
+    df_line410_2022 = pd.read_excel(r'data\clean_data\cleaned_data_2022_line410.xlsx')
+    df_line410_2022['Binary Defect Code'] = np.where(df_line410_2022['Defect Code'] == 0, 0, 1)
 
     # # Split the df by year
     # df["Recording Date"] = pd.to_datetime(df["Recording Date"], format="%d/%m/%Y %H:%M:%S")
@@ -113,10 +112,10 @@ if import_test_train_data == 0:
     # Removing the date from the data
 
     final_x_train = df.drop(["Recording Date", "Defect Code", "Binary Defect Code", "Group"], axis=1)
-    final_x_test = df_line409.drop(["Recording Date", "Defect Code", "Binary Defect Code", "Group"], axis=1)
+    final_x_test = df_line410_2022.drop(["Recording Date", "Defect Code", "Binary Defect Code", "Group"], axis=1)
 
     final_y_train = df["Binary Defect Code"]
-    final_y_test = df_line409["Binary Defect Code"]
+    final_y_test = df_line410_2022["Binary Defect Code"]
 
 
     # Calculate the quantity of each defect code in the train set
@@ -134,14 +133,18 @@ if import_test_train_data == 0:
 
     x_test = final_x_test  # comentar esta qnd fizer a norm
 
+    column_names = x_train_aug.columns
+
     # # Normalize X values
-    #
     # min_max_scaler = preprocessing.MinMaxScaler()
     # min_max_scaler.fit(x_train_aug)
     #
     # x_train_aug = min_max_scaler.transform(x_train_aug)
     # x_test = min_max_scaler.transform(final_x_test)
     #
+    # x_train_aug_df = pd.DataFrame(x_train_aug, columns=column_names)
+    # x_test_df = pd.DataFrame(x_test, columns=column_names)
+
     # # Save scaling parameters
     #
     # scaling_params = pd.DataFrame({
@@ -158,20 +161,20 @@ if import_test_train_data == 0:
     # Save test and train data
     print(f'\nSaving test and train data...')
 
-    pd.DataFrame(x_train_aug, columns=x_train_aug.columns).to_excel(
-        r'data\split_train_test_data\without_delta_values\binary_data\NOTNORM_binary_x_train_aug.xlsx',
+    pd.DataFrame(x_train_aug, columns=column_names).to_excel(
+        r'data\split_train_test_data\without_delta_values\binary_data\binary_x_train_aug.xlsx',
         index=False)
 
     pd.Series(y_train_aug, name='Defect Code').to_excel(
-        r'data\split_train_test_data\without_delta_values\binary_data\NOTNORM_binary_y_train_aug.xlsx',
+        r'data\split_train_test_data\without_delta_values\binary_data\binary_y_train_aug.xlsx',
         index=False)
 
-    pd.DataFrame(x_test, columns=x_test.columns).to_excel(
-        r'data\split_train_test_data\without_delta_values\binary_data\NOTNORM_binary_x_test.xlsx',
+    pd.DataFrame(x_test, columns=column_names).to_excel(
+        r'data\split_train_test_data\without_delta_values\binary_data\binary_x_test.xlsx',
         index=False)
 
     pd.Series(final_y_test, name='Defect Code').to_excel(
-        r'data\split_train_test_data\without_delta_values\binary_data\NOTNORM_binary_y_test.xlsx',
+        r'data\split_train_test_data\without_delta_values\binary_data\binary_y_test.xlsx',
         index=False)
 
     print(f'\nSaved train and test data!')
@@ -189,7 +192,7 @@ print(f'\nStarting Random Forest...')
 rndforest = RandomForestClassifier(random_state=42)
 
 if load_models == 1:
-    rndforest = load(r'models\without_delta_values\binary\NOTNORM_binary_random_forest_model.pkl')
+    rndforest = load(r'models\without_delta_values\binary\binary_random_forest_model.pkl')
 else:
     rndforest.fit(x_train_aug, y_train_aug)
 
@@ -217,7 +220,7 @@ logging.info(f"Precision: {precision_score_rf:.6f}")
 
 # Save
 if load_models == 0:
-    dump(rndforest, r'models\without_delta_values\binary\NOTNORM_binary_random_forest_model.pkl')
+    dump(rndforest, r'models\without_delta_values\binary\binary_random_forest_model.pkl')
 
 ###########
 # XGBOOST #
@@ -239,7 +242,7 @@ print(f'\nStarting XGBoost...')
 xgb_model = XGBClassifier(random_state=42)
 
 if load_models == 1:
-    xgb_model.load_model(r'models\without_delta_values\binary\NOTNORM_xgb_model.model')
+    xgb_model.load_model(r'models\without_delta_values\binary\xgb_model.model')
 else:
     xgb_model.fit(x_train_aug, y_train_aug_encoded)
 
@@ -271,7 +274,7 @@ logging.info(f"Precision: {precision_score_xgb:.6f}")
 
 # Save
 if load_models == 0:
-    xgb_model.save_model(r'models\without_delta_values\binary\NOTNORM_binary_xgb_model.json')
+    xgb_model.save_model(r'models\without_delta_values\binary\binary_xgb_model.json')
 
 # #######
 # # SVM #
@@ -282,7 +285,7 @@ if load_models == 0:
 # svm_model = SVC(random_state=42, probability=True, decision_function_shape='ovo')
 #
 # if load_models == 1:
-#     svm_model = load(r'models\without_delta_values\binary\NOTNORM_binary_svm_model.pkl')
+#     svm_model = load(r'models\without_delta_values\binary\binary_svm_model.pkl')
 # else:
 #     svm_model.fit(x_train_aug, y_train_aug)
 #
@@ -310,7 +313,7 @@ if load_models == 0:
 #
 # # Save
 # if load_models == 0:
-#     dump(svm_model, r'models\without_delta_values\binary\NOTNORM_binary_svm_model.pkl')
+#     dump(svm_model, r'models\without_delta_values\binary\binary_svm_model.pkl')
 
 ############
 # CATBOOST #
@@ -322,7 +325,7 @@ catboost_model = CatBoostClassifier(loss_function='Logloss', verbose=False)
 
 if load_models == 1:
     catboost_model = CatBoostClassifier(loss_function='Logloss', verbose=False)
-    catboost_model.load_model(r'models\without_delta_values\binary\NOTNORM_binary_catboost_model.cbm')
+    catboost_model.load_model(r'models\without_delta_values\binary\binary_catboost_model.cbm')
 else:
     catboost_model.fit(x_train_aug, y_train_aug)
 
@@ -349,4 +352,4 @@ logging.info(f"Precision: {precision_score_cat:.6f}")
 
 # Save
 if load_models == 0:
-    catboost_model.save_model(r'models\without_delta_values\binary\NOTNORM_binary_catboost_model.cbm')
+    catboost_model.save_model(r'models\without_delta_values\binary\binary_catboost_model.cbm')

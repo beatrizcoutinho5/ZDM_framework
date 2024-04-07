@@ -16,15 +16,14 @@ from sklearn.metrics import recall_score, precision_score, confusion_matrix, Con
 
 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 warnings.filterwarnings("ignore", category=UserWarning)
-
 # Make plots and prints?
 make_plots = 0
 
 # Import test and train data?
-import_test_train_data = 1
+import_test_train_data = 0
 
 # Load models?
-load_models = 1
+load_models = 0
 
 # Perfom Grid Search?
 grid_search = 0
@@ -35,25 +34,25 @@ final_x_test = pd.DataFrame()
 final_y_train = pd.Series(dtype='float64')
 final_y_test = pd.Series(dtype='float64')
 
-clean_data_delta_path = r'data\clean_data\cleaned_data_with_deltavalues2022_2023_2024.xlsx'
-test_data_path = r'data\clean_data\cleaned_data_with_deltavalues_2022_line410.xlsx'
+clean_data_delta_path = r'data\clean_data\cleaned_data2022_2023_2024.xlsx'
+test_data_path = r'data\clean_data\cleaned_data_2022_line410.xlsx'
 
 if import_test_train_data == 1:
 
     print(f'\nLoading test and train data...')
 
     x_train_aug = pd.read_excel(
-        r'data\split_train_test_data\with_delta_values\defect_groups\x_train_aug.xlsx')
+        r'data\split_train_test_data\without_delta_values\defect_groups\x_train_aug.xlsx')
 
     y_train_aug = pd.read_excel(
-        r'data\split_train_test_data\with_delta_values\defect_groups\y_train_aug.xlsx')[
+        r'data\split_train_test_data\without_delta_values\defect_groups\y_train_aug.xlsx')[
         'Group']
 
     x_test = pd.read_excel(
-        r'data\split_train_test_data\with_delta_values\defect_groups\x_test.xlsx')
+        r'data\split_train_test_data\without_delta_values\defect_groups\x_test.xlsx')
 
     final_y_test = pd.read_excel(
-        r'data\split_train_test_data\with_delta_values\defect_groups\y_test.xlsx')[
+        r'data\split_train_test_data\without_delta_values\defect_groups\y_test.xlsx')[
         'Group']
 
     print(f'Loaded test and train data!')
@@ -100,19 +99,19 @@ if import_test_train_data == 0:
     print(f'\nSaving test and train data...')
 
     pd.DataFrame(x_train_aug, columns=final_x_train.columns).to_excel(
-        r'data\split_train_test_data\with_delta_values\defect_groups\x_train_aug.xlsx',
+        r'data\split_train_test_data\without_delta_values\defect_groups\x_train_aug.xlsx',
         index=False)
 
     pd.Series(y_train_aug, name='Group').to_excel(
-        r'data\split_train_test_data\with_delta_values\defect_groups\y_train_aug.xlsx',
+        r'data\split_train_test_data\without_delta_values\defect_groups\y_train_aug.xlsx',
         index=False)
 
     pd.DataFrame(x_test, columns=final_x_test.columns).to_excel(
-        r'data\split_train_test_data\with_delta_values\defect_groups\x_test.xlsx',
+        r'data\split_train_test_data\without_delta_values\defect_groups\x_test.xlsx',
         index=False)
 
     pd.Series(final_y_test, name='Group').to_excel(
-        r'data\split_train_test_data\with_delta_values\defect_groups\y_test.xlsx',
+        r'data\split_train_test_data\without_delta_values\defect_groups\y_test.xlsx',
         index=False)
 
     print(f'\nSaved train and test data!')
@@ -156,7 +155,7 @@ if grid_search == 1:
     logging.info(f"Best parameters: {best_params_rf}")
 
 if load_models == 1:
-    rndforest = load(r'models\with_delta_values\defect_groups\random_forest_model.pkl')
+    rndforest = load(r'models\without_delta_values\defect_groups\random_forest_model.pkl')
 else:
     rndforest.fit(x_train_aug, y_train_aug)
 
@@ -172,7 +171,7 @@ disp_rf.plot()
 plt.xticks(rotation=60)
 plt.title('RF Confusion Matrix - with "Defect Class"')
 plt.subplots_adjust(left=0.3, right=0.9, top=0.9, bottom=0.4)
-plt.savefig(r'plots\confusion_matrix\with_delta_values\defect_groups\rf.png')
+plt.savefig(r'plots\confusion_matrix\without_delta_values\defect_groups\rf.png')
 plt.show()
 
 recall_score_rf = recall_score(final_y_test, y_pred_rf, average='weighted', zero_division=1)
@@ -187,7 +186,7 @@ logging.info(f"Precision: {precision_score_rf:.6f}")
 
 # Save
 if load_models == 0:
-    dump(rndforest, r'models\with_delta_values\defect_groups\random_forest_model.pkl')
+    dump(rndforest, r'models\without_delta_values\defect_groups\random_forest_model.pkl')
 
 ###########
 # XGBOOST #
@@ -231,7 +230,7 @@ if grid_search == 1:
     logging.info(f"Best parameters: {best_params_xgb}")
 
 if load_models == 1:
-    xgb_model.load_model(r'models\with_delta_values\defect_groups\xgb_model.json')
+    xgb_model.load_model(r'models\without_delta_values\defect_groups\xgb_model.json')
 else:
     xgb_model.fit(x_train_aug, y_train_aug_encoded)
 
@@ -251,7 +250,7 @@ disp_xgb.plot()
 plt.xticks(rotation=60)
 plt.title('XGBoost Confusion Matrix')
 plt.subplots_adjust(left=0.3, right=0.9, top=0.9, bottom=0.4)
-plt.savefig(r'plots\confusion_matrix\with_delta_values\defect_groups\xgboost.png')
+plt.savefig(r'plots\confusion_matrix\without_delta_values\defect_groups\xgboost.png')
 plt.show()
 
 recall_score_xgb = recall_score(final_y_test, y_pred_xgb, average='weighted', zero_division=1)
@@ -266,7 +265,7 @@ logging.info(f"Precision: {precision_score_xgb:.6f}")
 
 # Save
 if load_models == 0:
-    xgb_model.save_model(r'models\with_delta_values\defect_groups\xgb_model.json')
+    xgb_model.save_model(r'models\without_delta_values\defect_groups\xgb_model.json')
 
 ############
 # CATBOOST #
@@ -295,7 +294,7 @@ if grid_search == 1:
 
 if load_models == 1:
     catboost_model = CatBoostClassifier(loss_function='MultiClass', verbose=False)
-    catboost_model.load_model(r'models\with_delta_values\defect_groups\catboost_model.cbm')
+    catboost_model.load_model(r'models\without_delta_values\defect_groups\catboost_model.cbm')
 else:
     catboost_model.fit(x_train_aug, y_train_aug)
 
@@ -311,7 +310,7 @@ disp_cat.plot()
 plt.xticks(rotation=60)
 plt.title('CATBOOST Confusion Matrix')
 plt.subplots_adjust(left=0.3, right=0.9, top=0.9, bottom=0.4)
-plt.savefig(r'plots\confusion_matrix\with_delta_values\defect_groups\catboost.png')
+plt.savefig(r'plots\confusion_matrix\without_delta_values\defect_groups\catboost.png')
 plt.show()
 
 recall_score_cat = recall_score(final_y_test, y_pred_cat, average='weighted', zero_division=1)
@@ -326,4 +325,4 @@ logging.info(f"Precision: {precision_score_cat:.6f}")
 
 # # Save
 if load_models == 0:
-    catboost_model.save_model(r'models\with_delta_values\defect_groups\catboost_model.cbm')
+    catboost_model.save_model(r'models\without_delta_values\defect_groups\catboost_model.cbm')

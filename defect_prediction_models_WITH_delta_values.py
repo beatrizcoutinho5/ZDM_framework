@@ -205,12 +205,14 @@ if import_test_train_data == 0:
         plt.tight_layout()
         plt.show()
 
-    # Normalize X values
+    # # Normalize X values
+    #
+    # min_max_scaler = preprocessing.MinMaxScaler()
+    #
+    # x_train_aug = min_max_scaler.fit_transform(x_train_aug)
+    # x_test = min_max_scaler.transform(final_x_test)
 
-    min_max_scaler = preprocessing.MinMaxScaler()
-
-    x_train_aug = min_max_scaler.fit_transform(x_train_aug)
-    x_test = min_max_scaler.transform(final_x_test)
+    x_test = final_x_test
 
     # Save test and train data
     print(f'\nSaving test and train data...')

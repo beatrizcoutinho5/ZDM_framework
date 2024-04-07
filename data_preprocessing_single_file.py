@@ -19,7 +19,7 @@ df = pd.read_excel(dataset_path)
 make_plots = 0
 
 # Autocorrelation and Time Series Analysis?
-autocorrelation_analysis = 1
+autocorrelation_analysis = 0
 
 # Print initial dataset characteristics
 initial_number_features = len(df.columns)
@@ -324,6 +324,6 @@ if autocorrelation_analysis == 0:
     print(f"Removed {np.abs(final_number_samples - initial_number_samples)} samples.")
 
     df.to_excel(
-        r'data\clean_data\cleaned_data_2022_line409.xlsx',
+        r'data\clean_data\cleaned_data_2022_line410.xlsx',
         index=False)
     print("Saved clean data!")

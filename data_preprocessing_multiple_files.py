@@ -23,7 +23,7 @@ df = pd.concat([df2022, df2023, df2024], axis=0)
 make_plots = 0
 
 # Autocorrelation and Time Series Analysis?
-autocorrelation_analysis = 1
+autocorrelation_analysis = 0
 
 # Print initial dataset characteristics
 initial_number_features = len(df.columns)

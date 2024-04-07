@@ -81,32 +81,32 @@ for clean_data_path in clean_data_paths:
         # those defects are the only ones being considered in the classification process
         # since the rest of the defects have limited samples/instances
 
-        defect_code_column = 'Defect Code'
-        quantity_column = 'Quantity'
-
-        defect_quantity_dict = {}
-
-        for index, row in df.iterrows():
-            code = row[defect_code_column]
-            quantity = row[quantity_column]
-
-            defect_quantity_dict[code] = defect_quantity_dict.get(code, 0) + quantity
-
-        # Sort by quantity
-        sorted_defect_quantity = sorted(defect_quantity_dict.items(), key=lambda x: x[1], reverse=True)
-
-        # Save the top 10 defect codes
-        top_defects = [code for code, quantity in sorted_defect_quantity[:11]]
-
-        # Remove the instances of other defects from the dataframe
-        df = df[df["Defect Code"].isin(top_defects)]
-
-        # Split the df by year
-
-        df["Recording Date"] = pd.to_datetime(df["Recording Date"], format="%d/%m/%Y %H:%M:%S")
-
-        # Separate the DataFrame into different DataFrames based on years
-        years = df["Recording Date"].dt.year.unique()
+        # defect_code_column = 'Defect Code'
+        # quantity_column = 'Quantity'
+        #
+        # defect_quantity_dict = {}
+        #
+        # for index, row in df.iterrows():
+        #     code = row[defect_code_column]
+        #     quantity = row[quantity_column]
+        #
+        #     defect_quantity_dict[code] = defect_quantity_dict.get(code, 0) + quantity
+        #
+        # # Sort by quantity
+        # sorted_defect_quantity = sorted(defect_quantity_dict.items(), key=lambda x: x[1], reverse=True)
+        #
+        # # Save the top 10 defect codes
+        # top_defects = [code for code, quantity in sorted_defect_quantity[:11]]
+        #
+        # # Remove the instances of other defects from the dataframe
+        # df = df[df["Defect Code"].isin(top_defects)]
+        #
+        # # Split the df by year
+        #
+        # df["Recording Date"] = pd.to_datetime(df["Recording Date"], format="%d/%m/%Y %H:%M:%S")
+        #
+        # # Separate the DataFrame into different DataFrames based on years
+        # years = df["Recording Date"].dt.year.unique()
 
         # dfs_by_year = {}
         # for year in years:
@@ -138,19 +138,18 @@ for clean_data_path in clean_data_paths:
         final_y_train = df["Defect Code"]
         final_x_train = df.drop(["Group", "Defect Code"], axis=1)
 
-        df_line409 = pd.read_excel(r'data\clean_data\cleaned_data_2022_line409.xlsx')
-        df_line409 = df_line409[df_line409["Defect Code"].isin(top_defects)]
-        final_y_test = df_line409["Defect Code"]
-        final_x_test = df_line409.drop(["Group", "Defect Code"], axis=1)
+        df_line410_2022 = pd.read_excel(r'data\clean_data\cleaned_data_2022_line410.xlsx')
+        final_y_test = df_line410_2022["Defect Code"]
+        final_x_test = df_line410_2022.drop(["Group", "Defect Code"], axis=1)
 
         # Removing the date from the data
 
         final_x_train = final_x_train.drop("Recording Date", axis=1)
         final_x_test = final_x_test.drop("Recording Date", axis=1)
 
-        # Calculate the quantity of each defect code in the train set
-        defect_count = final_y_train.value_counts()
-        defect_count_without_zero = final_y_train[final_y_train != 0].value_counts()
+        # # Calculate the quantity of each defect code in the train set
+        # defect_count = final_y_train.value_counts()
+        # defect_count_without_zero = final_y_train[final_y_train != 0].value_counts()
 
         # Data Augmentation using SMOTE
 
@@ -159,52 +158,54 @@ for clean_data_path in clean_data_paths:
         defect_count_aug = y_train_aug.value_counts()
         defect_count_without_zero_aug = y_train_aug[y_train_aug != 0].value_counts()
 
-        # Plot the frequency of defects before and after data augmentation
-        if make_plots == 1:
-            augmentation_subdirectory_path = os.path.join(plots_dir, 'augmentation')
-            os.makedirs(augmentation_subdirectory_path, exist_ok=True)
+        # # Plot the frequency of defects before and after data augmentation
+        # if make_plots == 1:
+        #     augmentation_subdirectory_path = os.path.join(plots_dir, 'augmentation')
+        #     os.makedirs(augmentation_subdirectory_path, exist_ok=True)
+        #
+        #     fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(16, 12))
+        #
+        #     # Plot the bar plot with Defect Code = 0 in the original data
+        #     sns.barplot(x=defect_count.index, y=defect_count.values, palette="magma", ax=axes[0, 0])
+        #     axes[0, 0].set_title("Original - Quantity of the selected defect codes in TRAIN set + No Defect")
+        #     axes[0, 0].set_xlabel("Defect Code")
+        #     axes[0, 0].set_ylabel("Quantity")
+        #
+        #     # Plot the bar plot with only defects (excluding Defect Code = 0) in the original data
+        #     sns.barplot(x=defect_count_without_zero.index, y=defect_count_without_zero.values, palette="viridis",
+        #                 ax=axes[0, 1])
+        #     axes[0, 1].set_title("Original - Quantity of the selected defect codes in TRAIN set (excluding code 0)")
+        #     axes[0, 1].set_xlabel("Defect Code")
+        #     axes[0, 1].set_ylabel("Quantity")
+        #
+        #     # Plot the bar plot with Defect Code = 0 in the augmented data
+        #     sns.barplot(x=defect_count_aug.index, y=defect_count_aug.values, palette="magma", ax=axes[1, 0])
+        #     axes[1, 0].set_title("AUG - Quantity of the selected defect codes in TRAIN set + No Defect")
+        #     axes[1, 0].set_xlabel("Defect Code")
+        #     axes[1, 0].set_ylabel("Quantity")
+        #
+        #     # Plot the bar plot with only defects (excluding Defect Code = 0) in the augmented data
+        #     sns.barplot(x=defect_count_without_zero_aug.index, y=defect_count_without_zero_aug.values,
+        #                 palette="viridis",
+        #                 ax=axes[1, 1])
+        #     axes[1, 1].set_title("AUG - Quantity of the selected defect codes in TRAIN set (excluding code 0)")
+        #     axes[1, 1].set_xlabel("Defect Code")
+        #     axes[1, 1].set_ylabel("Quantity")
+        #
+        #     output_path = os.path.join(augmentation_subdirectory_path, 'data_before_and_after_SMOTE.png')
+        #     plt.savefig(output_path)
+        #
+        #     plt.tight_layout()
+        #     plt.show()
 
-            fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(16, 12))
+        # # Normalize X values
+        #
+        # min_max_scaler = preprocessing.MinMaxScaler()
+        #
+        # x_train_aug = min_max_scaler.fit_transform(x_train_aug)
+        # x_test = min_max_scaler.transform(final_x_test)
 
-            # Plot the bar plot with Defect Code = 0 in the original data
-            sns.barplot(x=defect_count.index, y=defect_count.values, palette="magma", ax=axes[0, 0])
-            axes[0, 0].set_title("Original - Quantity of the selected defect codes in TRAIN set + No Defect")
-            axes[0, 0].set_xlabel("Defect Code")
-            axes[0, 0].set_ylabel("Quantity")
-
-            # Plot the bar plot with only defects (excluding Defect Code = 0) in the original data
-            sns.barplot(x=defect_count_without_zero.index, y=defect_count_without_zero.values, palette="viridis",
-                        ax=axes[0, 1])
-            axes[0, 1].set_title("Original - Quantity of the selected defect codes in TRAIN set (excluding code 0)")
-            axes[0, 1].set_xlabel("Defect Code")
-            axes[0, 1].set_ylabel("Quantity")
-
-            # Plot the bar plot with Defect Code = 0 in the augmented data
-            sns.barplot(x=defect_count_aug.index, y=defect_count_aug.values, palette="magma", ax=axes[1, 0])
-            axes[1, 0].set_title("AUG - Quantity of the selected defect codes in TRAIN set + No Defect")
-            axes[1, 0].set_xlabel("Defect Code")
-            axes[1, 0].set_ylabel("Quantity")
-
-            # Plot the bar plot with only defects (excluding Defect Code = 0) in the augmented data
-            sns.barplot(x=defect_count_without_zero_aug.index, y=defect_count_without_zero_aug.values,
-                        palette="viridis",
-                        ax=axes[1, 1])
-            axes[1, 1].set_title("AUG - Quantity of the selected defect codes in TRAIN set (excluding code 0)")
-            axes[1, 1].set_xlabel("Defect Code")
-            axes[1, 1].set_ylabel("Quantity")
-
-            output_path = os.path.join(augmentation_subdirectory_path, 'data_before_and_after_SMOTE.png')
-            plt.savefig(output_path)
-
-            plt.tight_layout()
-            plt.show()
-
-        # Normalize X values
-
-        min_max_scaler = preprocessing.MinMaxScaler()
-
-        x_train_aug = min_max_scaler.fit_transform(x_train_aug)
-        x_test = min_max_scaler.transform(final_x_test)
+        x_test = final_x_test
 
         # Save test and train data
         print(f'\nSaving test and train data...')

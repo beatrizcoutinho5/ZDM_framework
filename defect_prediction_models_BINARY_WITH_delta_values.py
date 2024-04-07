@@ -1,5 +1,6 @@
 import os
 import logging
+import warnings
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -14,7 +15,7 @@ from imblearn.over_sampling import SMOTE
 from sklearn.preprocessing import LabelEncoder
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import recall_score, precision_score, confusion_matrix, ConfusionMatrixDisplay
-
+warnings.filterwarnings("ignore", category=UserWarning)
 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 # Make plots and prints?
@@ -35,7 +36,7 @@ final_x_test = pd.DataFrame()
 final_y_train = pd.Series(dtype='float64')
 final_y_test = pd.Series(dtype='float64')
 
-clean_data_delta_path = r'data\clean_data\cleaned_data_with_deltavalues2022_2023_2024.xlsx'
+clean_data_delta_path = r'data\clean_data\binary_cleaned_data_with_deltavalues_2022_2023_2024.xlsx'
 
 if import_test_train_data == 1:
     print(f'\nLoading test and train data...')
@@ -74,18 +75,26 @@ if import_test_train_data == 0:
 
     # For binary classification
     # new column where '0' is one class (no defect) and any other code is the second class (defect)
-    df['Binary Defect Code'] = np.where(df['Defect Code'] == 0, 0, 1)
+    # df['Binary Defect Code'] = np.where(df['Defect Code'] == 0, 0, 1)
 
-    df_line410_2022 = pd.read_excel(r'data\clean_data\cleaned_data_with_deltavalues_2022_line410.xlsx')
-    df_line410_2022['Binary Defect Code'] = np.where(df_line410_2022['Defect Code'] == 0, 0, 1)
+    df_line410_2022 = pd.read_excel(r'data\clean_data\binary_cleaned_data_with_deltavalues_2022_line410.xlsx')
+    # df_line410_2022['Binary Defect Code'] = np.where(df_line410_2022['Defect Code'] == 0, 0, 1)
 
     # Removing the date from the data
 
-    final_x_train = df.drop(["Recording Date", "Defect Code", "Binary Defect Code", "Group"], axis=1)
-    final_x_test = df_line410_2022.drop(["Recording Date", "Defect Code", "Binary Defect Code", "Group"], axis=1)
+    # final_x_train = df.drop(["Recording Date", "Defect Code", "Binary Defect Code", "Group"], axis=1)
+    # final_x_test = df_line410_2022.drop(["Recording Date", "Defect Code", "Binary Defect Code", "Group"], axis=1)
 
-    final_y_train = df["Binary Defect Code"]
-    final_y_test = df_line410_2022["Binary Defect Code"]
+    final_y_train = df["Defect Code"]
+    final_y_test = df_line410_2022["Defect Code"]
+
+    final_x_train = df.drop(["Recording Date", "Defect Code", "Group"], axis=1)
+    final_x_test = df_line410_2022.drop(["Recording Date", "Defect Code", "Group"], axis=1)
+
+    # final_y_train = df["Binary Defect Code"]
+    # final_y_test = df_line410_2022["Binary Defect Code"]
+
+
 
     # Calculate the quantity of each defect code in the train set
     defect_count = final_y_train.value_counts()
@@ -98,25 +107,25 @@ if import_test_train_data == 0:
     # x_train_aug = final_x_train # comentar isto qnd fizer augmentation
     # y_train_aug = final_y_train
 
-    # x_test = final_x_test  # comentar esta qnd fizer a norm
+    x_test = final_x_test  # comentar esta qnd fizer a norm
 
 
     column_names = x_train_aug.columns
 
-    # Normalize X values
-    min_max_scaler = preprocessing.MinMaxScaler()
-    min_max_scaler.fit(x_train_aug)
-
-    x_train_aug = min_max_scaler.transform(x_train_aug)
-    x_test = min_max_scaler.transform(final_x_test)
-
-    x_train_aug_df = pd.DataFrame(x_train_aug, columns=column_names)
-    x_test_df = pd.DataFrame(x_test, columns=column_names)
-
+    # # Normalize X values
+    # min_max_scaler = preprocessing.MinMaxScaler()
+    # min_max_scaler.fit(x_train_aug)
+    #
+    # x_train_aug = min_max_scaler.transform(x_train_aug)
+    # x_test = min_max_scaler.transform(final_x_test)
+    #
+    # x_train_aug = pd.DataFrame(x_train_aug, columns=column_names)
+    # x_test = pd.DataFrame(x_test, columns=column_names)
+    #
     # # Save scaling parameters
     #
     # scaling_params = pd.DataFrame({
-    #     'feature': df_x_train_aug.columns,
+    #     'feature': x_train_aug.columns,
     #     'min': min_max_scaler.data_min_,
     #     'scale': min_max_scaler.scale_
     #
@@ -210,7 +219,7 @@ print(f'\nStarting XGBoost...')
 xgb_model = XGBClassifier(random_state=42)
 
 if load_models == 1:
-    xgb_model.load_model(r'models\with_delta_values\binary\xgb_model.model')
+    xgb_model.load_model(r'models\with_delta_values\binary\binary_xgb_model.json')
 else:
     xgb_model.fit(x_train_aug, y_train_aug_encoded)
 
