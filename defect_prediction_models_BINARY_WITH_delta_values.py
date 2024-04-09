@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 
 from sklearn.svm import SVC
 from sklearn import preprocessing
+from sklearn.ensemble import VotingClassifier
 from datetime import datetime
 from xgboost import XGBClassifier
 from joblib import dump, load
@@ -22,7 +23,7 @@ timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 make_plots = 0
 
 # Import test and train data?
-import_test_train_data = 0
+import_test_train_data = 1
 
 # Load models?
 # 0 -> train the models
@@ -291,3 +292,47 @@ logging.info(f"Precision: {precision_score_cat:.6f}")
 # Save
 if load_models == 0:
     catboost_model.save_model(r'models\with_delta_values\binary\binary_catboost_model.cbm')
+
+#####################
+# ENSEMBLE / VOTING #
+#####################
+
+print(f'\nStarting Ensemble...')
+
+estimators = [
+    ('random_forest', rndforest),
+    ('xgboost', xgb_model),
+    ('catboost', catboost_model)
+]
+
+voting_classifier = VotingClassifier(estimators, voting='hard')
+
+if load_models == 1:
+    voting_classifier = load(r'models\with_delta_values\binary\binary_voting_model.pkl')
+
+else:
+    voting_classifier.fit(x_train_aug, y_train_aug)
+
+y_pred_ensemble = voting_classifier.predict(x_test)
+
+# Evaluation
+confusion_matrix_en = confusion_matrix(final_y_test, y_pred_ensemble)
+disp_en = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_en, display_labels=voting_classifier.classes_)
+disp_en.plot()
+plt.title('ENSEMBLE Confusion Matrix')
+plt.savefig(r'plots\confusion_matrix\with_delta_values\binary\ensemble.png')
+plt.show()
+
+recall_score_en = recall_score(final_y_test, y_pred_ensemble, average='weighted', zero_division=1)
+print(f'Recall: {recall_score_en:.6f}')
+
+precision_score_en = precision_score(final_y_test, y_pred_ensemble, average='weighted', zero_division=1)
+print(f'Precision: {precision_score_en:.6f}')
+
+logging.info("\nEnsemble Metrics:")
+logging.info(f"Recall: {recall_score_en:.6f}")
+logging.info(f"Precision: {precision_score_en:.6f}")
+
+# Save
+if load_models == 0:
+    dump(voting_classifier, r'models\with_delta_values\binary\binary_voting_model.pkl')

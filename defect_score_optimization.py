@@ -11,11 +11,10 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error
 from xgboost import XGBClassifier
 from catboost import CatBoostClassifier
 
-dual_annealing_optim = 0
+dual_annealing_optim = 1
 powell_optim = 0
 nelder_mead_optim = 0
-basinhopping_optim = 1
-
+basinhopping_optim = 0
 warnings.filterwarnings("ignore")
 
 data_path = r'data\clean_data\binary_cleaned_data_with_deltavalues_2022_2023_2024.xlsx'
@@ -78,27 +77,27 @@ for test_df in all_dfs:
 
 
     # using MSE
-    def fitness_function(x, target_defect_score, features_space):
-
-        x_concat = build_feature_array(x, features_space)
-        current_defect_score = defect_score(x_concat)
-
-        return mean_squared_error(current_defect_score, [target_defect_score])
-
-
-    # # # using log-cosh loss
     # def fitness_function(x, target_defect_score, features_space):
     #
     #     x_concat = build_feature_array(x, features_space)
     #     current_defect_score = defect_score(x_concat)
     #
-    #     # log-cosh loss calculation -> log-cosh loss=log(cosh(predicted−actual))
-    #     delta = current_defect_score - target_defect_score
-    #     loss = np.log(np.cosh(delta))
-    #
-    #     return np.mean(loss)
+    #     return mean_squared_error(current_defect_score, [target_defect_score])
 
-    # # using absolute error
+
+    # # using log-cosh loss
+    def fitness_function(x, target_defect_score, features_space):
+
+        x_concat = build_feature_array(x, features_space)
+        current_defect_score = defect_score(x_concat)
+
+        # log-cosh loss calculation -> log-cosh loss=log(cosh(predicted−actual))
+        delta = current_defect_score - target_defect_score
+        loss = np.log(np.cosh(delta))
+
+        return np.mean(loss)
+
+    # # using absolute error ([M]AE)
     # def fitness_function(x, target_defect_score, features_space):
     #     x_concat = build_feature_array(x, features_space)
     #     current_defect_score = defect_score(x_concat)
@@ -106,6 +105,7 @@ for test_df in all_dfs:
     #     abs_diff = np.abs(current_defect_score - target_defect_score)
     #
     #     return abs_diff
+
     def build_feature_array(x, features_space):
 
         x_concat = np.zeros(len(features_space))
