@@ -17,7 +17,7 @@ nelder_mead_optim = 0
 basinhopping_optim = 0
 warnings.filterwarnings("ignore")
 
-data_path = r'data\clean_data\binary_cleaned_data_with_deltavalues_2022_2023_2024.xlsx'
+data_path = r'data\clean_data\binary_cleaned_data_without_deltavalues_2022_2023_2024.xlsx'
 
 df = pd.read_excel(data_path)
 
@@ -26,9 +26,9 @@ df = pd.read_excel(data_path)
 
 df = df.drop(["Recording Date", "Defect Code", "Group"], axis=1)
 
-rf_model_path = r'models\with_delta_values\binary\binary_random_forest_model.pkl'
-xgb_model_path = r'models\with_delta_values\binary\binary_xgb_model.json'
-catboost_model_path = r'models\with_delta_values\binary\binary_catboost_model.cbm'
+rf_model_path = r'models\without_delta_values\binary\binary_random_forest_model.pkl'
+xgb_model_path = r'models\without_delta_values\binary\binary_xgb_model.json'
+catboost_model_path = r'models\without_delta_values\binary\binary_catboost_model.cbm'
 
 # load models
 rf_model = joblib.load(rf_model_path)
@@ -77,25 +77,25 @@ for test_df in all_dfs:
 
 
     # using MSE
-    # def fitness_function(x, target_defect_score, features_space):
-    #
-    #     x_concat = build_feature_array(x, features_space)
-    #     current_defect_score = defect_score(x_concat)
-    #
-    #     return mean_squared_error(current_defect_score, [target_defect_score])
-
-
-    # # using log-cosh loss
     def fitness_function(x, target_defect_score, features_space):
 
         x_concat = build_feature_array(x, features_space)
         current_defect_score = defect_score(x_concat)
 
-        # log-cosh loss calculation -> log-cosh loss=log(cosh(predicted−actual))
-        delta = current_defect_score - target_defect_score
-        loss = np.log(np.cosh(delta))
+        return mean_squared_error(current_defect_score, [target_defect_score])
 
-        return np.mean(loss)
+
+    # # using log-cosh loss
+    # def fitness_function(x, target_defect_score, features_space):
+    #
+    #     x_concat = build_feature_array(x, features_space)
+    #     current_defect_score = defect_score(x_concat)
+    #
+    #     # log-cosh loss calculation -> log-cosh loss=log(cosh(predicted−actual))
+    #     delta = current_defect_score - target_defect_score
+    #     loss = np.log(np.cosh(delta))
+    #
+    #     return np.mean(loss)
 
     # # using absolute error ([M]AE)
     # def fitness_function(x, target_defect_score, features_space):
@@ -285,37 +285,63 @@ for test_df in all_dfs:
         #
         # print(f"\nStarting optimization...")
 
-        target_defect_score = 0.5
+        target_defect_scores = [0.1, 0.5]
 
-        if test_df.equals(df_01_03) or test_df.equals(df_03_05):
-            target_defect_score = 0.1
+        def_aux_01 = 0
+        time_aux_01 = 0
 
-        # to count the time that the optimization took (in seconds)
-        start_time = time.time()
+        def_aux_05 = 0
+        time_aux_05 = 0
 
-        best_params, mse = optimize_params(features_space, x0, target_defect_score)
+        for target_defect_score in target_defect_scores:
 
-        end_time = time.time()
-        elapsed_time = end_time - start_time
+            # target_defect_score = 0.5
 
-        final_defect_score = defect_score(best_params)
+            if test_df.equals(df_01_03) or test_df.equals(df_03_05):
+                target_defect_score = 0.1
 
-        best_params_selected = best_params[indices]
+            # to count the time that the optimization took (in seconds)
+            start_time = time.time()
 
-        reduction_percentage = (initial_defect_score - final_defect_score) * 100
+            best_params, mse = optimize_params(features_space, x0, target_defect_score)
 
-        score_reducing.append(reduction_percentage)
-        time_spent.append(elapsed_time)
+            end_time = time.time()
+            elapsed_time = end_time - start_time
 
-        # # results
-        # print('\n---- Optimization Results ----')
-        # print('\nTarget Defect Score:   ', target_defect_score)
-        # print('Best Parameters:    ', best_params_selected.round(2))
-        # print('Initial Defect Score:  ', initial_defect_score)
-        # print('Final Defect Score:    ', final_defect_score)
-        # print(f'Reduced Defect Score in {reduction_percentage}%')
-        # print('Elapsed Time (in seconds):    ', round(elapsed_time, 2))
-        # print('MSE:                ', mse.round(3))
+            final_defect_score = defect_score(best_params)
+
+            best_params_selected = best_params[indices]
+
+            reduction_percentage = (initial_defect_score - final_defect_score) * 100
+
+            if target_defect_score == 0.1:
+                def_aux_01 = reduction_percentage
+                time_aux_01 = elapsed_time
+            else:
+                def_aux_05 = reduction_percentage
+                time_aux_05 = elapsed_time
+
+
+            # score_reducing.append(reduction_percentage)
+            # time_spent.append(elapsed_time)
+
+            # results
+            print('\n---- Optimization Results ----')
+            print('\nTarget Defect Score:   ', target_defect_score)
+            # print('Best Parameters:    ', best_params_selected.round(2))
+            print('Initial Defect Score:  ', initial_defect_score)
+            print('Final Defect Score:    ', final_defect_score)
+            print(f'Reduced Defect Score in {reduction_percentage}%')
+            print('Elapsed Time (in seconds):    ', round(elapsed_time, 2))
+            print('MSE:                ', mse.round(3))
+
+        if def_aux_01 < def_aux_05:
+            score_reducing.append(def_aux_01)
+            time_spent.append(time_aux_01)
+
+        else:
+            score_reducing.append(def_aux_05)
+            time_spent.append(time_aux_05)
 
     # avg results
 
@@ -343,6 +369,6 @@ for test_df in all_dfs:
     elif test_df.equals(df_99_1):
         print("df_99_1")
 
-    print(f'Target Defect Score: {target_defect_score}')
+    # print(f'Target Defect Score: {target_defect_score}')
     print(f'Reduced Defect Score in {average_reduction_percentage}%')
     print('Elapsed Time (in seconds):    ', round(average_elapsed_time, 2))

@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 from statsmodels.graphics.tsaplots import plot_acf
+from sklearn.preprocessing import LabelEncoder
 
 # Directory to save the resulting plots
 plots_dir = "plots"
@@ -107,11 +108,31 @@ df = df.drop(columns_remove, axis=1)
 # features with few unique value were considered as categorical
 columns_cat = ["GFFTT", "Finishing Top", "Finishing Down", "Reference Top", "Reference Down"]
 
-for i in columns_cat:
-    # categorical representation
-    df[i] = df[i].astype('category')
-    # new column numerical code for every category in the feature
-    df[i + '_cat'] = df[i].cat.codes
+label_encoder = LabelEncoder()
+
+# Initialize an empty dictionary to store the encoding mappings
+category_to_numerical = {}
+
+# Iterate over columns and encode categories
+for col in columns_cat:
+
+    label_encoder = LabelEncoder()
+
+    df[col + '_cat'] = label_encoder.fit_transform(df[col])
+
+    category_to_numerical[col] = dict(zip(df[col], df[col + '_cat']))
+
+# to store
+category_numerical_list = []
+
+# Iterate over the dictionary and extract unique category and numerical encoding pairs
+for col, encoding_map in category_to_numerical.items():
+    for category, numerical_encoding in encoding_map.items():
+        category_numerical_list.append((col, category, numerical_encoding))
+
+category_numerical_df = pd.DataFrame(category_numerical_list, columns=['Feature', 'Category', 'Numerical Value'])
+category_numerical_df = category_numerical_df.drop_duplicates(subset=['Category'])
+category_numerical_df.to_excel('categorical_to_numeric_representations.xlsx', index=False)
 
 df = df.drop(columns_cat, axis=1)
 

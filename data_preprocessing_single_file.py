@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 from statsmodels.graphics.tsaplots import plot_acf
+from sklearn.preprocessing import LabelEncoder
 
 # Directory to save the resulting plots
 plots_dir = "plots"
@@ -100,15 +101,47 @@ df = df.drop(columns_remove, axis=1)
 
 # Transform categorical features into numerical representation
 # features with few unique value were considered as categorical
+
 columns_cat = ["GFFTT", "Finishing Top", "Finishing Down", "Reference Top", "Reference Down"]
 
-for i in columns_cat:
-    # categorical representation
-    df[i] = df[i].astype('category')
-    # new column numerical code for every category in the feature
-    df[i + '_cat'] = df[i].cat.codes
+category_numerical_df = pd.read_excel('categorical_to_numeric_representations.xlsx')
+category_to_numerical_loaded = dict(zip(category_numerical_df['Category'], category_numerical_df['Numerical Value']))
 
+for i in columns_cat:
+    df[i].replace(category_to_numerical_loaded, inplace=True)
+    df[i + '_cat'] = df[i]
+
+    # Check each value in the column to see if it is not in the dictionary
+    for value in df[i].unique():
+        if value not in category_to_numerical_loaded:
+            random_value = np.random.randint(1000, 9999)
+
+            # Ensure the random value is unique
+            while random_value in category_to_numerical_loaded.values():
+                random_value = np.random.randint(1000, 9999)
+
+            df[i].replace(value, random_value, inplace=True)
+            category_to_numerical_loaded[value] = random_value
+
+
+print(df)
 df = df.drop(columns_cat, axis=1)
+# Convert the dictionary to a DataFrame
+updated_category_numerical_df = pd.DataFrame(list(category_to_numerical_loaded.items()), columns=['Category', 'Numerical Value'])
+# Remove rows with missing values in the 'Category' column
+updated_category_numerical_df = updated_category_numerical_df.dropna(subset=['Category'])
+
+# Convert the 'Category' column to strings
+updated_category_numerical_df['Category'] = updated_category_numerical_df['Category'].astype(str)
+
+# Remove categories that consist only of digits
+updated_category_numerical_df = updated_category_numerical_df[~updated_category_numerical_df['Category'].str.isdigit()]
+
+
+# Save the updated dictionary to an Excel file
+updated_category_numerical_df.to_excel('categorical_to_numeric_representations.xlsx', index=False)
+
+
 
 # Remove rows with any missing values
 df = df.dropna(how='any', axis=0)

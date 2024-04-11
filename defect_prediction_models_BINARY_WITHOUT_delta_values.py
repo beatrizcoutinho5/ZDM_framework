@@ -18,7 +18,7 @@ from sklearn.metrics import recall_score, precision_score, confusion_matrix, Con
 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 # Make plots and prints?
-make_plots = 0
+make_plots = 1
 
 # Import test and train data?
 import_test_train_data = 0
@@ -35,7 +35,7 @@ final_x_test = pd.DataFrame()
 final_y_train = pd.Series(dtype='float64')
 final_y_test = pd.Series(dtype='float64')
 
-clean_data_delta_path = r'data\clean_data\cleaned_data2022_2023_2024.xlsx'
+clean_data_delta_path = r'data\clean_data\binary_cleaned_data2022_2023_2024.xlsx'
 
 if import_test_train_data == 1:
     print(f'\nLoading test and train data...')
@@ -70,12 +70,12 @@ if import_test_train_data == 0:
     plots_dir = "plots"
     os.makedirs(plots_dir, exist_ok=True)
 
-    # For binary classification
-    # new column where '0' is one class (no defect) and any other code is the second class (defect)
-    df['Binary Defect Code'] = np.where(df['Defect Code'] == 0, 0, 1)
+    # # For binary classification
+    # # new column where '0' is one class (no defect) and any other code is the second class (defect)
+    # df['Binary Defect Code'] = np.where(df['Defect Code'] == 0, 0, 1)
 
-    df_line410_2022 = pd.read_excel(r'data\clean_data\cleaned_data_2022_line410.xlsx')
-    df_line410_2022['Binary Defect Code'] = np.where(df_line410_2022['Defect Code'] == 0, 0, 1)
+    df_line410_2022 = pd.read_excel(r'data\clean_data\binary_cleaned_data_2022_line410.xlsx')
+    # df_line410_2022['Binary Defect Code'] = np.where(df_line410_2022['Defect Code'] == 0, 0, 1)
 
     # # Split the df by year
     # df["Recording Date"] = pd.to_datetime(df["Recording Date"], format="%d/%m/%Y %H:%M:%S")
@@ -111,11 +111,11 @@ if import_test_train_data == 0:
 
     # Removing the date from the data
 
-    final_x_train = df.drop(["Recording Date", "Defect Code", "Binary Defect Code", "Group"], axis=1)
-    final_x_test = df_line410_2022.drop(["Recording Date", "Defect Code", "Binary Defect Code", "Group"], axis=1)
+    final_x_train = df.drop(["Recording Date", "Defect Code", "Group"], axis=1)
+    final_x_test = df_line410_2022.drop(["Recording Date", "Defect Code",  "Group"], axis=1)
 
-    final_y_train = df["Binary Defect Code"]
-    final_y_test = df_line410_2022["Binary Defect Code"]
+    final_y_train = df["Defect Code"]
+    final_y_test = df_line410_2022["Defect Code"]
 
 
     # Calculate the quantity of each defect code in the train set

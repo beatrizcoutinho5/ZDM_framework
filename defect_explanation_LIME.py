@@ -29,19 +29,19 @@ from sklearn.metrics import recall_score, precision_score, confusion_matrix, Con
 # Suppress InconsistentVersionWarning
 warnings.filterwarnings("ignore", category=UserWarning)
 
-rf_model_path = r'models\with_delta_values\binary\binary_random_forest_model.pkl'
-xgb_model_path = r'models\with_delta_values\binary\binary_xgb_model.json'
-catboost_model_path = r'models\with_delta_values\binary\binary_catboost_model.cbm'
+rf_model_path = r'models\without_delta_values\binary\binary_random_forest_model.pkl'
+xgb_model_path = r'models\without_delta_values\binary\binary_xgb_model.json'
+catboost_model_path = r'models\without_delta_values\binary\binary_catboost_model.cbm'
 
 # Load train and test data
 x_train = pd.read_excel(
-    r'data\split_train_test_data\with_delta_values\binary_data\binary_x_train_aug.xlsx')
+    r'data\split_train_test_data\without_delta_values\binary_data\binary_x_train_aug.xlsx')
 y_train = pd.read_excel(
-    r'data\split_train_test_data\with_delta_values\binary_data\binary_y_train_aug.xlsx')
+    r'data\split_train_test_data\without_delta_values\binary_data\binary_y_train_aug.xlsx')
 x_test = pd.read_excel(
-    r'data\split_train_test_data\with_delta_values\binary_data\binary_x_test.xlsx')
+    r'data\split_train_test_data\without_delta_values\binary_data\binary_x_test.xlsx')
 y_test = pd.read_excel(
-    r'data\split_train_test_data\with_delta_values\binary_data\binary_y_test.xlsx')
+    r'data\split_train_test_data\without_delta_values\binary_data\binary_y_test.xlsx')
 
 # Reduce data size to 1% of original (for the test to be faster since SHAP takes a long time)
 num_samples = int(0.0005 * len(x_train))
@@ -81,7 +81,7 @@ exp = explainer.explain_instance(
 
 fig = exp.as_pyplot_figure(label=1)
 fig.set_size_inches(20, 10)
-plt.savefig(r'plots\lime\with_delta_values\binary\lime_rf.png')
+plt.savefig(r'plots\lime\without_delta_values\binary\lime_rf.png')
 plt.show()
 
 # Explainer using CatBoost
@@ -101,5 +101,5 @@ exp = explainer.explain_instance(
 
 fig = exp.as_pyplot_figure(label=1)
 fig.set_size_inches(20, 10)
-plt.savefig(r'plots\lime\with_delta_values\binary\lime_catboost.png')
+plt.savefig(r'plots\lime\without_delta_values\binary\lime_catboost.png')
 plt.show()
