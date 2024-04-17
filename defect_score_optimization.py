@@ -17,7 +17,7 @@ nelder_mead_optim = 0
 basinhopping_optim = 0
 warnings.filterwarnings("ignore")
 
-data_path = r'data\clean_data\binary_cleaned_data_without_deltavalues_2022_2023_2024.xlsx'
+data_path = r'data\clean_data\binary_cleaned_data_2022_line410.xlsx'
 
 df = pd.read_excel(data_path)
 
@@ -57,8 +57,16 @@ df_99_1 = df[(df['Defect Score'] >= 0.99) & (df['Defect Score'] <= 1)]
 
 all_dfs = [df_01_03, df_03_05, df_05_06, df_06_07, df_07_08, df_08_09, df_09_95, df_95_99, df_99_1]
 
-df = df.drop(["Defect Score"], axis=1)
 for test_df in all_dfs:
+    print(len(test_df))
+
+
+df = df.drop(["Defect Score"], axis=1)
+
+for test_df in all_dfs:
+
+    sample_size = min(10, len(test_df))  # select 10 samples or all samples if less than 10
+    random_defect_indexes = np.random.choice(test_df.index, size=sample_size, replace=False)
 
     # random_defect_indexes = np.random.choice(test_df.index, size=15, replace=False)
 
@@ -76,14 +84,22 @@ for test_df in all_dfs:
         return avg_defect_score
 
 
-    # using MSE
-    def fitness_function(x, target_defect_score, features_space):
+    # # using MSE
+    # def fitness_function(x, target_defect_score, features_space):
+    #
+    #     x_concat = build_feature_array(x, features_space)
+    #     current_defect_score = defect_score(x_concat)
+    #
+    #     return mean_squared_error(current_defect_score, [target_defect_score])
 
+
+    # TESTE E SEM TER EM CONTA O TARGET DEFECT SCORE
+    def fitness_function(x, target_defect_score, features_space):
         x_concat = build_feature_array(x, features_space)
         current_defect_score = defect_score(x_concat)
-
-        return mean_squared_error(current_defect_score, [target_defect_score])
-
+        # Return the mean squared error of the current defect score
+        # with respect to itself, effectively minimizing the defect score
+        return mean_squared_error(current_defect_score, [current_defect_score])
 
     # # using log-cosh loss
     # def fitness_function(x, target_defect_score, features_space):
@@ -200,33 +216,23 @@ for test_df in all_dfs:
     x0 = df.iloc[20]
 
     if test_df.equals(df_01_03):
-        defect_samples = [55138, 54832, 55586, 1409, 55200, 55625, 54382, 55960, 55018, 52932, 8999, 52941, 55771,
-                          54813, 54841]
+        defect_samples = [5265, 13891, 11970, 11875, 6016, 5196, 11208, 14334, 4980, 2890]
     elif test_df.equals(df_03_05):
-        defect_samples = [43470, 9440, 43626, 55860, 53332, 54940, 55763, 54219, 9438, 37059, 43990, 54021, 54152,
-                          54389, 53467]
+        defect_samples = [14057, 5784, 2210, 684, 5249, 9865, 1368, 6857, 7502, 15514]
     elif test_df.equals(df_05_06):
-        defect_samples = [4924, 55667, 6776, 55023, 46497, 53901, 56013, 53409, 53922, 53926, 53689, 44107, 55295,
-                          55490, 27021]
+        defect_samples = [9337, 12767, 1509, 9870, 4262, 9330, 6865, 13605, 5187, 8750]
     elif test_df.equals(df_06_07):
-        defect_samples = [55227, 54100, 29445, 52827, 54282, 53228, 7643, 53154, 54613, 54101, 9455, 51288, 45778,
-                          54759, 38823]
+        defect_samples = [6006, 13581, 2280, 10465, 9886, 10118, 6210, 6007, 11940, 6008]
     elif test_df.equals(df_07_08):
-        defect_samples = [27012, 25691, 4494, 43217, 53153, 55230, 55965, 52705, 54542, 53870, 55238, 45865, 46934,
-                          53124, 43464]
+        defect_samples = [11958, 4925, 7388, 3837, 281, 10977, 14734, 4591, 6121, 11938]
     elif test_df.equals(df_08_09):
-        defect_samples = [933, 6703, 39713, 53176, 27015, 46084, 54548, 36256, 49148, 48144, 54103, 53030, 29594, 43416,
-                          38857]
+        defect_samples = [1822, 13010, 14464, 2018, 9756, 12, 1725, 2899, 3004, 529]
     elif test_df.equals(df_09_95):
-        defect_samples = [52845, 39858, 18009, 55953, 29581, 8635, 22326, 27034, 20074, 51292, 23110, 55938, 29580,
-                          23743, 45938]
+        defect_samples = [764, 11071, 1269, 12229, 3015, 9009, 8552, 13979, 7299, 8679]
     elif test_df.equals(df_95_99):
-        defect_samples = [4749, 49861, 19973, 36825, 18143, 41954, 47214, 20166, 26509, 29604, 931, 40529,
-                          52661, 28441, 1019]
-
+        defect_samples = [15351, 8819, 9650, 8771, 14936, 5838, 15343, 7511, 7725, 8561]
     elif test_df.equals(df_99_1):
-        defect_samples = [31189, 13006, 11701, 5623, 47555, 30668, 51754, 40313, 40102, 1272, 20468, 1770, 24774, 47248,
-                          176]
+        defect_samples = [6790, 14359, 14375, 11409, 15656, 2153, 14376, 7026, 586, 11900]
 
     # defect_samples = random_defect_indexes
 
@@ -285,7 +291,7 @@ for test_df in all_dfs:
         #
         # print(f"\nStarting optimization...")
 
-        target_defect_scores = [0.1, 0.5]
+        target_defect_scores = [0, 0.1, 0.5]
 
         def_aux_01 = 0
         time_aux_01 = 0
@@ -298,7 +304,7 @@ for test_df in all_dfs:
             # target_defect_score = 0.5
 
             if test_df.equals(df_01_03) or test_df.equals(df_03_05):
-                target_defect_score = 0.1
+                target_defect_score = 0
 
             # to count the time that the optimization took (in seconds)
             start_time = time.time()
@@ -321,9 +327,8 @@ for test_df in all_dfs:
                 def_aux_05 = reduction_percentage
                 time_aux_05 = elapsed_time
 
-
-            # score_reducing.append(reduction_percentage)
-            # time_spent.append(elapsed_time)
+            score_reducing.append(reduction_percentage)
+            time_spent.append(elapsed_time)
 
             # results
             print('\n---- Optimization Results ----')
@@ -342,6 +347,9 @@ for test_df in all_dfs:
         else:
             score_reducing.append(def_aux_05)
             time_spent.append(time_aux_05)
+
+        # if test_df.equals(df_01_03) or test_df.equals(df_03_05):
+        #     break
 
     # avg results
 
@@ -372,3 +380,4 @@ for test_df in all_dfs:
     # print(f'Target Defect Score: {target_defect_score}')
     print(f'Reduced Defect Score in {average_reduction_percentage}%')
     print('Elapsed Time (in seconds):    ', round(average_elapsed_time, 2))
+    print('Indexes used:' , random_defect_indexes)

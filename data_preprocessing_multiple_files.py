@@ -100,7 +100,7 @@ columns_remove = ["Defect Group", "Defect Group Description", "Defect Descriptio
                   "Pallet Code Production Date", "Line Working?", "Humidity", "Temperature",
                   "Calculated Thermal Cycle Time", "Single Station Thermal Cycle Time",
                   "Double Station Thermal Cycle Time", "Jaw Clamping Time", "Suction Cup Pickup Time",
-                  "Scratch Test"]
+                  "Scratch Test", "Quantity"]
 
 df = df.drop(columns_remove, axis=1)
 
@@ -187,7 +187,7 @@ categorical_features = ["Production Order Code", "Production Order Opening", "De
                         "Control Panel with Micro Stop", "Floor 1", "Floor 2", "Bridge Platform", "Floor 1 Blow Time",
                         "Floor 2 Blow Time", "Left Jaw Discharge", "GFFTT_cat", "Finishing Top_cat"]
 
-continuous_features = ["Quantity", "Length", "Width", "Thickness", "Lot Size", "Cycle Time", "Mechanical Cycle Time",
+continuous_features = ["Length", "Width", "Thickness", "Lot Size", "Cycle Time", "Mechanical Cycle Time",
                        "Thermal Cycle Time", "Control Panel Delay Time", "Sandwich Preparation Time", "Carriage Time",
                        "Lower Plate Temperature", "Upper Plate Temperature", "Pressure", "Liston 1 Speed",
                        "Liston 2 Speed", "Centering Table", "Carriage Speed", "Take-off Path", "Take-off Time",
@@ -223,7 +223,7 @@ if make_plots == 1:
 # Removing zero values (if they exist) from the specified features
 
 features_remove_zero = ['Carriage Speed', 'High Pressure Input Time', 'Liston 1 Speed', 'Liston 2 Speed', 'Lot Size',
-                        'Mechanical Cycle Time', 'Press Input Table Speed', 'Pressure', 'Quantity',
+                        'Mechanical Cycle Time', 'Press Input Table Speed', 'Pressure',
                         'Carriage Time', 'Centering Table', 'Lower Plate Temperature', 'Upper Plate Temperature']
 
 rows_zero_removed_count = 0
@@ -296,7 +296,7 @@ if autocorrelation_analysis == 1:
 
         print("Autocorrelation plots saved.")
 
-    for col in (high_autocorr_columns + ["Recording Date"] + ["Quantity"]):
+    for col in (high_autocorr_columns + ["Recording Date"]):
         # Create a new column that contains the feature values shifting the value by one (lag=1)
         df["{}-1".format(col)] = df[col].shift(1)
 
@@ -313,7 +313,7 @@ if autocorrelation_analysis == 1:
         df = df.drop("{}-1".format(col), axis=1)
 
     # removing the quantity feature as a defect always has quantity = 1
-    df = df.drop("Quantity", axis=1)
+    # df = df.drop("Quantity", axis=1)
     df = df.dropna(axis=0)
 
     # Print initial dataset characteristics

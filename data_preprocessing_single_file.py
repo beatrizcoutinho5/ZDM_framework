@@ -95,7 +95,7 @@ columns_remove = ["Defect Group", "Defect Group Description", "Defect Descriptio
                   "Pallet Code Production Date", "Line Working?", "Humidity", "Temperature",
                   "Calculated Thermal Cycle Time", "Single Station Thermal Cycle Time",
                   "Double Station Thermal Cycle Time", "Jaw Clamping Time", "Suction Cup Pickup Time",
-                  "Scratch Test"]
+                  "Scratch Test", "Quantity"]
 
 df = df.drop(columns_remove, axis=1)
 
@@ -108,10 +108,8 @@ category_numerical_df = pd.read_excel('categorical_to_numeric_representations.xl
 category_to_numerical_loaded = dict(zip(category_numerical_df['Category'], category_numerical_df['Numerical Value']))
 
 for i in columns_cat:
-    df[i].replace(category_to_numerical_loaded, inplace=True)
-    df[i + '_cat'] = df[i]
 
-    # Check each value in the column to see if it is not in the dictionary
+    # check each value in the column to see if it is not in the dictionary
     for value in df[i].unique():
         if value not in category_to_numerical_loaded:
             random_value = np.random.randint(1000, 9999)
@@ -120,27 +118,28 @@ for i in columns_cat:
             while random_value in category_to_numerical_loaded.values():
                 random_value = np.random.randint(1000, 9999)
 
-            df[i].replace(value, random_value, inplace=True)
             category_to_numerical_loaded[value] = random_value
 
 
-print(df)
-df = df.drop(columns_cat, axis=1)
-# Convert the dictionary to a DataFrame
 updated_category_numerical_df = pd.DataFrame(list(category_to_numerical_loaded.items()), columns=['Category', 'Numerical Value'])
-# Remove rows with missing values in the 'Category' column
 updated_category_numerical_df = updated_category_numerical_df.dropna(subset=['Category'])
-
-# Convert the 'Category' column to strings
 updated_category_numerical_df['Category'] = updated_category_numerical_df['Category'].astype(str)
 
-# Remove categories that consist only of digits
-updated_category_numerical_df = updated_category_numerical_df[~updated_category_numerical_df['Category'].str.isdigit()]
+# remove any value that have only digits
+updated_category_numerical_df = updated_category_numerical_df[~updated_category_numerical_df['Category'].str.replace('.', '', regex=True).str.isdigit()]
 
 
-# Save the updated dictionary to an Excel file
 updated_category_numerical_df.to_excel('categorical_to_numeric_representations.xlsx', index=False)
+updated_category_numerical_df.to_excel(r'app\categorical_to_numeric_representations.xlsx', index=False)
 
+category_numerical_df = pd.read_excel('categorical_to_numeric_representations.xlsx')
+category_to_numerical_loaded = dict(zip(category_numerical_df['Category'], category_numerical_df['Numerical Value']))
+
+for i in columns_cat:
+    df[i].replace(category_to_numerical_loaded, inplace=True)
+    df[i + '_cat'] = df[i]
+
+df = df.drop(columns_cat, axis=1)
 
 
 # Remove rows with any missing values
@@ -194,7 +193,7 @@ categorical_features = ["Production Order Code", "Production Order Opening", "De
                         "Control Panel with Micro Stop", "Floor 1", "Floor 2", "Bridge Platform", "Floor 1 Blow Time",
                         "Floor 2 Blow Time", "Left Jaw Discharge", "GFFTT_cat", "Finishing Top_cat"]
 
-continuous_features = ["Quantity", "Length", "Width", "Thickness", "Lot Size", "Cycle Time", "Mechanical Cycle Time",
+continuous_features = ["Length", "Width", "Thickness", "Lot Size", "Cycle Time", "Mechanical Cycle Time",
                        "Thermal Cycle Time", "Control Panel Delay Time", "Sandwich Preparation Time", "Carriage Time",
                        "Lower Plate Temperature", "Upper Plate Temperature", "Pressure", "Liston 1 Speed",
                        "Liston 2 Speed", "Centering Table", "Carriage Speed", "Take-off Path", "Take-off Time",
@@ -230,7 +229,7 @@ if make_plots == 1:
 # Removing zero values (if they exist) from the specified features
 
 features_remove_zero = ['Carriage Speed', 'High Pressure Input Time', 'Liston 1 Speed', 'Liston 2 Speed', 'Lot Size',
-                        'Mechanical Cycle Time', 'Press Input Table Speed', 'Pressure', 'Quantity',
+                        'Mechanical Cycle Time', 'Press Input Table Speed', 'Pressure',
                         'Carriage Time', 'Centering Table', 'Lower Plate Temperature', 'Upper Plate Temperature']
 
 rows_zero_removed_count = 0
@@ -316,7 +315,7 @@ if autocorrelation_analysis == 1:
         df = df.drop("{}-1".format(col), axis=1)
 
     # removing the quantity feature as a defect always has quantity = 1
-    df = df.drop("Quantity", axis=1)
+    # df = df.drop("Quantity", axis=1)
     df = df.dropna(axis=0)
 
     # Print final dataset characteristics

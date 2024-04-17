@@ -1,9 +1,13 @@
 import pandas as pd
 
-df = pd.read_excel(r'data\clean_data\cleaned_data_2022_line410.xlsx')
-# df = pd.read_excel(r'data\clean_data\cleaned_data2022_2023_2024.xlsx')
+datasets = [r'data\clean_data\cleaned_data_2022_line410.xlsx', r'data\clean_data\cleaned_data2022_2023_2024.xlsx' ]
+for data in datasets:
 
-df['Defect Code'] = df['Defect Code'].apply(lambda x: 1 if x != 0 else 0)
+    df = pd.read_excel(data)
 
-df.to_excel(r'data\clean_data\binary_cleaned_data_2022_line410.xlsx', index=False)
-# df.to_excel(r'data\clean_data\binary_cleaned_data2022_2023_2024.xlsx', index=False)
+    df['Defect Code'] = df['Defect Code'].apply(lambda x: 1 if x != 0 else 0)
+
+    if data == r'data\clean_data\cleaned_data_2022_line410.xlsx':
+        df.to_excel(r'data\clean_data\binary_cleaned_data_2022_line410.xlsx', index=False)
+    elif data == r'data\clean_data\cleaned_data2022_2023_2024.xlsx':
+        df.to_excel(r'data\clean_data\binary_cleaned_data2022_2023_2024.xlsx', index=False)

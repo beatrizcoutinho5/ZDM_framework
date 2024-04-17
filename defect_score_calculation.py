@@ -10,7 +10,7 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error
 from xgboost import XGBClassifier
 from catboost import CatBoostClassifier
 
-data_path = r'data\clean_data\binary_cleaned_data2022_2023_2024.xlsx'
+data_path = r'data\clean_data\binary_cleaned_data_2022_line410.xlsx'
 warnings.filterwarnings("ignore", category=UserWarning)
 
 df = pd.read_excel(data_path)
@@ -33,24 +33,13 @@ catboost_prob = catboost_model.predict_proba(df)
 avg_defect_score = np.mean([rf_prob[:, 1], xgb_prob[:, 1], catboost_prob[:, 1]], axis=0)
 
 df["Defect Score"] = avg_defect_score
-
-df["Defect Code"] = pd.read_excel(data_path)["Defect Code"]
-
-# Rearrange columns to have "Defect Score" and "Defect Code" as the first columns
-cols = df.columns.tolist()
-cols = ['Defect Score', 'Defect Code'] + [col for col in cols if col not in ['Defect Score', 'Defect Code']]
-df = df[cols]
-
-# actual_defect_codes = pd.read_excel(data_path)["Defect Code"]
 #
-# predicted_defect_codes = np.where(avg_defect_score > 0.5, 1, 0)
+# df["Defect Code"] = pd.read_excel(data_path)["Defect Code"]
 #
-# correct_predictions = np.sum(predicted_defect_codes == actual_defect_codes)
-# total_samples = len(actual_defect_codes)
-# percentage_correct = (correct_predictions / total_samples) * 100
-#
-# print("Percentage of correct predictions:", percentage_correct)
+# # Rearrange columns to have "Defect Score" and "Defect Code" as the first columns
+# cols = df.columns.tolist()
+# cols = ['Defect Score', 'Defect Code'] + [col for col in cols if col not in ['Defect Score', 'Defect Code']]
+# df = df[cols]
 
-
-
-df.to_excel(r'data\split_train_test_data\defect_score_binary_cleaned_data2022_2023_2024.xlsx', index=False)
+df["Recording Date"] = pd.read_excel(data_path)["Recording Date"]
+df.to_excel(r'data\split_train_test_data\defect_score_binary_cleaned_data_2022_line410.xlsx', index=False)
