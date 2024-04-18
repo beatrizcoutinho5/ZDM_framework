@@ -2,6 +2,7 @@ from flask import Flask, request, render_template, url_for, request, jsonify, re
 import numpy as np
 import pandas as pd
 import joblib
+import json
 import warnings
 import time
 
@@ -10,6 +11,11 @@ from sklearn.metrics import mean_squared_error
 from joblib import dump, load
 
 from __main__ import app
+
+import paho.mqtt.client as mqtt
+
+
+
 
 # the names of the features that must be present after the sample is processed
 column_names = [
@@ -27,10 +33,17 @@ column_names = [
     'Reference Top_cat'
 ]
 
+
 # receive the sample from the HTTP request
-def process_sample():
-    # dict
-    sample_data = request.json
+def process_sample(sample_data):
+    # start_time = time.time()
+    # # dict
+    # sample_data = request.json
+    #
+    # end_time = time.time()
+    # response_time = end_time - start_time
+    #
+    # print(f"Request processed in {response_time:.4f} seconds")
 
     if not sample_data:
         return jsonify({'error': 'No sample data provided'}), 400
@@ -55,12 +68,13 @@ def sample_pre_processing(sample):
     sample = sample[0][0]
 
     if "Line Working?" in sample and sample["Line Working?"] == -1:
-        return "Line is not working, sample not valid."
+        print("Line is not working, sample not valid.")
+        return -1
 
     # check for missing values in the sample
-    has_missing_values = any(value is None for value in sample.values())
-    if has_missing_values:
-        return "The sample contains features with missing values."
+    if any(pd.isna(value) for value in sample.values()):
+        print("The sample contains NaN values.")
+        return -1
 
     # remove features that are not relevant for the model
     features_to_remove = ["Defect Group", "Defect Group Description", "Defect Description", "Pallet Code",
@@ -136,7 +150,18 @@ def sample_pre_processing(sample):
         print("Sample is missing the following features:")
         for col in missing_columns:
             print(col)
-        return "Sample is missing features"
+        return -1
 
     # pre-processed sample
     return sample
+
+
+def prepare_sample(sample_data):
+
+    sample = process_sample(sample_data)
+    processed_sample = sample_pre_processing(sample)
+
+    if processed_sample == -1:
+        return -1
+    else:
+        return processed_sample

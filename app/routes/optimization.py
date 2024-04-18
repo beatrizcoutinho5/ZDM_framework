@@ -12,12 +12,15 @@ from joblib import dump, load
 from xgboost import XGBClassifier
 from catboost import CatBoostClassifier
 
-from .dataprocessing import process_sample, sample_pre_processing
+from .dataprocessing import process_sample, sample_pre_processing, prepare_sample
 from __main__ import app
 
-# model = load(r'models\binary\binary_random_forest_model.pkl')
-model = CatBoostClassifier ()
-model.load_model(r'models\binary\binary_catboost_model.cbm')
+model = load(r'models\binary\binary_random_forest_model.pkl')
+
+
+
+# model = CatBoostClassifier ()
+# model.load_model(r'models\binary\binary_catboost_model.cbm')
 
 data_path = r'binary_cleaned_data2022_2023_2024.xlsx'
 df = pd.read_excel(data_path)
@@ -40,7 +43,7 @@ column_names = [
 ]
 
 def init_optimization_routes(app):
-    @app.route('/optimize_defect_score', methods=['POST'])
+    @app.route('/optimize_defect_score')
     def optimize_defect_score_route():
         return optimize_defect_score()
 
@@ -139,17 +142,14 @@ def feature_space_pre_processing(sample):
     return features_space, indices
 
 
-@app.route('/optimize_defect_score', methods=['POST'])
-def optimize_defect_score():
+@app.route('/optimize_defect_score')
+def optimize_defect_score(sample):
     # start timer to record the time the optimization took, from receiving the sample to providing
     # a parameteres adjustment suggestion
 
     start_time = time.time()
 
     # sample pre-processing (receiving a raw sample)
-    reshaped_data = process_sample()
-    sample = sample_pre_processing(reshaped_data)
-
     sample = {feature: sample.get(feature) for feature in column_names}
     sample = np.array(list(sample.values())).reshape(1, -1)
 
@@ -167,7 +167,9 @@ def optimize_defect_score():
     initial_parameters = [sample[0][index] for index in indices]
 
     # defining the target defect score for the optimizer
-    target_defect_scores = [0.01, 0.5]
+    # target_defect_scores = [0.01, 0.5]
+    target_defect_scores = [0.5]
+
 
     # reference sample to start the optimization (very low defect score)
     x0 = [
