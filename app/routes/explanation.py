@@ -36,18 +36,20 @@ model = load(r'models\binary\binary_random_forest_model.pkl')
 x_train = pd.read_excel(
     r'routes\binary_x_train_aug.xlsx')
 
+explainer = lime.lime_tabular.LimeTabularExplainer(
+        x_train.values,
+        feature_names=x_train.columns,
+        class_names=['0', '1'],
+        mode='classification',
+        discretize_continuous=True
+    )
+
 def init_explanation_routes(app):
     @app.route('/shap_explainer', methods=['POST'])
     def shap_explainer_route():
         return shap_explainer()
 
-def shap_explainer():
-
-    data = process_sample()
-    sample = sample_pre_processing(data)
-
-    # prediction
-    prediction = sample_defect_prediction_model(sample)
+def shap_explainer(sample):
 
     rf_explainer = shap.TreeExplainer(model)
 
@@ -65,36 +67,30 @@ def shap_explainer():
 
     sample = sample.reshape(-1, len(sample_keys))
 
-    fig, ax = plt.subplots(figsize=(20, 20))
+    fig, ax = plt.subplots(figsize=(25, 20))
     shap.summary_plot(shap_values_for_class, features=sample, feature_names=sample_keys, plot_type='bar',
                       show=False)
     plt.show()
 
+    return fig
 
+def lime_explainer(sample):
 
+    print(type(sample))
 
-    # ### TESTE com o LIME
-    #
-    # # Explainer using Random Forest
-    #
-    # explainer = lime.lime_tabular.LimeTabularExplainer(
-    #     x_train.values,
-    #     feature_names=x_train.columns,
-    #     class_names=['0', '1'],
-    #     mode='classification',
-    #     discretize_continuous=True
-    # )
-    #
-    # sample_values = [sample[key] for key in x_train.columns]
-    #
-    # exp = explainer.explain_instance(
-    #     sample_values,
-    #     model.predict_proba
-    # )
-    #
-    # fig = exp.as_pyplot_figure(label=1)
-    # fig.set_size_inches(20, 10)
-    # plt.show()
+    sample_values = list(sample.values())
+    sample_values = np.array(sample_values)
+
+    print(sample_values)
+
+    exp = explainer.explain_instance(
+        sample_values,
+        model.predict_proba
+    )
+
+    fig = exp.as_pyplot_figure(label=1)
+    fig.set_size_inches(20, 10)
+    plt.show()
 
     return "OK!"
 

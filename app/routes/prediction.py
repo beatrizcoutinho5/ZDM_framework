@@ -27,7 +27,7 @@ def init_prediction_routes(app):
 
 def sample_defect_prediction_model(sample):
 
-    # convert into a NumPy array
+    # convert into a np array
     sample_values = np.array(list(sample.values())).reshape(1, -1)
 
     # defect prediction model
