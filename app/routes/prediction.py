@@ -42,6 +42,9 @@ def predict_defect(processed_sample):
 
     print(f'Prediction: {prediction}')
 
-    return "OKKKKKKKKK <3"
+    prediction_str = str(prediction[0])
+    prediction_char = prediction_str[0] if prediction_str else ''
+
+    return prediction_char
 
 
