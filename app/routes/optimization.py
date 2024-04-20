@@ -212,8 +212,8 @@ def optimize_defect_score(sample):
     else:
         # print the best optimization results
 
-        print('---- Optimization Results ----')
-        print('\nTarget Defect Score:   ', best_target_defect_score)
+        print('\n**** Optimization Results ****')
+        print('Target Defect Score:   ', best_target_defect_score)
         print('Initial Parameters:    ', initial_parameters)
         print('Best Parameters:    ', best_params_selected.round(2))
         print('Initial Defect Score:  ', initial_defect_score)
