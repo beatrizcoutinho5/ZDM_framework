@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="{{ url_for('static', filename = 'css/style.css')  }}" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+
+  <body class="bg-page">
+    <!-- **************************************************************** -->
+    <!-- header -->
+    <!-- **************************************************************** -->
+
+    <!-- wave -->
+
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 1440 320"
+      class="header"
+    >
+      <defs>
+        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color: hsla(209, 99%, 40%, 1)" />
+          <stop offset="100%" style="stop-color: hsla(211, 100%, 28%, 1)" />
+        </linearGradient>
+      </defs>
+      <path
+        fill="url(#gradient)"
+        fill-opacity="1"
+        d="M0,256L80,261.3C160,267,320,277,480,277.3C640,277,800,267,960,245.3C1120,224,1280,192,1360,176L1440,160L1440,0L1360,0C1280,0,1120,0,960,0C800,0,640,0,480,0C320,0,160,0,80,0L0,0Z"
+      ></path>
+    </svg>
+
+    <!-- logo and zdm -->
+
+    <div class="header-logo-container">
+      <img src="{{ url_for('static', filename='images/zdm_logo.png') }}"  class="header-logo-img" />
+      <span class="header-logo-text font-alatsi"> ZDM </span>
+    </div>
+
+    <div class="line"></div>
+
+    <!-- buttons to switch pages -->
+
+    <div class="page-buttons-container">
+      <div class="page-buttons-container-div">
+        <a href="/dashboard_optimization" style="text-decoration: none">
+          <span class="font-alata page-buttons"> Dashboards </span>
+        </a>
+      </div>
+
+      <div class="page-buttons-container-div-selected">
+        <a href="/analytics" style="text-decoration: none">
+          <span class="font-alata page-buttons"> Analytics </span>
+        </a>
+      </div>
+
+      <div class="page-buttons-container-div">
+        <a href="/historic_data" style="text-decoration: none">
+          <span class="font-alata page-buttons"> Historic Data </span>
+        </a>
+      </div>
+    </div>
+
+    <!-- **************************************************************** -->
+    <!-- sub-header -->
+    <!-- **************************************************************** -->
+
+    <div
+      class="date-time font-alata"
+      style="display: flex; width: 30%; right: 1.75%"
+    >
+      <div style="left: 10%; display: flex; flex-direction: row; width: 50%">
+        <div>from</div>
+        <div
+          style="
+            position: relative;
+            left: 5%;
+            top: -30%;
+            display: flex;
+            flex-direction: column;
+            align-items: right;
+          "
+        >
+          <br />
+          <input
+            type="date"
+            value="2024-03-21"
+            class="date-time-selector font-alata"
+            id="dateInput1"
+          />
+          <input
+            type="time"
+            value="21:02:47"
+            class="date-time-selector font-alata"
+            id="timeInput1"
+          />
+        </div>
+      </div>
+
+      <div style="left: 10%; display: flex; flex-direction: row; width: 50%">
+        <div>to</div>
+        <div
+          style="
+            position: relative;
+            left: 5%;
+            top: -30%;
+            display: flex;
+            flex-direction: column;
+            align-items: right;
+          "
+        >
+          <br />
+          <input
+            type="date"
+            value="2024-03-21"
+            class="date-time-selector font-alata"
+            id="dateInput2"
+          />
+          <input
+            type="time"
+            value="21:02:47"
+            class="date-time-selector font-alata"
+            id="timeInput2"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- **************************************************************** -->
+    <!-- body -->
+    <!-- **************************************************************** -->
+
+    <!-- rectangle panel -->
+
+    <div class="bg-rect" style="align-items: center">
+      <div class="anl-div" style="display: flex">
+        <div class="anl-div-vertical">
+          <div class="anl-div-vertical-ind">
+            <span class="anl-div-vertical-ind-num font-alatsi"> 6 </span>
+
+            <span class="anl-div-vertical-ind-text font-alata">
+              Number of Defects
+            </span>
+          </div>
+
+          <div class="anl-div-vertical-ind">
+            <span class="anl-div-vertical-ind-num font-alatsi"> 1.4% </span>
+
+            <span class="anl-div-vertical-ind-num-extra font-alatsi">
+              -2.1%
+            </span>
+
+            <span class="anl-div-vertical-ind-text font-alata">
+              Percentage of Defects
+            </span>
+          </div>
+
+          <div class="anl-div-vertical-ind">
+            <span class="anl-div-vertical-ind-num font-alatsi"> 429 </span>
+
+            <span class="anl-div-vertical-ind-text font-alata">
+              Produced Panels
+            </span>
+          </div>
+        </div>
+
+        <div class="anl-div-horizontal">
+          <div class="anl-div-horizontal-ind" style="margin-top: 2.5%">
+            <span class="production-status-text font-alata"> PRODUCING </span>
+
+            <span class="anl-div-vertical-ind-text font-alata">
+              Production Line Status
+            </span>
+          </div>
+
+          <div
+            class="anl-div-horizontal-ind"
+            style="height: 59%; margin-top: 1%"
+          ></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- **************************************************************** -->
+    <!-- footer -->
+    <!-- **************************************************************** -->
+
+    <div class="bg-ellipse">
+      <svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
+        <ellipse
+          cx="100"
+          cy="50"
+          rx="100"
+          ry="50"
+          fill="#0168CA"
+          fill-opacity="1"
+        />
+      </svg>
+    </div>
+  </body>
+
+  <script>
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = String(currentDate.getMonth() + 1).padStart(2, "0");
+    const currentDay = String(currentDate.getDate()).padStart(2, "0");
+    const currentHours = String(currentDate.getHours()).padStart(2, "0");
+    const currentMinutes = String(currentDate.getMinutes()).padStart(2, "0");
+
+    document.getElementById(
+      "dateInput1"
+    ).value = `${currentYear}-${currentMonth}-${currentDay}`;
+    document.getElementById(
+      "timeInput1"
+    ).value = `${currentHours}:${currentMinutes}`;
+
+    document.getElementById(
+      "dateInput2"
+    ).value = `${currentYear}-${currentMonth}-${currentDay}`;
+    document.getElementById(
+      "timeInput2"
+    ).value = `${currentHours}:${currentMinutes}`;
+  </script>
+</html>

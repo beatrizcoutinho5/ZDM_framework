@@ -31,7 +31,9 @@ def sample_defect_prediction_model(sample):
     sample_values = np.array(list(sample.values())).reshape(1, -1)
 
     # defect prediction model
-    prediction = model.predict(sample_values)
+    prediction = model.predict_proba(sample_values)
+    prediction = prediction[0]
+    prediction = prediction[1]
 
     return prediction
 
@@ -40,11 +42,15 @@ def predict_defect(processed_sample):
 
     prediction = sample_defect_prediction_model(processed_sample)
 
+    prediction = prediction*100
+
+    prediction = round(prediction, 3)
+
     print(f'Prediction: {prediction}')
 
-    prediction_str = str(prediction[0])
-    prediction_char = prediction_str[0] if prediction_str else ''
+    # prediction_str = str(prediction[0])
+    # prediction_char = prediction_str[0] if prediction_str else ''
 
-    return prediction_char
+    return prediction
 
 

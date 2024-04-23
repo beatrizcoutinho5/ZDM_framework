@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="{{ url_for('static', filename = 'css/style.css')  }}" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+
+  </head>
+
+  <body class="bg-page bd">
+    <!-- **************************************************************** -->
+    <!-- header -->
+    <!-- **************************************************************** -->
+
+    <!-- wave -->
+
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 1440 320"
+      class="header"
+    >
+      <defs>
+        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color: hsla(209, 99%, 40%, 1)" />
+          <stop offset="100%" style="stop-color: hsla(211, 100%, 28%, 1)" />
+        </linearGradient>
+      </defs>
+      <path
+        fill="url(#gradient)"
+        fill-opacity="1"
+        d="M0,256L80,261.3C160,267,320,277,480,277.3C640,277,800,267,960,245.3C1120,224,1280,192,1360,176L1440,160L1440,0L1360,0C1280,0,1120,0,960,0C800,0,640,0,480,0C320,0,160,0,80,0L0,0Z"
+      ></path>
+    </svg>
+
+    <!-- logo and zdm -->
+
+    <div class="header-logo-container">
+      <img src="{{ url_for('static', filename='images/zdm_logo.png') }}" class="header-logo-img" />
+      <span class="header-logo-text font-alatsi"> ZDM </span>
+    </div>
+
+    <div class="line"></div>
+
+    <!-- buttons to switch pages -->
+
+    <div class="page-buttons-container">
+      <div class="page-buttons-container-div-selected">
+        <a href="/dashboard_optimization'" style="text-decoration: none">
+          <span class="font-alata page-buttons"> Dashboards </span>
+        </a>
+      </div>
+
+      <div class="page-buttons-container-div">
+        <a href="/analytics" style="text-decoration: none">
+          <span class="font-alata page-buttons"> Analytics </span>
+        </a>
+      </div>
+
+      <div class="page-buttons-container-div">
+        <a href="/historic_data" style="text-decoration: none">
+          <span class="font-alata page-buttons"> Historic Data </span>
+        </a>
+      </div>
+    </div>
+
+    <!-- **************************************************************** -->
+    <!-- sub-header -->
+    <!-- **************************************************************** -->
+
+    <!-- buttons to switch dashvoard pages -->
+
+    <div class="dashboard-buttons-container">
+
+      <div class="dashboard-buttons-container-div-selected ">
+
+        <a href="/dashboard_optimization"style="text-decoration: none;"> <span class="font-alata page-buttons"> Optimization </span> </a>
+
+      </div>
+
+      <div class="dashboard-buttons-container-div ">
+
+        <a href="{{url_for('dashboard_explanation')}}" style="text-decoration: none;"> <span class="font-alata page-buttons"> Explanation </span> </a>
+      </div>
+    </div>
+
+
+
+    <div class="date-time font-alata">
+      21st march 2024 <br />
+      21:02:47
+    </div>
+
+    <!-- **************************************************************** -->
+    <!-- body -->
+    <!-- **************************************************************** -->
+
+    <!-- rectangle panel -->
+
+    <div class="bg-rect">
+
+      <div class="optim-div" style="left: 5%">
+
+        <!-- current values (before optimization)   -->
+
+        <div class="optim-div-big font-alata">
+          <span class="optim-div-big-text">
+            Defect Probability <br />
+            of Current Panel
+          </span>
+
+          <span class="optim-div-big-num font-alatsi">  {{prediction}}% </span>
+        </div>
+
+        <div class="optim-sub-div font-alata">
+          <div class="optim-div-small">
+            <span class="optim-div-small-text"> Upper Plate Temperature </span>
+
+            <span class="optim-div-small-num font-alatsi"> 32 </span>
+          </div>
+
+          <div class="optim-div-small">
+            <span class="optim-div-small-text"> Pressure </span>
+
+            <span class="optim-div-small-num font-alatsi"> 5 </span>
+          </div>
+        </div>
+
+        <div class="optim-sub-div font-alata">
+          <div class="optim-div-small">
+            <span class="optim-div-small-text"> Lower Plate Temperature </span>
+
+            <span class="optim-div-small-num font-alatsi"> 84 </span>
+          </div>
+
+          <div class="optim-div-small">
+            <span class="optim-div-small-text"> Thermal Cycle Time </span>
+
+            <span class="optim-div-small-num font-alatsi"> 47 </span>
+          </div>
+        </div>
+        <div class="optim-sub-div font-alata">
+          <div class="optim-div-small">
+            <span class="optim-div-small-text"> Width </span>
+
+            <span class="optim-div-small-num font-alatsi"> 2440 </span>
+          </div>
+
+          <div class="optim-div-small">
+            <span class="optim-div-small-text"> Length </span>
+
+            <span class="optim-div-small-num font-alatsi"> 4880 </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- values after optimization)   -->
+
+      <div class="optim-div" style="left: 15%">
+        <div class="optim-div-big font-alata">
+          <span class="optim-div-big-text">
+            Defect Probability <br />
+            <span style="color:#805AFF;">After </span> Optimization
+          </span>
+
+          <span class="optim-div-big-num font-alatsi" style="color:#48D706;"> 61% </span>
+        </div>
+
+        <div class="optim-sub-div font-alata">
+          <div class="optim-div-small">
+            <span class="optim-div-small-text"> Upper Plate Temperature </span>
+
+            <span class="optim-div-small-num font-alatsi" style="color:#805AFF;"> 32 </span>
+          </div>
+
+          <div class="optim-div-small">
+            <span class="optim-div-small-text"> Pressure </span>
+
+            <span class="optim-div-small-num font-alatsi" style="color:#805AFF;"> 5 </span>
+          </div>
+        </div>
+
+        <div class="optim-sub-div font-alata">
+          <div class="optim-div-small">
+            <span class="optim-div-small-text"> Lower Plate Temperature </span>
+
+            <span class="optim-div-small-num font-alatsi" style="color:#805AFF;"> 84 </span>
+          </div>
+
+          <div class="optim-div-small">
+            <span class="optim-div-small-text"> Thermal Cycle Time </span>
+
+            <span class="optim-div-small-num font-alatsi" style="color:#805AFF;"> 47 </span>
+          </div>
+        </div>
+        <div class="optim-div-big font-alata">
+          <span class="optim-div-big-text" style="font-size: 20px; margin-top: 2%;">
+           By Adjusting the  <br/>
+           Parameters, <span style="color:#805AFF;"> Reduce <br/>
+           Defect Probability  </span> Up To
+          </span>
+
+          <span class="optim-div-big-num font-alatsi" style="color:#805AFF;"> 12% </span>
+        </div>
+          
+        </div>
+      </div>
+    </div>
+
+    <!-- **************************************************************** -->
+    <!-- footer -->
+    <!-- **************************************************************** -->
+
+    <div class="bg-ellipse">
+      <svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
+        <ellipse
+          cx="100"
+          cy="50"
+          rx="100"
+          ry="50"
+          fill="#0168CA"
+          fill-opacity="1"
+        />
+      </svg>
+    </div>
+  </body>
+
+<script>
+        // Auto-refresh the page every 10 seconds
+        setInterval(function() {
+            location.reload();
+        }, 2000); // Adjust the time interval as needed (in milliseconds)
+    </script>
+</html>

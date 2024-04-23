@@ -29,7 +29,10 @@ DB_SCHEMA = 'zdm_framework'
 DB_USER = 'sie2338'
 DB_PASSWORD = 'logan123'
 
+prediction=0
+
 def on_message(client, userdata, message):
+    global prediction
 
     payload = json.loads(message.payload.decode())
     recording_date = str(payload.get("Recording Date"))
@@ -45,7 +48,7 @@ def on_message(client, userdata, message):
         prediction = predict_defect(processed_sample)
         optimize_defect_score(processed_sample)
 
-        if prediction == 1:
+        if prediction >=50:
             shap_explainer(processed_sample)
             lime_explainer(processed_sample)
 
@@ -78,9 +81,13 @@ mqtt_thread.start()
 # init_optimization_routes(app)
 # init_explanation_routes(app)
 
+@app.route('/dashboard_explanation')
+def dashboard_explanation():
+    return render_template('dashboard_explanation.html')
+
 @app.route('/')
 def home():
-    return render_template('index.html')
+    return render_template('dashboard_optimization.html', prediction = prediction)
 
 if __name__ == '__main__':
 
