@@ -1,6 +1,10 @@
 import threading
 import time
 import logging
+import os
+import uuid
+from flask import render_template, send_from_directory
+import matplotlib.pyplot as plt
 
 from flask import Flask, render_template, Request
 import warnings
@@ -50,6 +54,9 @@ upt_after_optim = "-"
 lpt_after_optim = "-"
 tct_after_optim = "-"
 
+shap_fig = None
+lime_fig = None
+
 
 def on_message(client, userdata, message):
     global prediction
@@ -69,6 +76,9 @@ def on_message(client, userdata, message):
     global lpt_after_optim
     global tct_after_optim
 
+    global shap_fig
+    global lime_fig
+
     prediction = "-"
     defect_score_after_optim = "-"
     optim_phrase = "Defect Probability After Optimization"
@@ -83,7 +93,6 @@ def on_message(client, userdata, message):
     processed_sample = prepare_sample(payload)
 
     if processed_sample == -1:
-
         current_lpt = "-"
         current_upt = "-"
         current_pressure = "-"
@@ -105,13 +114,27 @@ def on_message(client, userdata, message):
 
         prediction = predict_defect(processed_sample)
 
+        if prediction <= 50:
+
+            shap_fig = None
+            lime_fig = None
+
         defect_score_after_optim = reduction_percentage = tct_after_optim = pressure_after_optim = lpt_after_optim = upt_after_optim = "load"
-        optim_phrase, defect_score_after_optim, reduction_percentage, tct_after_optim, pressure_after_optim, lpt_after_optim, upt_after_optim = optimize_defect_score(processed_sample)
+        optim_phrase, defect_score_after_optim, reduction_percentage, tct_after_optim, pressure_after_optim, lpt_after_optim, upt_after_optim = optimize_defect_score(
+            processed_sample)
 
         if prediction >= 50:
-            shap_explainer(processed_sample)
-            lime_explainer(processed_sample)
+
+            shap_fig = shap_explainer(processed_sample)
+            lime_fig = lime_explainer(processed_sample)
+
+            shap_fig.savefig('static/images/shap_plot')
+            lime_fig.savefig('static/images/lime_plot')
+
+            plt.close(shap_fig)
+            plt.close(lime_fig)
     else:
+
         prediction = "-"
 
     elapsed_time = time.time() - start_time
@@ -141,14 +164,30 @@ def mqtt_loop():
 mqtt_thread = threading.Thread(target=mqtt_loop)
 mqtt_thread.start()
 
+@app.route('/open_dashboard_explanation')
+def open_dashboard_explanation():
+    return render_template('dashboard_explanation.html', shap_fig=shap_fig, lime_fig=lime_fig)
 
-# init_prediction_routes(app)
-# init_optimization_routes(app)
-# init_explanation_routes(app)
 
-@app.route('/dashboard_explanation')
-def dashboard_explanation():
-    return render_template('dashboard_explanation.html')
+@app.route('/open_dashboard_optimization')
+def open_dashboard_optimization():
+    return render_template('dashboard_optimization.html', prediction=prediction, optim_phrase=optim_phrase,
+                           defect_score_after_optim=defect_score_after_optim, reduce_percentage=reduction_percentage,
+                           current_lpt=current_lpt, current_upt=current_upt, current_pressure=current_pressure,
+                           current_width=current_width, current_length=current_length, current_tct=current_tct,
+                           lpt_after_optim=lpt_after_optim, upt_after_optim=upt_after_optim,
+                           tct_after_optim=tct_after_optim,
+                           pressure_after_optim=pressure_after_optim)
+
+
+@app.route('/open_analytics')
+def open_analytics():
+    return render_template('analytics.html')
+
+
+@app.route('/open_historic_data')
+def open_historic_data():
+    return render_template('historic_data.html')
 
 
 @app.route('/')
@@ -157,9 +196,9 @@ def home():
                            defect_score_after_optim=defect_score_after_optim, reduce_percentage=reduction_percentage,
                            current_lpt=current_lpt, current_upt=current_upt, current_pressure=current_pressure,
                            current_width=current_width, current_length=current_length, current_tct=current_tct,
-                           lpt_after_optim = lpt_after_optim, upt_after_optim = upt_after_optim, tct_after_optim= tct_after_optim,
-                           pressure_after_optim = pressure_after_optim)
-
+                           lpt_after_optim=lpt_after_optim, upt_after_optim=upt_after_optim,
+                           tct_after_optim=tct_after_optim,
+                           pressure_after_optim=pressure_after_optim)
 
 
 if __name__ == '__main__':

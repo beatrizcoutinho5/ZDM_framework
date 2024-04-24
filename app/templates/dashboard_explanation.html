@@ -43,24 +43,24 @@
     <!-- buttons to switch pages -->
 
     <div class="page-buttons-container">
-      <div class="page-buttons-container-div-selected">
-        <a href="/'dashboard_optimization" style="text-decoration: none">
-          <span class="font-alata page-buttons"> Dashboards </span>
+    <div class="page-buttons-container-div-selected">
+        <a href=href="{{url_for('open_dashboard_optimization')}}" style="text-decoration: none">
+            <span class="font-alata page-buttons"> Dashboards </span>
         </a>
-      </div>
-
-      <div class="page-buttons-container-div">
-        <a href=/analytics" style="text-decoration: none">
-          <span class="font-alata page-buttons"> Analytics </span>
-        </a>
-      </div>
-
-      <div class="page-buttons-container-div">
-        <a href="/historic_data" style="text-decoration: none">
-          <span class="font-alata page-buttons"> Historic Data </span>
-        </a>
-      </div>
     </div>
+
+    <div class="page-buttons-container-div">
+        <a href="{{url_for('open_analytics')}}" style="text-decoration: none">
+            <span class="font-alata page-buttons"> Analytics </span>
+        </a>
+    </div>
+
+    <div class="page-buttons-container-div">
+        <a href="{{url_for('open_historic_data')}}" style="text-decoration: none">
+            <span class="font-alata page-buttons"> Historic Data </span>
+        </a>
+    </div>
+</div>
 
     <!-- **************************************************************** -->
     <!-- sub-header -->
@@ -70,15 +70,15 @@
 
     <div class="dashboard-buttons-container">
 
-      <div class="dashboard-buttons-container-div-selected ">
+      <div class="dashboard-buttons-container-div ">
 
-        <a href="/dashboard_optimization" style="text-decoration: none;"> <span class="font-alata page-buttons"> Optimization </span> </a>
+        <a href="{{url_for('open_dashboard_optimization')}}" style="text-decoration: none;"> <span class="font-alata page-buttons"> Optimization </span> </a>
 
       </div>
 
-      <div class="dashboard-buttons-container-div ">
+      <div class="dashboard-buttons-container-div-selected ">
 
-        <a href="/dashboard_explanation" style="text-decoration: none;"> <span class="font-alata page-buttons"> Explanation </span> </a>
+        <a href="{{url_for('open_dashboard_explanation')}}"style="text-decoration: none;"> <span class="font-alata page-buttons"> Explanation </span> </a>
 
       </div>
 
@@ -122,12 +122,24 @@
           <div style="display: flex">
 
             <div class="tooltip-container">
+
+                {% if shap_fig == None %}
+
+                <img
+                src="{{ url_for('static', filename='images/blank.png') }}"
+                style="height: 380px; margin-left: 2%; margin-right: 2%; cursor: pointer"
+              />
+
+                {% else %}
+
               <img
                 id="shap_plot"
                 src="{{ url_for('static', filename='images/shap_plot.png') }}"
                 style="height: 380px; margin-left: 2%; margin-right: 2%; cursor: pointer"
                 onclick="openFullscreen('shap_plot')"
               />
+
+                {% endif %}
 
               <span class="tooltip-text font-roboto">
                 The <b> SHAP Mean Importance </b> <br />
@@ -138,12 +150,27 @@
             </div>
 
             <div class="tooltip-container">
+
+
+                {% if lime_fig == None %}
+
+                <img
+                src="{{ url_for('static', filename='images/blank.png') }}"
+                style="height: 380px; margin-left: 2%; margin-right: 2%; cursor: pointer"
+              />
+
+                {% else %}
+
+
+
               <img
                 id="lime_plot"
                 src="{{ url_for('static', filename='images/lime_plot.png') }}"
                 style="height: 380px; margin-left: 2%; margin-right: 2%; cursor: pointer"
                 onclick="openFullscreen('lime_plot')"
               />
+
+                {% endif %}
 
               <span class="tooltip-text font-roboto" style="width: 200px; height: 85px; justify-content: center;">
     

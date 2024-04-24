@@ -46,19 +46,19 @@
 
 <div class="page-buttons-container">
     <div class="page-buttons-container-div-selected">
-        <a href="/dashboard_optimization'" style="text-decoration: none">
+        <a href=href="{{url_for('open_dashboard_optimization')}}" style="text-decoration: none">
             <span class="font-alata page-buttons"> Dashboards </span>
         </a>
     </div>
 
     <div class="page-buttons-container-div">
-        <a href="/analytics" style="text-decoration: none">
+        <a href="{{url_for('open_analytics')}}" style="text-decoration: none">
             <span class="font-alata page-buttons"> Analytics </span>
         </a>
     </div>
 
     <div class="page-buttons-container-div">
-        <a href="/historic_data" style="text-decoration: none">
+        <a href="{{url_for('open_historic_data')}}" style="text-decoration: none">
             <span class="font-alata page-buttons"> Historic Data </span>
         </a>
     </div>
@@ -74,14 +74,14 @@
 
     <div class="dashboard-buttons-container-div-selected ">
 
-        <a href="/dashboard_optimization" style="text-decoration: none;"> <span class="font-alata page-buttons"> Optimization </span>
+        <a href="{{url_for('open_dashboard_optimization')}}"style="text-decoration: none;"> <span class="font-alata page-buttons"> Optimization </span>
         </a>
 
     </div>
 
     <div class="dashboard-buttons-container-div ">
 
-        <a href="{{url_for('dashboard_explanation')}}" style="text-decoration: none;"> <span
+        <a href="{{url_for('open_dashboard_explanation')}}" style="text-decoration: none;"> <span
                 class="font-alata page-buttons"> Explanation </span> </a>
     </div>
 </div>
