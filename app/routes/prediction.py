@@ -44,12 +44,8 @@ def predict_defect(processed_sample):
 
     prediction = prediction*100
 
-    prediction = round(prediction, 3)
-
+    prediction = round(prediction, 1)
     print(f'Prediction: {prediction}')
-
-    # prediction_str = str(prediction[0])
-    # prediction_char = prediction_str[0] if prediction_str else ''
 
     return prediction
 

@@ -31,6 +31,6 @@ def publish_data():
         print(f'Data published: {sample_dict}')
 
         # publish samples with 1 min interval
-        time.sleep(60)
+        time.sleep(40)
 
 publish_data()

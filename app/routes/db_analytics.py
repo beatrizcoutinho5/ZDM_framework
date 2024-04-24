@@ -122,14 +122,14 @@ def db_get_avg_feature_values():
     cursor.execute(query_tct)
     tct_result = cursor.fetchone()[0]
 
-    print("\nFeatures avg values:")
-    print(f"Lower Plate Temperature: {lpt_result}")
-    print(f"Upper Plate Temperature: {upt_result}")
-    print(f"Length: {length_result}")
-    print(f"Width: {width_result}")
-    print(f"Thickness: {thickness_result}")
-    print(f"Pressure: {pressure_result}")
-    print(f"Thermal Cycle Time: {tct_result}")
+    # print("\nFeatures avg values:")
+    # print(f"Lower Plate Temperature: {lpt_result}")
+    # print(f"Upper Plate Temperature: {upt_result}")
+    # print(f"Length: {length_result}")
+    # print(f"Width: {width_result}")
+    # print(f"Thickness: {thickness_result}")
+    # print(f"Pressure: {pressure_result}")
+    # print(f"Thermal Cycle Time: {tct_result}")
 
     cursor.close()
     conn.close()
@@ -139,8 +139,6 @@ def db_get_avg_feature_values():
 
 
 def db_get_defects_number(start_time=None, end_time=None):
-
-    print("entrei")
 
     conn = psycopg2.connect(
         dbname=DB_NAME,
@@ -161,7 +159,7 @@ def db_get_defects_number(start_time=None, end_time=None):
                                 "WHERE \"Defect Prediction\" = '1'")
         cursor.execute(defects_number_query)
         result = cursor.fetchone()
-        print(f"Number of defects: {result[0]}")
+        # print(f"Number of defects: {result[0]}")
 
     # only a start time provided but not as end
     # make the end time today

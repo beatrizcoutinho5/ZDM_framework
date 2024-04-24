@@ -17,8 +17,6 @@ from __main__ import app
 
 model = load(r'models\binary\binary_random_forest_model.pkl')
 
-
-
 # model = CatBoostClassifier ()
 # model.load_model(r'models\binary\binary_catboost_model.cbm')
 
@@ -42,6 +40,7 @@ column_names = [
     'Reference Top_cat'
 ]
 
+
 def init_optimization_routes(app):
     @app.route('/optimize_defect_score')
     def optimize_defect_score_route():
@@ -50,7 +49,6 @@ def init_optimization_routes(app):
 
 # defect score = model probability
 def predict_defect_score(sample):
-
     sample_values = sample.reshape(1, -1)
     prediction = model.predict_proba(sample_values)
     defect_score = prediction[:, 1]
@@ -110,7 +108,6 @@ def feature_space_pre_processing(sample):
 
     sample_values = sample.flatten().tolist()
 
-
     # save the sample feature values along with the feature names
     features_space = list(zip(column_names, sample_values))
 
@@ -133,9 +130,9 @@ def feature_space_pre_processing(sample):
         0]
     pressure_index = [i for i, (feature, _) in enumerate(features_space) if feature == 'Pressure'][0]
     lower_plate_temp_index = \
-    [i for i, (feature, _) in enumerate(features_space) if feature == 'Lower Plate Temperature'][0]
+        [i for i, (feature, _) in enumerate(features_space) if feature == 'Lower Plate Temperature'][0]
     upper_plate_temp_index = \
-    [i for i, (feature, _) in enumerate(features_space) if feature == 'Upper Plate Temperature'][0]
+        [i for i, (feature, _) in enumerate(features_space) if feature == 'Upper Plate Temperature'][0]
 
     indices = [thermal_cycle_time_index, pressure_index, lower_plate_temp_index, upper_plate_temp_index]
 
@@ -156,20 +153,26 @@ def optimize_defect_score(sample):
     initial_defect_score = predict_defect_score(sample)
 
     # if the defect score is under 10%, an optimization is not needed
-    if initial_defect_score <= 0.1:
-        print("Defect probability is too low, no need for optimization!")
 
-        return "OK"
 
     # obtaining features_space
     features_space, indices = feature_space_pre_processing(sample)
 
     initial_parameters = [sample[0][index] for index in indices]
 
-    # defining the target defect score for the optimizer
-    # target_defect_scores = [0.01, 0.5]
-    target_defect_scores = [0.5]
+    current_tct = round(initial_parameters[0],0)
+    current_pressure = round(initial_parameters[1],0)
+    current_lpt = round(initial_parameters[2],0)
+    current_upt = round(initial_parameters[3],0)
 
+    if initial_defect_score <= 0.1:
+        print("Defect probability is too low, no need for optimization!")
+
+        return "Defect probability is too low, no need for optimization!", "-", "-", current_tct, current_pressure, current_lpt, current_upt
+
+    # defining the target defect score for the optimizer
+    target_defect_scores = [0.01, 0.5]
+    # target_defect_scores = [0.5]
 
     # reference sample to start the optimization (very low defect score)
     x0 = [
@@ -207,7 +210,11 @@ def optimize_defect_score(sample):
 
     # if the algorithm wasn't able to reduce the initial defect score return an error message
     if best_reduction_percentage <= 0:
+
+        initial_defect_score_p = initial_defect_score[0]*100
         print("Parameters can't be optimized :(")
+
+        return "Parameters can't be optimized!", initial_defect_score_p, "0", current_tct, current_pressure, current_lpt, current_upt
 
     else:
         # print the best optimization results
@@ -222,4 +229,18 @@ def optimize_defect_score(sample):
         print('Elapsed Time (in seconds):    ', round(best_elapsed_time, 2))
         print('MSE:                ', best_mse.round(3))
 
-    return "OK :)"
+    best_final_defect_score = best_final_defect_score*100
+    best_final_defect_score = np.round(best_final_defect_score, 1)
+    best_final_defect_score = best_final_defect_score[0]
+
+    best_reduction_percentage = np.round(best_reduction_percentage, 1)
+    best_reduction_percentage = best_reduction_percentage[0]
+
+    tct_after_optim = round(best_params_selected[0], 1)
+    pressure_after_optim =round(best_params_selected[1],1)
+    lpt_after_optim = round(best_params_selected[2],1)
+    upt_after_optim = round(best_params_selected[3],1)
+
+
+
+    return "Defect Probability After Optimization", best_final_defect_score, best_reduction_percentage, tct_after_optim, pressure_after_optim, lpt_after_optim, upt_after_optim

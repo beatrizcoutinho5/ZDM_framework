@@ -373,18 +373,20 @@ html {
 }
 
 .optim-div-big-text {
-  font-size: 25px;
+  font-size: 23px;
   color: #031a6b;
-  margin-top: 4%;
+  margin-top: 2%;
   margin-left: 3%;
   padding: 2%;
+  width: 50%;
 }
 
 .optim-div-big-num {
-  font-size: 75px;
+  position: fixed;
+  font-size: 65px;
   color: #ea4646;
-  margin-top: 1%;
-  margin-left: 6%;
+  margin-top: -1%;
+  margin-left: 245px;
   padding: 2%;
   text-align: center;
   justify-content: center;
@@ -593,4 +595,18 @@ html {
 
 .download-button:hover {
   transform: scale(1.03);
+}
+
+.load-img-container{
+
+  height: 40px;
+  width: 40px;
+  align-items: center;
+
+}
+
+.load-img{
+
+  height: 40px;
+  width: 40px;
 }
