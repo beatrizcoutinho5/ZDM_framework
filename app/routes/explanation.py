@@ -76,12 +76,8 @@ def shap_explainer(sample):
 
 def lime_explainer(sample):
 
-    print(type(sample))
-
     sample_values = list(sample.values())
     sample_values = np.array(sample_values)
-
-    print(sample_values)
 
     exp = explainer.explain_instance(
         sample_values,
@@ -90,7 +86,6 @@ def lime_explainer(sample):
 
     fig = exp.as_pyplot_figure(label=1)
     fig.set_size_inches(20, 10)
-    # plt.show()
 
     return fig
 

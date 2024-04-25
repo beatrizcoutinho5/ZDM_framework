@@ -4,6 +4,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename = 'css/style.css')  }}" />
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
 
   <body class="bg-page">
@@ -44,7 +45,7 @@
 
     <div class="page-buttons-container">
     <div class="page-buttons-container-div">
-        <a href=href="{{url_for('open_dashboard_optimization')}}" style="text-decoration: none">
+        <a href="{{url_for('open_dashboard_optimization')}}" style="text-decoration: none">
             <span class="font-alata page-buttons"> Dashboards </span>
         </a>
     </div>
@@ -66,66 +67,25 @@
     <!-- sub-header -->
     <!-- **************************************************************** -->
 
-    <div
-      class="date-time font-alata"
-      style="display: flex; width: 30%; right: 1.75%"
-    >
-      <div style="left: 10%; display: flex; flex-direction: row; width: 50%">
+    <div class="date-time font-alata" style="display: flex; width: 30%; right: 1.75%">
+    <div style="left: 10%; display: flex; flex-direction: row; width: 50%">
         <div>from</div>
-        <div
-          style="
-            position: relative;
-            left: 5%;
-            top: -30%;
-            display: flex;
-            flex-direction: column;
-            align-items: right;
-          "
-        >
-          <br />
-          <input
-            type="date"
-            value="2024-03-21"
-            class="date-time-selector font-alata"
-            id="dateInput1"
-          />
-          <input
-            type="time"
-            value="21:02:47"
-            class="date-time-selector font-alata"
-            id="timeInput1"
-          />
+        <div style="position: relative; left: 5%; top: -30%; display: flex; flex-direction: column; align-items: right;">
+            <br />
+            <input type="date" value="2024-03-21" class="date-time-selector font-alata" id="dateInput1" />
+            <input type="time" value="21:02:47" class="date-time-selector font-alata" id="timeInput1" />
         </div>
-      </div>
-
-      <div style="left: 10%; display: flex; flex-direction: row; width: 50%">
-        <div>to</div>
-        <div
-          style="
-            position: relative;
-            left: 5%;
-            top: -30%;
-            display: flex;
-            flex-direction: column;
-            align-items: right;
-          "
-        >
-          <br />
-          <input
-            type="date"
-            value="2024-03-21"
-            class="date-time-selector font-alata"
-            id="dateInput2"
-          />
-          <input
-            type="time"
-            value="21:02:47"
-            class="date-time-selector font-alata"
-            id="timeInput2"
-          />
-        </div>
-      </div>
     </div>
+
+    <div style="left: 10%; display: flex; flex-direction: row; width: 50%">
+        <div>to</div>
+        <div style="position: relative; left: 5%; top: -30%; display: flex; flex-direction: column; align-items: right;">
+            <br />
+            <input type="date" value="2024-03-21" class="date-time-selector font-alata" id="dateInput2" />
+            <input type="time" value="21:02:47" class="date-time-selector font-alata" id="timeInput2" />
+        </div>
+    </div>
+</div>
 
     <!-- **************************************************************** -->
     <!-- body -->
@@ -137,7 +97,7 @@
       <div class="anl-div" style="display: flex">
         <div class="anl-div-vertical">
           <div class="anl-div-vertical-ind">
-            <span class="anl-div-vertical-ind-num font-alatsi"> 6 </span>
+            <span class="anl-div-vertical-ind-num font-alatsi"> {{defects_number_result}} </span>
 
             <span class="anl-div-vertical-ind-text font-alata">
               Number of Defects
@@ -145,11 +105,7 @@
           </div>
 
           <div class="anl-div-vertical-ind">
-            <span class="anl-div-vertical-ind-num font-alatsi"> 1.4% </span>
-
-            <span class="anl-div-vertical-ind-num-extra font-alatsi">
-              -2.1%
-            </span>
+            <span class="anl-div-vertical-ind-num font-alatsi"> {{percentage_defect}}% </span>
 
             <span class="anl-div-vertical-ind-text font-alata">
               Percentage of Defects
@@ -157,7 +113,7 @@
           </div>
 
           <div class="anl-div-vertical-ind">
-            <span class="anl-div-vertical-ind-num font-alatsi"> 429 </span>
+            <span class="anl-div-vertical-ind-num font-alatsi"> {{produced_panels_result}} </span>
 
             <span class="anl-div-vertical-ind-text font-alata">
               Produced Panels
@@ -177,7 +133,12 @@
           <div
             class="anl-div-horizontal-ind"
             style="height: 59%; margin-top: 1%"
-          ></div>
+          >
+
+              <canvas id="defectsChart"></canvas>
+
+
+          </div>
         </div>
       </div>
     </div>
@@ -222,4 +183,68 @@
       "timeInput2"
     ).value = `${currentHours}:${currentMinutes}`;
   </script>
+
+<script>
+    const dateInput1 = document.getElementById('dateInput1');
+    const timeInput1 = document.getElementById('timeInput1');
+    const dateInput2 = document.getElementById('dateInput2');
+    const timeInput2 = document.getElementById('timeInput2');
+
+   const delay = 3000; // 1 second delay (adjust as needed)
+
+    // Function to handle date and time change event with delay
+    let timeoutId;
+    function handleDateTimeChangeWithDelay() {
+        clearTimeout(timeoutId); // Clear any previous timeouts
+        timeoutId = setTimeout(async () => {
+            const fromDate = dateInput1.value + ' ' + timeInput1.value;
+            const toDate = dateInput2.value + ' ' + timeInput2.value;
+            const response = await fetch(`/update-analytics?fromDate=${fromDate}&toDate=${toDate}`);
+            location.reload(); // Reload the page after updating analytics (you can update UI instead if needed)
+        }, delay);
+    }
+
+    // Add event listeners to both date and time input elements
+    dateInput1.addEventListener('change', handleDateTimeChangeWithDelay);
+    timeInput1.addEventListener('change', handleDateTimeChangeWithDelay);
+    dateInput2.addEventListener('change', handleDateTimeChangeWithDelay);
+    timeInput2.addEventListener('change', handleDateTimeChangeWithDelay);
+
+</script>
+
+<script>
+    // Get the data from {{defects_number_per_day_results}}
+    const defectsData = JSON.parse("{{defects_number_per_day_results | tojson | safe}}");
+
+    // Extract labels and values from the data
+    const labels = Object.keys(defectsData);
+    const values = Object.values(defectsData);
+
+    // Create a bar chart
+    const ctx = document.getElementById('defectsChart').getContext('2d');
+    const defectsChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Defects per Day',
+                data: values,
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+    });
+</script>
+
+
 </html>

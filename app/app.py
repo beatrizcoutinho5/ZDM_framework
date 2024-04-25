@@ -6,11 +6,13 @@ import uuid
 from flask import render_template, send_from_directory
 import matplotlib.pyplot as plt
 
-from flask import Flask, render_template, Request
+from flask import Flask, render_template
+from flask import request
 import warnings
 import json
 import paho.mqtt.client as mqtt
 import psycopg2
+from flask import jsonify
 
 warnings.filterwarnings("ignore")
 
@@ -57,6 +59,13 @@ tct_after_optim = "-"
 shap_fig = None
 lime_fig = None
 
+line_status = "Not Working"
+
+defects_number_result = 0
+produced_panels_result = 0
+percentage_defect = 0
+defects_number_per_day_results = 0
+
 
 def on_message(client, userdata, message):
     global prediction
@@ -79,6 +88,8 @@ def on_message(client, userdata, message):
     global shap_fig
     global lime_fig
 
+    global line_status
+
     prediction = "-"
     defect_score_after_optim = "-"
     optim_phrase = "Defect Probability After Optimization"
@@ -89,6 +100,10 @@ def on_message(client, userdata, message):
     print(f"\nReceived message: {payload}")
 
     start_time = time.time()
+
+    if payload["Line Working?"] != -1:
+        line_status = "Producing"
+        print(line_status)
 
     processed_sample = prepare_sample(payload)
 
@@ -110,12 +125,11 @@ def on_message(client, userdata, message):
         current_width = processed_sample.get('Width')
         current_length = processed_sample.get('Length')
 
-        print(current_lpt, current_upt, current_pressure, current_tct, current_width, current_length)
+        # print(current_lpt, current_upt, current_pressure, current_tct, current_width, current_length)
 
         prediction = predict_defect(processed_sample)
 
         if prediction <= 50:
-
             shap_fig = None
             lime_fig = None
 
@@ -152,6 +166,26 @@ def on_message(client, userdata, message):
         "------------------------------------------------------------------------------------------------------------------------")
 
 
+@app.route('/update-analytics')
+def update_analytics():
+    global defects_number_result
+    global produced_panels_result
+    global percentage_defect
+    global defects_number_per_day_results
+
+    from_date = request.args.get('fromDate')
+    to_date = request.args.get('toDate')
+
+    print(from_date)
+    print(to_date)
+
+    defects_number_result, produced_panels_result, percentage_defect, defects_number_per_day_results = db_get_defects_number(from_date, to_date)
+    defects_number_result = defects_number_result[0]
+    produced_panels_result = produced_panels_result[0]
+
+    return jsonify({'success': True})
+
+
 # MQTT client
 def mqtt_loop():
     mqtt_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
@@ -163,6 +197,7 @@ def mqtt_loop():
 
 mqtt_thread = threading.Thread(target=mqtt_loop)
 mqtt_thread.start()
+
 
 @app.route('/open_dashboard_explanation')
 def open_dashboard_explanation():
@@ -179,10 +214,11 @@ def open_dashboard_optimization():
                            tct_after_optim=tct_after_optim,
                            pressure_after_optim=pressure_after_optim)
 
-
 @app.route('/open_analytics')
 def open_analytics():
-    return render_template('analytics.html')
+    return render_template('analytics.html', defects_number_result=defects_number_result,
+                           produced_panels_result=produced_panels_result, percentage_defect=percentage_defect,
+                           defects_number_per_day_results= defects_number_per_day_results)
 
 
 @app.route('/open_historic_data')

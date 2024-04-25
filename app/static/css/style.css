@@ -544,12 +544,12 @@ html {
 
 .date-time-selector[type="date"]::-webkit-calendar-picker-indicator {
   cursor: pointer;
-  background-image: url(calendar.png);
+  background-image: url('/static/images/calendar.png');
 }
 
 .date-time-selector[type="time"]::-webkit-calendar-picker-indicator {
   cursor: pointer;
-  background-image: url(clock_png.png);
+  background-image: url('/static/images/clock_png.png');
 }
 
 .table-head {
@@ -586,7 +586,7 @@ html {
   height: 10%;
   width: 13%;
   border-radius: 60px;
-  background-image: url(gradient.png);
+  background-image: url('/static/images/gradient.png');
   border: none;
   color: white;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);

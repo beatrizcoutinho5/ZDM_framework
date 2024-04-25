@@ -149,43 +149,61 @@ def db_get_defects_number(start_time=None, end_time=None):
     )
     cursor = conn.cursor()
 
-    defects_number_query = None
+    defects_number_query = ("SELECT COUNT(\"Defect Prediction\") "
+                            "FROM zdm_framework.ProductionData "
+                            f"WHERE \"Defect Prediction\" = '1' "
+                            f"AND \"Recording Date\" BETWEEN '{start_time}' AND '{end_time}'")
 
-    # no date interval provided, return total defect count
-    if start_time is None and end_time is None:
+    cursor.execute(defects_number_query)
+    defects_number_result = cursor.fetchone()
+    print(f"Number of defects: {defects_number_result[0]}")
 
-        defects_number_query = ("SELECT COUNT(\"Defect Prediction\") "
+    produced_panels_query = (
+                                "SELECT COUNT(\"Defect Prediction\") "
                                 "FROM zdm_framework.ProductionData "
-                                "WHERE \"Defect Prediction\" = '1'")
-        cursor.execute(defects_number_query)
-        result = cursor.fetchone()
-        # print(f"Number of defects: {result[0]}")
+                                f"WHERE \"Recording Date\" BETWEEN '{start_time}' AND '{end_time}'"
+                            )
 
-    # only a start time provided but not as end
-    # make the end time today
-    elif start_time is not None and end_time is None:
+    cursor.execute(produced_panels_query)
+    produced_panels_result = cursor.fetchone()
+    print(f"Produced Panels: {produced_panels_result[0]}")
 
-        end_time = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
-        defects_number_query = ("SELECT COUNT(\"Defect Prediction\") "
-                                "FROM zdm_framework.ProductionData "
-                                f"WHERE \"Defect Prediction\" = '1' "
-                                f"AND \"Recording Date\" BETWEEN '{start_time}' AND '{end_time}'")
-        cursor.execute(defects_number_query)
-        result = cursor.fetchone()
-        print(f"Number of defects: {result[0]}")
+    if produced_panels_result[0] != 0:
+        percentage_defect = (defects_number_result[0] / produced_panels_result[0])*100
+        percentage_defect = round(percentage_defect, 1)
+        print(f"Percentage of Defects: {percentage_defect}")
 
-    # provides both the start and end time
-    elif start_time is not None and end_time is not None:
+    else:
+        percentage_defect = 0
 
-        defects_number_query = ("SELECT COUNT(\"Defect Prediction\") "
-                                "FROM zdm_framework.ProductionData "
-                                f"WHERE \"Defect Prediction\" = '1' "
-                                f"AND \"Recording Date\" BETWEEN '{start_time}' AND '{end_time}'")
-        cursor.execute(defects_number_query)
-        result = cursor.fetchone()
-        print(f"Number of defects: {result[0]}")
+
+    datetime_obj_start = datetime.strptime(start_time, "%Y-%m-%d %H:%M")
+    date_part_start = datetime_obj_start.strftime("%Y-%m-%d")
+
+    datetime_obj_end = datetime.strptime(end_time, "%Y-%m-%d %H:%M")
+    date_part_end = datetime_obj_end.strftime("%Y-%m-%d")
+
+    print(f"date_part_start: {date_part_start}")
+    print(f"date_part_end: {date_part_end}")
+
+    # Query to count defects for each day within the time range
+    defects_number_per_day_query = (
+                                        "SELECT TO_DATE(\"Recording Date\", 'YYYY-MM-DD') AS defect_date, COUNT(\"Defect Prediction\") AS defect_count "
+                                        "FROM zdm_framework.ProductionData "
+                                        f"WHERE \"Defect Prediction\" = '1' "
+                                        f"AND TO_DATE(\"Recording Date\", 'YYYY-MM-DD') BETWEEN '{date_part_start}' AND '{date_part_end}' "
+                                        "GROUP BY TO_DATE(\"Recording Date\", 'YYYY-MM-DD') "
+                                        "ORDER BY TO_DATE(\"Recording Date\", 'YYYY-MM-DD')"
+    )
+
+    cursor.execute(defects_number_per_day_query)
+    defects_number_per_day_results = cursor.fetchall()
+
+    defects_number_per_day_results = [(date.strftime('%Y-%m-%d'), count) for date, count in defects_number_per_day_results]
 
     cursor.close()
     conn.close()
 
-    return defects_number_query
+    return defects_number_result, produced_panels_result, percentage_defect, defects_number_per_day_results
+
+
