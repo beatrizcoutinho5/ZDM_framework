@@ -571,6 +571,20 @@ html {
   flex-direction: column;
 }
 
+.table-body{
+  position: relative;
+  width: 100%;
+  height: 60%;
+  top: -20%;
+}
+
+.table-body-div {
+  width: 140px;
+  display: flex;
+  flex-direction: column;
+}
+
+
 .table-line {
   position: relative;
   width: 90%;

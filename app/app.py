@@ -29,7 +29,7 @@ MQTT_TOPIC = 'sample_data'
 from routes.prediction import predict_defect
 from routes.optimization import optimize_defect_score, prepare_sample
 from routes.explanation import shap_explainer, lime_explainer
-from routes.db_analytics import db_save_sample, db_get_defects_number, db_get_avg_feature_values
+from routes.db_analytics import db_save_sample, db_get_defects_number, db_get_historic_data, db_download_historic_data
 
 # Database connection
 DB_HOST = 'db.fe.up.pt'
@@ -66,6 +66,11 @@ produced_panels_result = 0
 percentage_defect = 0
 defects_number_per_day_results = 0
 
+explanation = 0
+
+historic_data = []
+csv_done = 0
+
 
 def on_message(client, userdata, message):
     global prediction
@@ -89,11 +94,13 @@ def on_message(client, userdata, message):
     global lime_fig
 
     global line_status
+    global explanation
 
     prediction = "-"
     defect_score_after_optim = "-"
     optim_phrase = "Defect Probability After Optimization"
     reduction_percentage = "-"
+    explanation = 0
 
     payload = json.loads(message.payload.decode())
     recording_date = str(payload.get("Recording Date"))
@@ -145,6 +152,8 @@ def on_message(client, userdata, message):
             shap_fig.savefig('static/images/shap_plot')
             lime_fig.savefig('static/images/lime_plot')
 
+            explanation = 1
+
             plt.close(shap_fig)
             plt.close(lime_fig)
     else:
@@ -186,6 +195,23 @@ def update_analytics():
     return jsonify({'success': True})
 
 
+@app.route('/update-historic-data')
+def update_historic_data():
+
+    global historic_data
+    global csv_done
+
+    csv_done = 0
+
+    from_date = request.args.get('fromDate')
+    to_date = request.args.get('toDate')
+
+    historic_data = db_get_historic_data(from_date, to_date)
+    csv_done = db_download_historic_data(from_date, to_date)
+
+    return jsonify({'success': True})
+
+
 # MQTT client
 def mqtt_loop():
     mqtt_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
@@ -212,7 +238,8 @@ def open_dashboard_optimization():
                            current_width=current_width, current_length=current_length, current_tct=current_tct,
                            lpt_after_optim=lpt_after_optim, upt_after_optim=upt_after_optim,
                            tct_after_optim=tct_after_optim,
-                           pressure_after_optim=pressure_after_optim)
+                           pressure_after_optim=pressure_after_optim,
+                           explanation = explanation)
 
 @app.route('/open_analytics')
 def open_analytics():
@@ -223,7 +250,7 @@ def open_analytics():
 
 @app.route('/open_historic_data')
 def open_historic_data():
-    return render_template('historic_data.html')
+    return render_template('historic_data.html', historic_data = historic_data, csv_done = csv_done)
 
 
 @app.route('/')

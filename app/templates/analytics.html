@@ -85,7 +85,7 @@
             <input type="time" value="21:02:47" class="date-time-selector font-alata" id="timeInput2" />
         </div>
     </div>
-</div>
+    </div>
 
     <!-- **************************************************************** -->
     <!-- body -->
@@ -190,7 +190,7 @@
     const dateInput2 = document.getElementById('dateInput2');
     const timeInput2 = document.getElementById('timeInput2');
 
-   const delay = 3000; // 1 second delay (adjust as needed)
+    const delay = 2000; // 1 second delay (adjust as needed)
 
     // Function to handle date and time change event with delay
     let timeoutId;
@@ -200,6 +200,9 @@
             const fromDate = dateInput1.value + ' ' + timeInput1.value;
             const toDate = dateInput2.value + ' ' + timeInput2.value;
             const response = await fetch(`/update-analytics?fromDate=${fromDate}&toDate=${toDate}`);
+            // Store the values of date and time inputs in local storage
+            localStorage.setItem('fromDate', fromDate);
+            localStorage.setItem('toDate', toDate);
             location.reload(); // Reload the page after updating analytics (you can update UI instead if needed)
         }, delay);
     }
@@ -210,6 +213,17 @@
     dateInput2.addEventListener('change', handleDateTimeChangeWithDelay);
     timeInput2.addEventListener('change', handleDateTimeChangeWithDelay);
 
+    // Retrieve and set the values of date and time inputs from local storage after page reloads
+    document.addEventListener('DOMContentLoaded', function() {
+        const fromDate = localStorage.getItem('fromDate');
+        const toDate = localStorage.getItem('toDate');
+        if (fromDate && toDate) {
+            dateInput1.value = fromDate.split(' ')[0];
+            timeInput1.value = fromDate.split(' ')[1];
+            dateInput2.value = toDate.split(' ')[0];
+            timeInput2.value = toDate.split(' ')[1];
+        }
+    });
 </script>
 
 <script>

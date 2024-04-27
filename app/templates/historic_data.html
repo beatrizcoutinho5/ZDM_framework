@@ -65,65 +65,24 @@
     <!-- sub-header -->
     <!-- **************************************************************** -->
 
-    <div
-      class="date-time font-alata"
-      style="display: flex; width: 30%; right: 1.75%"
-    >
-      <div style="left: 10%; display: flex; flex-direction: row; width: 50%">
+    <div class="date-time font-alata" style="display: flex; width: 30%; right: 1.75%">
+    <div style="left: 10%; display: flex; flex-direction: row; width: 50%">
         <div>from</div>
-        <div
-          style="
-            position: relative;
-            left: 5%;
-            top: -30%;
-            display: flex;
-            flex-direction: column;
-            align-items: right;
-          "
-        >
-          <br />
-          <input
-            type="date"
-            value="2024-03-21"
-            class="date-time-selector font-alata"
-            id="dateInput1"
-          />
-          <input
-            type="time"
-            value="21:02:47"
-            class="date-time-selector font-alata"
-            id="timeInput1"
-          />
+        <div style="position: relative; left: 5%; top: -30%; display: flex; flex-direction: column; align-items: right;">
+            <br />
+            <input type="date" value="2024-03-21" class="date-time-selector font-alata" id="dateInput1" />
+            <input type="time" value="21:02:47" class="date-time-selector font-alata" id="timeInput1" />
         </div>
-      </div>
+    </div>
 
-      <div style="left: 10%; display: flex; flex-direction: row; width: 50%">
+    <div style="left: 10%; display: flex; flex-direction: row; width: 50%">
         <div>to</div>
-        <div
-          style="
-            position: relative;
-            left: 5%;
-            top: -30%;
-            display: flex;
-            flex-direction: column;
-            align-items: right;
-          "
-        >
-          <br />
-          <input
-            type="date"
-            value="2024-03-21"
-            class="date-time-selector font-alata"
-            id="dateInput2"
-          />
-          <input
-            type="time"
-            value="21:02:47"
-            class="date-time-selector font-alata"
-            id="timeInput2"
-          />
+        <div style="position: relative; left: 5%; top: -30%; display: flex; flex-direction: column; align-items: right;">
+            <br />
+            <input type="date" value="2024-03-21" class="date-time-selector font-alata" id="dateInput2" />
+            <input type="time" value="21:02:47" class="date-time-selector font-alata" id="timeInput2" />
         </div>
-      </div>
+    </div>
     </div>
 
     <!-- **************************************************************** -->
@@ -136,7 +95,7 @@
       <table class="font-alata">
         <thead class="table-head">
           <tr>
-            <th><div>Recording Date</div></th>
+            <th><div >Recording Date</div></th>
             <th><div>Defect Prediction</div></th>
             <th><div>Upper Plate Temperature</div></th>
             <th><div>Lower Plate Temperature</div></th>
@@ -147,13 +106,35 @@
           </tr>
         </thead>
 
-        <div class="table-line"></div>
+<!--        <div class="table-line"></div>-->
+
+          <tbody class="table-body">
+            <div class="table-body-container">
+              {% for sample in historic_data %}
+              <tr>
+                <td><div class="table-body-div">{{ sample[0] }}</div></td>  <!-- Recording Date -->
+                <td><div class="table-body-div">{{ sample[1] }}</div></td>  <!-- Defect Prediction -->
+                <td><div class="table-body-div">{{ sample[2] }}</div></td>  <!-- Upper Plate Temperature -->
+                <td><div class="table-body-div">{{ sample[3] }}</div></td>  <!-- Lower Plate Temperature -->
+                <td><div class="table-body-div">{{ sample[4] }}</div></td>  <!-- Thermal Cycle Time -->
+                <td><div class="table-body-div">{{ sample[5] }}</div></td>  <!-- Width -->
+                <td><div class="table-body-div">{{ sample[6] }}</div></td>  <!-- Length -->
+                <td><div class="table-body-div">{{ sample[7] }}</div></td>  <!-- Pressure -->
+              </tr>
+              {% endfor %}
+            </div>
+          </tbody>
+
       </table>
 
-      <button class="download-button font-alata">
-        Download data with all <br />
-        features as CSV
-      </button>
+        {% if csv_done == 1%}
+          <button id="download-button" class="download-button font-alata">
+            Download data with all <br />
+            features as CSV
+        </button>
+        {% else %}
+        <div></div>
+        {% endif %}
     </div>
 
     <!-- **************************************************************** -->
@@ -174,7 +155,62 @@
     </div>
   </body>
 
-  <script>
+<script>
+    const dateInput1 = document.getElementById('dateInput1');
+    const timeInput1 = document.getElementById('timeInput1');
+    const dateInput2 = document.getElementById('dateInput2');
+    const timeInput2 = document.getElementById('timeInput2');
+
+    const delay = 1000; // 1 second delay (adjust as needed)
+
+    // Function to handle date and time change event with delay
+    let timeoutId;
+    function handleDateTimeChangeWithDelay() {
+        clearTimeout(timeoutId); // Clear any previous timeouts
+        timeoutId = setTimeout(async () => {
+            const fromDate = dateInput1.value + ' ' + timeInput1.value;
+            const toDate = dateInput2.value + ' ' + timeInput2.value;
+            const response = await fetch(`/update-historic-data?fromDate=${fromDate}&toDate=${toDate}`);
+            // Store the values of date and time inputs in local storage
+            localStorage.setItem('fromDate', fromDate);
+            localStorage.setItem('toDate', toDate);
+            location.reload(); // Reload the page after updating analytics (you can update UI instead if needed)
+        }, delay);
+    }
+
+    // Add event listeners to both date and time input elements
+    dateInput1.addEventListener('change', handleDateTimeChangeWithDelay);
+    timeInput1.addEventListener('change', handleDateTimeChangeWithDelay);
+    dateInput2.addEventListener('change', handleDateTimeChangeWithDelay);
+    timeInput2.addEventListener('change', handleDateTimeChangeWithDelay);
+
+    // Retrieve and set the values of date and time inputs from local storage after page reloads
+    document.addEventListener('DOMContentLoaded', function() {
+        const fromDate = localStorage.getItem('fromDate');
+        const toDate = localStorage.getItem('toDate');
+        if (fromDate && toDate) {
+            dateInput1.value = fromDate.split(' ')[0];
+            timeInput1.value = fromDate.split(' ')[1];
+            dateInput2.value = toDate.split(' ')[0];
+            timeInput2.value = toDate.split(' ')[1];
+        }
+    });
+</script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('download-button').addEventListener('click', function(event) {
+        // Prevent the default form submission behavior
+        event.preventDefault();
+
+        // Perform the download action
+        window.location.href = '../static/data.csv';
+    });
+});
+</script>
+
+<script>
     const currentDate = new Date();
     const currentYear = currentDate.getFullYear();
     const currentMonth = String(currentDate.getMonth() + 1).padStart(2, "0");
@@ -188,6 +224,7 @@
     document.getElementById(
       "timeInput1"
     ).value = `${currentHours}:${currentMinutes}`;
+
     document.getElementById(
       "dateInput2"
     ).value = `${currentYear}-${currentMonth}-${currentDay}`;
@@ -195,4 +232,5 @@
       "timeInput2"
     ).value = `${currentHours}:${currentMinutes}`;
   </script>
+
 </html>

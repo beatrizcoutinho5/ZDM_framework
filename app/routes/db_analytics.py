@@ -1,6 +1,7 @@
 import psycopg2
 from datetime import datetime
-
+import csv
+import os
 from __main__ import app
 
 # Database connection
@@ -61,7 +62,6 @@ def db_save_sample(processed_sample, recording_date, prediction):
 
     print(f"\nSaved sample data to database!")
 
-
 def db_get_avg_feature_values():
 
     conn = psycopg2.connect(
@@ -121,15 +121,6 @@ def db_get_avg_feature_values():
 
     cursor.execute(query_tct)
     tct_result = cursor.fetchone()[0]
-
-    # print("\nFeatures avg values:")
-    # print(f"Lower Plate Temperature: {lpt_result}")
-    # print(f"Upper Plate Temperature: {upt_result}")
-    # print(f"Length: {length_result}")
-    # print(f"Width: {width_result}")
-    # print(f"Thickness: {thickness_result}")
-    # print(f"Pressure: {pressure_result}")
-    # print(f"Thermal Cycle Time: {tct_result}")
 
     cursor.close()
     conn.close()
@@ -205,5 +196,99 @@ def db_get_defects_number(start_time=None, end_time=None):
     conn.close()
 
     return defects_number_result, produced_panels_result, percentage_defect, defects_number_per_day_results
+
+
+def db_get_historic_data(start_time=None, end_time=None):
+
+    conn = psycopg2.connect(
+        dbname=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        host=DB_HOST,
+        port=DB_PORT
+    )
+    cursor = conn.cursor()
+
+    # Parse start_time and end_time strings with time
+    datetime_obj_start = datetime.strptime(start_time, "%Y-%m-%d %H:%M")
+    date_part_start = datetime_obj_start.strftime("%Y-%m-%d")
+
+    datetime_obj_end = datetime.strptime(end_time, "%Y-%m-%d %H:%M")
+    date_part_end = datetime_obj_end.strftime("%Y-%m-%d")
+
+    # Query to get the historic data between the selected dates
+    historic_data_query = (
+        "SELECT \"Recording Date\", \"Defect Prediction\", \"Upper Plate Temperature\", "
+        "\"Lower Plate Temperature\", \"Thermal Cycle Time\", \"Width\", \"Length\", \"Pressure\" "
+        "FROM zdm_framework.ProductionData "
+        f"WHERE TO_DATE(\"Recording Date\", 'YYYY-MM-DD') BETWEEN '{date_part_start}' AND '{date_part_end}' "
+        "GROUP BY \"Recording Date\", \"Defect Prediction\", \"Upper Plate Temperature\", "
+        "\"Lower Plate Temperature\", \"Thermal Cycle Time\", \"Width\", \"Length\", \"Pressure\" "
+        "ORDER BY TO_DATE(\"Recording Date\", 'YYYY-MM-DD') DESC "
+        "LIMIT 3"
+    )
+
+    cursor.execute(historic_data_query)
+    historic_data = cursor.fetchall()
+
+    print(historic_data)
+
+    cursor.close()
+    conn.close()
+
+    return historic_data
+
+
+def db_download_historic_data(start_time=None, end_time=None):
+
+    conn = psycopg2.connect(
+        dbname=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        host=DB_HOST,
+        port=DB_PORT
+    )
+    cursor = conn.cursor()
+
+    datetime_obj_start = datetime.strptime(start_time, "%Y-%m-%d %H:%M")
+    date_part_start = datetime_obj_start.strftime("%Y-%m-%d")
+
+    datetime_obj_end = datetime.strptime(end_time, "%Y-%m-%d %H:%M")
+    date_part_end = datetime_obj_end.strftime("%Y-%m-%d")
+
+    # Query to get the historic data between the selected dates
+    historic_data_query = (
+        "SELECT * "
+        "FROM zdm_framework.ProductionData "
+        f"WHERE TO_DATE(\"Recording Date\", 'YYYY-MM-DD') BETWEEN '{date_part_start}' AND '{date_part_end}' "
+        "ORDER BY TO_DATE(\"Recording Date\", 'YYYY-MM-DD') ASC "
+    )
+
+    cursor.execute(historic_data_query)
+    historic_data = cursor.fetchall()
+
+    column_names = [desc[0] for desc in cursor.description]
+
+    cursor.close()
+    conn.close()
+
+    static_folder = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static')
+    csv_file_path = os.path.join(static_folder, 'data.csv')
+
+    with open(csv_file_path, 'w', newline='') as csvfile:
+        csv_writer = csv.writer(csvfile)
+        # Write the header
+        csv_writer.writerow(column_names)
+        # Write the data
+        csv_writer.writerows(historic_data)
+
+    print(f"CSV file has been created successfully.")
+
+    return 1
+
+
+
+
+
 
 

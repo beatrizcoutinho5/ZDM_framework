@@ -160,10 +160,10 @@ def optimize_defect_score(sample):
 
     initial_parameters = [sample[0][index] for index in indices]
 
-    current_tct = round(initial_parameters[0],0)
-    current_pressure = round(initial_parameters[1],0)
-    current_lpt = round(initial_parameters[2],0)
-    current_upt = round(initial_parameters[3],0)
+    current_tct = round(initial_parameters[0])
+    current_pressure = round(initial_parameters[1])
+    current_lpt = round(initial_parameters[2])
+    current_upt = round(initial_parameters[3])
 
     if initial_defect_score <= 0.1:
         print("Defect probability is too low, no need for optimization!")
