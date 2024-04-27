@@ -1,0 +1,26 @@
+<!-- Buttons to switch pages -->
+
+<div class="page-buttons-container">
+
+    <!-- Dashboards -->
+    <div class="page-buttons-container-div {% if active_page == 'dashboard' %} page-buttons-container-div-selected {% endif %}">
+        <a href="{{ url_for('open_dashboard_optimization') }}" style="text-decoration: none">
+            <span class="font-alata page-buttons"> Dashboards </span>
+        </a>
+    </div>
+
+    <!-- Analytics -->
+    <div class="page-buttons-container-div {% if active_page == 'analytics' %} page-buttons-container-div-selected {% endif %}">
+        <a href="{{ url_for('open_analytics') }}" style="text-decoration: none">
+            <span class="font-alata page-buttons"> Analytics </span>
+        </a>
+    </div>
+
+    <!-- Historic Data -->
+    <div class="page-buttons-container-div {% if active_page == 'historic_data' %} page-buttons-container-div-selected {% endif %}">
+        <a href="{{ url_for('open_historic_data') }}" style="text-decoration: none">
+            <span class="font-alata page-buttons"> Historic Data </span>
+        </a>
+    </div>
+
+</div>

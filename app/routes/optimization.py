@@ -1,30 +1,20 @@
-from catboost import CatBoostClassifier
-from flask import Flask, request, render_template, url_for, request, jsonify, redirect
+import time
 import numpy as np
 import pandas as pd
-import joblib
-import warnings
-import time
 
+from joblib import load
 from scipy.optimize import dual_annealing
 from sklearn.metrics import mean_squared_error
-from joblib import dump, load
-from xgboost import XGBClassifier
-from catboost import CatBoostClassifier
 
-from .dataprocessing import process_sample, sample_pre_processing, prepare_sample
-from __main__ import app
-
+# Model Load
 model = load(r'models\binary\binary_random_forest_model.pkl')
 
-# model = CatBoostClassifier ()
-# model.load_model(r'models\binary\binary_catboost_model.cbm')
-
+# MUDAR ISTO
 data_path = r'binary_cleaned_data2022_2023_2024.xlsx'
 df = pd.read_excel(data_path)
 df = df.drop(["Recording Date", "Defect Code", "Group"], axis=1)
 
-# the names of the features that must be present after the sample is processed
+# The names of the features that must be present after the sample is processed
 column_names = [
     'Production Line', 'Production Order Code', 'Production Order Opening', 'Length', 'Width',
     'Thickness', 'Lot Size', 'Cycle Time', 'Mechanical Cycle Time', 'Thermal Cycle Time',
@@ -41,13 +31,7 @@ column_names = [
 ]
 
 
-def init_optimization_routes(app):
-    @app.route('/optimize_defect_score')
-    def optimize_defect_score_route():
-        return optimize_defect_score()
-
-
-# defect score = model probability
+# Defect score = Model probability
 def predict_defect_score(sample):
     sample_values = sample.reshape(1, -1)
     prediction = model.predict_proba(sample_values)
@@ -56,7 +40,7 @@ def predict_defect_score(sample):
     return defect_score
 
 
-# mse fitness function for the optimizer
+# MSE fitness function for the optimizer
 def fitness_function(x, target_defect_score, features_space):
     x_concat = build_feature_array(x, features_space)
     current_defect_score = predict_defect_score(x_concat)
@@ -67,19 +51,25 @@ def fitness_function(x, target_defect_score, features_space):
 def build_feature_array(x, features_space):
     x_concat = np.zeros(len(features_space))
     x_list = list(x)
+
     for i, v in enumerate(features_space):
+
         if type(v[1]) != tuple:
             x_concat[i] = v[1]
+
         else:
             x_concat[i] = x_list.pop(0)
+
     return x_concat
 
 
-# defect score optimization using dual annealing
+# Defect score optimization using Dual Annealing
 def optimize_params(features_space, x0, target_defect_score):
-    for i, v in enumerate(features_space):
-        if v[1] is None:
-            features_space[i][1] = (df[v[0]].min(), df[v[0]].max())
+
+    # print(features_space)
+    # for i, v in enumerate(features_space):
+    #     if v[1] is None:
+    #         features_space[i][1] = (df[v[0]].min(), df[v[0]].max())
 
     nff_idx, bounds = zip(*[(i, v[1]) for i, v in enumerate(features_space) if type(v[1]) == tuple])
     x0_filtered = [v for i, v in enumerate(x0) if i in set(nff_idx)]
@@ -99,8 +89,9 @@ def optimize_params(features_space, x0, target_defect_score):
     return best_params, mse
 
 
-# features space pre-processing
+# Features space pre-processing
 def feature_space_pre_processing(sample):
+
     sample_values = []
 
     for i in range(len(sample)):
@@ -108,10 +99,10 @@ def feature_space_pre_processing(sample):
 
     sample_values = sample.flatten().tolist()
 
-    # save the sample feature values along with the feature names
+    # Save the sample feature values along with the feature names
     features_space = list(zip(column_names, sample_values))
 
-    # intervals for the features that can be adjusted in real-time
+    # Intervals for the features that can be adjusted in real-time
     # the rest of the features can't be adjusted
     intervals = {
         'Thermal Cycle Time': (10, 150),
@@ -120,12 +111,12 @@ def feature_space_pre_processing(sample):
         'Upper Plate Temperature': (160, 210)
     }
 
-    # updates the values (bounds) for the real time features in the features_space
+    # Updates the values (bounds) for the real time features in the features_space
     for i, (f, v) in enumerate(features_space):
         if f in intervals:
             features_space[i] = (f, intervals[f])
 
-    # indices of the real time features in the features_space (used to only print the relevant features later)
+    # Indices of the real time features in the features_space
     thermal_cycle_time_index = [i for i, (feature, _) in enumerate(features_space) if feature == 'Thermal Cycle Time'][
         0]
     pressure_index = [i for i, (feature, _) in enumerate(features_space) if feature == 'Pressure'][0]
@@ -139,50 +130,44 @@ def feature_space_pre_processing(sample):
     return features_space, indices
 
 
-@app.route('/optimize_defect_score')
+# @app.route('/optimize_defect_score')
 def optimize_defect_score(sample):
-    # start timer to record the time the optimization took, from receiving the sample to providing
-    # a parameteres adjustment suggestion
 
+    # Start timer to record the time the optimization took, from receiving the sample to providing
+    # a parameteres adjustment suggestion
     start_time = time.time()
 
-    # sample pre-processing (receiving a raw sample)
     sample = {feature: sample.get(feature) for feature in column_names}
     sample = np.array(list(sample.values())).reshape(1, -1)
 
     initial_defect_score = predict_defect_score(sample)
 
-    # if the defect score is under 10%, an optimization is not needed
-
-
-    # obtaining features_space
+    # Obtaining features_space
     features_space, indices = feature_space_pre_processing(sample)
 
+    # Get sample's initial real-time features values
     initial_parameters = [sample[0][index] for index in indices]
-
     current_tct = round(initial_parameters[0])
     current_pressure = round(initial_parameters[1])
     current_lpt = round(initial_parameters[2])
     current_upt = round(initial_parameters[3])
 
+    # If the defect score is under 10%, an optimization is not needed
     if initial_defect_score <= 0.1:
-        print("Defect probability is too low, no need for optimization!")
-
         return "Defect probability is too low, no need for optimization!", "-", "-", current_tct, current_pressure, current_lpt, current_upt
 
-    # defining the target defect score for the optimizer
+    # Defining the target defect scores for the optimizer
     target_defect_scores = [0.01, 0.5]
-    # target_defect_scores = [0.5]
 
-    # reference sample to start the optimization (very low defect score)
+    # Reference sample to start the optimization (very low defect score)
     x0 = [
         410, 79430159686, 1, 30, 2800, 2070, 19, 120, 32, 10.2, 22, 0, 0, 23.6, 5.7,
         187, 188, 350, 0, 1400, 1200, 1, 0, 1, 2000, 4000, 40, 0, 0, 0, 0, 0, 1, 0,
         2200, 100, 0, 20, 50, 16, 1000, 0, 0, 0, 0, 1, 7, 7
     ]
 
-    # since we are experimenting with different target defect scores, after we calculate the optimization considering
-    # each targe, we need to store the required variables to then return only the best result
+    # Since we are experimenting with different target defect scores, after calculating the optimization considering
+    # each target, we need to store the required variables to then return only the best result
 
     best_reduction_percentage = -float('inf')
     best_target_defect_score = None
@@ -198,8 +183,7 @@ def optimize_defect_score(sample):
         current_final_defect_score = predict_defect_score(current_params)
         current_reduction_percentage = (initial_defect_score - current_final_defect_score) * 100
 
-        # update best result if the current reduction percentage is higher
-
+        # Update best result if the current reduction percentage is higher
         if current_reduction_percentage > best_reduction_percentage:
             best_reduction_percentage = current_reduction_percentage
             best_target_defect_score = target_defect_score
@@ -208,17 +192,16 @@ def optimize_defect_score(sample):
             best_params_selected = current_params[indices]
             best_elapsed_time = time.time() - start_time
 
-    # if the algorithm wasn't able to reduce the initial defect score return an error message
+    # If the algorithm wasn't able to reduce the initial defect score
     if best_reduction_percentage <= 0:
 
-        initial_defect_score_p = initial_defect_score[0]*100
-        print("Parameters can't be optimized :(")
+        initial_defect_score_p = initial_defect_score[0] * 100
 
         return "Parameters can't be optimized!", initial_defect_score_p, "0", current_tct, current_pressure, current_lpt, current_upt
 
     else:
-        # print the best optimization results
 
+        # Print the best optimization results
         print('\n**** Optimization Results ****')
         print('Target Defect Score:   ', best_target_defect_score)
         print('Initial Parameters:    ', initial_parameters)
@@ -229,18 +212,19 @@ def optimize_defect_score(sample):
         print('Elapsed Time (in seconds):    ', round(best_elapsed_time, 2))
         print('MSE:                ', best_mse.round(3))
 
-    best_final_defect_score = best_final_defect_score*100
+    # Return final defect score
+    best_final_defect_score = best_final_defect_score * 100
     best_final_defect_score = np.round(best_final_defect_score, 1)
     best_final_defect_score = best_final_defect_score[0]
 
+    # Return the difference between the defect score before and after optimization
     best_reduction_percentage = np.round(best_reduction_percentage, 1)
     best_reduction_percentage = best_reduction_percentage[0]
 
-    tct_after_optim = round(best_params_selected[0], 1)
-    pressure_after_optim =round(best_params_selected[1],1)
-    lpt_after_optim = round(best_params_selected[2],1)
-    upt_after_optim = round(best_params_selected[3],1)
-
-
+    # Return the adjusted values of the real-time features that allow the defect score reduce
+    tct_after_optim = round(best_params_selected[0], 1)  # Thermal Cycle Time
+    pressure_after_optim = round(best_params_selected[1], 1)  # Pressure
+    lpt_after_optim = round(best_params_selected[2], 1)  # Lower Plate Temperature
+    upt_after_optim = round(best_params_selected[3], 1)  # Upper Plate Temperature
 
     return "Defect Probability After Optimization", best_final_defect_score, best_reduction_percentage, tct_after_optim, pressure_after_optim, lpt_after_optim, upt_after_optim

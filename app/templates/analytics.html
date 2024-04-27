@@ -1,231 +1,73 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <link rel="stylesheet" href="{{ url_for('static', filename = 'css/style.css')  }}" />
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  </head>
 
-  <body class="bg-page">
-    <!-- **************************************************************** -->
-    <!-- header -->
-    <!-- **************************************************************** -->
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename = 'css/style.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
 
-    <!-- wave -->
+<body class="bg-page">
 
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 1440 320"
-      class="header"
-    >
-      <defs>
-        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" style="stop-color: hsla(209, 99%, 40%, 1)" />
-          <stop offset="100%" style="stop-color: hsla(211, 100%, 28%, 1)" />
-        </linearGradient>
-      </defs>
-      <path
-        fill="url(#gradient)"
-        fill-opacity="1"
-        d="M0,256L80,261.3C160,267,320,277,480,277.3C640,277,800,267,960,245.3C1120,224,1280,192,1360,176L1440,160L1440,0L1360,0C1280,0,1120,0,960,0C800,0,640,0,480,0C320,0,160,0,80,0L0,0Z"
-      ></path>
-    </svg>
+    <!-- Header -->
+    {% include 'header.html' %}
 
-    <!-- logo and zdm -->
+    <!-- Buttons to switch pages -->
+    {% include 'page_buttons.html' %}
 
-    <div class="header-logo-container">
-      <img src="{{ url_for('static', filename='images/zdm_logo.png') }}"  class="header-logo-img" />
-      <span class="header-logo-text font-alatsi"> ZDM </span>
-    </div>
+    <!-- Sub-header -->
+    {% include 'date_and_time.html' %}
 
-    <div class="line"></div>
-
-    <!-- buttons to switch pages -->
-
-    <div class="page-buttons-container">
-    <div class="page-buttons-container-div">
-        <a href="{{url_for('open_dashboard_optimization')}}" style="text-decoration: none">
-            <span class="font-alata page-buttons"> Dashboards </span>
-        </a>
-    </div>
-
-    <div class="page-buttons-container-div-selected">
-        <a href="{{url_for('open_analytics')}}" style="text-decoration: none">
-            <span class="font-alata page-buttons"> Analytics </span>
-        </a>
-    </div>
-
-    <div class="page-buttons-container-div">
-        <a href="{{url_for('open_historic_data')}}" style="text-decoration: none">
-            <span class="font-alata page-buttons"> Historic Data </span>
-        </a>
-    </div>
-</div>
-
-    <!-- **************************************************************** -->
-    <!-- sub-header -->
-    <!-- **************************************************************** -->
-
-    <div class="date-time font-alata" style="display: flex; width: 30%; right: 1.75%">
-    <div style="left: 10%; display: flex; flex-direction: row; width: 50%">
-        <div>from</div>
-        <div style="position: relative; left: 5%; top: -30%; display: flex; flex-direction: column; align-items: right;">
-            <br />
-            <input type="date" value="2024-03-21" class="date-time-selector font-alata" id="dateInput1" />
-            <input type="time" value="21:02:47" class="date-time-selector font-alata" id="timeInput1" />
-        </div>
-    </div>
-
-    <div style="left: 10%; display: flex; flex-direction: row; width: 50%">
-        <div>to</div>
-        <div style="position: relative; left: 5%; top: -30%; display: flex; flex-direction: column; align-items: right;">
-            <br />
-            <input type="date" value="2024-03-21" class="date-time-selector font-alata" id="dateInput2" />
-            <input type="time" value="21:02:47" class="date-time-selector font-alata" id="timeInput2" />
-        </div>
-    </div>
-    </div>
-
-    <!-- **************************************************************** -->
-    <!-- body -->
-    <!-- **************************************************************** -->
-
-    <!-- rectangle panel -->
-
+    <!-- Body -->
     <div class="bg-rect" style="align-items: center">
-      <div class="anl-div" style="display: flex">
-        <div class="anl-div-vertical">
-          <div class="anl-div-vertical-ind">
-            <span class="anl-div-vertical-ind-num font-alatsi"> {{defects_number_result}} </span>
+        <div class="anl-div" style="display: flex">
+            <div class="anl-div-vertical">
 
-            <span class="anl-div-vertical-ind-text font-alata">
-              Number of Defects
-            </span>
-          </div>
+                <!-- Number of defects for the selected time period -->
+                <div class="anl-div-vertical-ind">
+                    <span class="anl-div-vertical-ind-num font-alatsi">{{ defects_number_result }}</span>
+                    <span class="anl-div-vertical-ind-text font-alata">Number of Defects</span>
+                </div>
 
-          <div class="anl-div-vertical-ind">
-            <span class="anl-div-vertical-ind-num font-alatsi"> {{percentage_defect}}% </span>
+                <!-- Percentage of defects for the selected time period -->
+                <div class="anl-div-vertical-ind">
+                    <span class="anl-div-vertical-ind-num font-alatsi">{{ percentage_defect }}%</span>
+                    <span class="anl-div-vertical-ind-text font-alata">Percentage of Defects</span>
+                </div>
 
-            <span class="anl-div-vertical-ind-text font-alata">
-              Percentage of Defects
-            </span>
-          </div>
+                <!-- Number of produced panels for the selected time period -->
+                <div class="anl-div-vertical-ind">
+                    <span class="anl-div-vertical-ind-num font-alatsi">{{ produced_panels_result }}</span>
+                    <span class="anl-div-vertical-ind-text font-alata">Produced Panels</span>
+                </div>
+            </div>
 
-          <div class="anl-div-vertical-ind">
-            <span class="anl-div-vertical-ind-num font-alatsi"> {{produced_panels_result}} </span>
+            <div class="anl-div-horizontal">
 
-            <span class="anl-div-vertical-ind-text font-alata">
-              Produced Panels
-            </span>
-          </div>
+                <!-- Current production line status -->
+                <div class="anl-div-horizontal-ind" style="margin-top: 2.5%">
+                    <span class="production-status-text font-alata">PRODUCING</span>
+                    <span class="anl-div-vertical-ind-text font-alata">Production Line Status</span>
+                </div>
+
+                <!-- Bar chart of the number of defects per day for the select time period -->
+                <div class="anl-div-horizontal-ind" style="height: 59%; margin-top: 1%">
+                    <canvas id="defectsChart"></canvas>
+                </div>
+            </div>
         </div>
-
-        <div class="anl-div-horizontal">
-          <div class="anl-div-horizontal-ind" style="margin-top: 2.5%">
-            <span class="production-status-text font-alata"> PRODUCING </span>
-
-            <span class="anl-div-vertical-ind-text font-alata">
-              Production Line Status
-            </span>
-          </div>
-
-          <div
-            class="anl-div-horizontal-ind"
-            style="height: 59%; margin-top: 1%"
-          >
-
-              <canvas id="defectsChart"></canvas>
-
-
-          </div>
-        </div>
-      </div>
     </div>
 
-    <!-- **************************************************************** -->
-    <!-- footer -->
-    <!-- **************************************************************** -->
+    <!-- Footer -->
+    {% include 'footer.html' %}
+</body>
 
-    <div class="bg-ellipse">
-      <svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
-        <ellipse
-          cx="100"
-          cy="50"
-          rx="100"
-          ry="50"
-          fill="#0168CA"
-          fill-opacity="1"
-        />
-      </svg>
-    </div>
-  </body>
-
-  <script>
-    const currentDate = new Date();
-    const currentYear = currentDate.getFullYear();
-    const currentMonth = String(currentDate.getMonth() + 1).padStart(2, "0");
-    const currentDay = String(currentDate.getDate()).padStart(2, "0");
-    const currentHours = String(currentDate.getHours()).padStart(2, "0");
-    const currentMinutes = String(currentDate.getMinutes()).padStart(2, "0");
-
-    document.getElementById(
-      "dateInput1"
-    ).value = `${currentYear}-${currentMonth}-${currentDay}`;
-    document.getElementById(
-      "timeInput1"
-    ).value = `${currentHours}:${currentMinutes}`;
-
-    document.getElementById(
-      "dateInput2"
-    ).value = `${currentYear}-${currentMonth}-${currentDay}`;
-    document.getElementById(
-      "timeInput2"
-    ).value = `${currentHours}:${currentMinutes}`;
-  </script>
-
+<script src="{{ url_for('static', filename='get_current_date_time.js') }}"></script>
+<script src="{{ url_for('static', filename='update_date_time.js') }}"></script>
 <script>
-    const dateInput1 = document.getElementById('dateInput1');
-    const timeInput1 = document.getElementById('timeInput1');
-    const dateInput2 = document.getElementById('dateInput2');
-    const timeInput2 = document.getElementById('timeInput2');
-
-    const delay = 2000; // 1 second delay (adjust as needed)
-
-    // Function to handle date and time change event with delay
-    let timeoutId;
-    function handleDateTimeChangeWithDelay() {
-        clearTimeout(timeoutId); // Clear any previous timeouts
-        timeoutId = setTimeout(async () => {
-            const fromDate = dateInput1.value + ' ' + timeInput1.value;
-            const toDate = dateInput2.value + ' ' + timeInput2.value;
-            const response = await fetch(`/update-analytics?fromDate=${fromDate}&toDate=${toDate}`);
-            // Store the values of date and time inputs in local storage
-            localStorage.setItem('fromDate', fromDate);
-            localStorage.setItem('toDate', toDate);
-            location.reload(); // Reload the page after updating analytics (you can update UI instead if needed)
-        }, delay);
-    }
-
-    // Add event listeners to both date and time input elements
-    dateInput1.addEventListener('change', handleDateTimeChangeWithDelay);
-    timeInput1.addEventListener('change', handleDateTimeChangeWithDelay);
-    dateInput2.addEventListener('change', handleDateTimeChangeWithDelay);
-    timeInput2.addEventListener('change', handleDateTimeChangeWithDelay);
-
-    // Retrieve and set the values of date and time inputs from local storage after page reloads
-    document.addEventListener('DOMContentLoaded', function() {
-        const fromDate = localStorage.getItem('fromDate');
-        const toDate = localStorage.getItem('toDate');
-        if (fromDate && toDate) {
-            dateInput1.value = fromDate.split(' ')[0];
-            timeInput1.value = fromDate.split(' ')[1];
-            dateInput2.value = toDate.split(' ')[0];
-            timeInput2.value = toDate.split(' ')[1];
-        }
-    });
+    initializeDateTimeUpdate("update-analytics");
 </script>
-
 <script>
     // Get the data from {{defects_number_per_day_results}}
     const defectsData = JSON.parse("{{defects_number_per_day_results | tojson | safe}}");
@@ -235,30 +77,29 @@
     const values = Object.values(defectsData);
 
     // Create a bar chart
-    const ctx = document.getElementById('defectsChart').getContext('2d');
+    const ctx = document.getElementById("defectsChart").getContext("2d");
     const defectsChart = new Chart(ctx, {
-        type: 'bar',
+        type: "bar",
         data: {
             labels: labels,
             datasets: [{
-                label: 'Defects per Day',
+                label: "Defects per Day",
                 data: values,
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                borderColor: 'rgba(255, 99, 132, 1)',
-                borderWidth: 1
-            }]
+                backgroundColor: "rgba(255, 99, 132, 0.2)",
+                borderColor: "rgba(255, 99, 132, 1)",
+                borderWidth: 1,
+            }, ],
         },
         options: {
             scales: {
                 yAxes: [{
                     ticks: {
-                        beginAtZero: true
-                    }
-                }]
-            }
-        }
+                        beginAtZero: true,
+                    },
+                }, ],
+            },
+        },
     });
 </script>
-
 
 </html>

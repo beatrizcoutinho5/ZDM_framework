@@ -1,21 +1,6 @@
-from flask import Flask, request, render_template, url_for, request, jsonify, redirect
+from flask import  jsonify
 import numpy as np
 import pandas as pd
-import joblib
-import json
-import warnings
-import time
-
-from scipy.optimize import dual_annealing
-from sklearn.metrics import mean_squared_error
-from joblib import dump, load
-
-from __main__ import app
-
-import paho.mqtt.client as mqtt
-
-
-
 
 # the names of the features that must be present after the sample is processed
 column_names = [

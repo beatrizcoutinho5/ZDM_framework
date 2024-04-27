@@ -1,305 +1,249 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <link rel="stylesheet" href="{{ url_for('static', filename = 'css/style.css')  }}"/>
-    <meta charset="UTF-8"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename = 'css/style.css') }}">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-
 </head>
 
 <body class="bg-page bd">
-<!-- **************************************************************** -->
-<!-- header -->
-<!-- **************************************************************** -->
 
-<!-- wave -->
+    <!-- Header -->
+    {% include 'header.html' %}
 
-<svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 1440 320"
-        class="header"
->
-    <defs>
-        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" style="stop-color: hsla(209, 99%, 40%, 1)"/>
-            <stop offset="100%" style="stop-color: hsla(211, 100%, 28%, 1)"/>
-        </linearGradient>
-    </defs>
-    <path
-            fill="url(#gradient)"
-            fill-opacity="1"
-            d="M0,256L80,261.3C160,267,320,277,480,277.3C640,277,800,267,960,245.3C1120,224,1280,192,1360,176L1440,160L1440,0L1360,0C1280,0,1120,0,960,0C800,0,640,0,480,0C320,0,160,0,80,0L0,0Z"
-    ></path>
-</svg>
+    <!-- Buttons to switch pages -->
+    {% include 'page_buttons.html' %}
 
-<!-- logo and zdm -->
+    <!-- Buttons to switch dashboard pages -->
+    <div class="dashboard-buttons-container">
 
-<div class="header-logo-container">
-    <img src="{{ url_for('static', filename='images/zdm_logo.png') }}" class="header-logo-img"/>
-    <span class="header-logo-text font-alatsi"> ZDM </span>
-</div>
-
-<div class="line"></div>
-
-<!-- buttons to switch pages -->
-
-<div class="page-buttons-container">
-    <div class="page-buttons-container-div-selected">
-        <a href=href="{{url_for('open_dashboard_optimization')}}" style="text-decoration: none">
-            <span class="font-alata page-buttons"> Dashboards </span>
-        </a>
-    </div>
-
-    <div class="page-buttons-container-div">
-        <a href="{{url_for('open_analytics')}}" style="text-decoration: none">
-            <span class="font-alata page-buttons"> Analytics </span>
-        </a>
-    </div>
-
-    <div class="page-buttons-container-div">
-        <a href="{{url_for('open_historic_data')}}" style="text-decoration: none">
-            <span class="font-alata page-buttons"> Historic Data </span>
-        </a>
-    </div>
-</div>
-
-<!-- **************************************************************** -->
-<!-- sub-header -->
-<!-- **************************************************************** -->
-
-<!-- buttons to switch dashvoard pages -->
-
-<div class="dashboard-buttons-container">
-
-    <div class="dashboard-buttons-container-div-selected ">
-
-        <a href="{{url_for('open_dashboard_optimization')}}"style="text-decoration: none;"> <span class="font-alata page-buttons"> Optimization </span>
-        </a>
-
-    </div>
-
-    {% set prediction_int = prediction | int %}
-
-    {% if (prediction_int >= 50 and explanation == 1) %}
-
-    <div class="dashboard-buttons-container-div ">
-
-        <a href="{{url_for('open_dashboard_explanation')}}" style="text-decoration: none;"> <span
-                class="font-alata page-buttons"> Explanation </span> </a>
-    </div>
-
-    {% else %}
-
-    <div></div>
-
-    {% endif %}
-
-
-</div>
-
-
-<div class="date-time font-alata">
-    21st march 2024 <br/>
-    21:02:47
-</div>
-
-<!-- **************************************************************** -->
-<!-- body -->
-<!-- **************************************************************** -->
-
-<!-- rectangle panel -->
-
-<div class="bg-rect">
-
-    <div class="optim-div" style="left: 5%">
-
-        <!-- current values (before optimization)   -->
-
-        <div class="optim-div-big font-alata">
-          <span class="optim-div-big-text">
-            Defect Probability <br/>
-            of Current Panel
-          </span>
-
-            <span class="optim-div-big-num font-alatsi">  {{prediction}}% </span>
+        <!-- Optimization dashboard -->
+        <div class="dashboard-buttons-container-div-selected ">
+            <a href="{{url_for('open_dashboard_optimization')}}" style="text-decoration: none;">
+                <span class="font-alata page-buttons"> Optimization </span>
+            </a>
         </div>
 
-        <div class="optim-sub-div font-alata">
-            <div class="optim-div-small">
-                <span class="optim-div-small-text"> Upper Plate Temperature </span>
+        <!-- Only allows to go to the explanation page when the product is likely to be a defect -->
+        <!-- Since the XAI models are set to explain the reason why the sample was predicted -->
+        <!-- to be in the defect class (1) -->
+        {% set prediction_int = prediction | int %}
+        {% if (prediction_int >= 50 and explanation == 1) %}
 
-                <span class="optim-div-small-num font-alatsi"> {{current_upt}}°C </span>
+        <div class="dashboard-buttons-container-div ">
+            <a href="{{url_for('open_dashboard_explanation')}}" style="text-decoration: none;">
+                <span class="font-alata page-buttons"> Explanation </span>
+            </a>
+        </div>
+
+        {% else %}
+        <div></div>
+
+        {% endif %}
+    </div>
+
+    <div class="date-time font-alata" id="dateTimeDisplay">
+    </div>
+
+
+    <!-- Body -->
+
+    <div class="bg-rect">
+
+        <div class="optim-div" style="left: 5%">
+
+            <!-- Current values (before optimization) -->
+
+            <!-- Current defect probability -->
+            <div class="optim-div-big font-alata">
+                <span class="optim-div-big-text">
+                    Defect Probability <br/>
+                    of Current Panel
+                </span>
+
+                <span class="optim-div-big-num font-alatsi">
+                    {{prediction}}%
+                </span>
             </div>
 
-            <div class="optim-div-small">
-                <span class="optim-div-small-text"> Pressure </span>
+            <div class="optim-sub-div font-alata">
 
-                <span class="optim-div-small-num font-alatsi"> {{current_pressure}}Pa </span>
+                <!-- Current upper plate temperature -->
+                <div class="optim-div-small">
+                    <span class="optim-div-small-text"> Upper Plate Temperature </span>
+
+                    <span class="optim-div-small-num font-alatsi"> {{current_upt}}°C </span>
+                </div>
+
+                <!-- Current pressure -->
+                <div class="optim-div-small">
+                    <span class="optim-div-small-text"> Pressure </span>
+
+                    <span class="optim-div-small-num font-alatsi"> {{current_pressure}}Pa </span>
+                </div>
+            </div>
+
+            <div class="optim-sub-div font-alata">
+
+                <!-- Current lower plate temperature -->
+                <div class="optim-div-small">
+                    <span class="optim-div-small-text"> Lower Plate Temperature </span>
+
+                    <span class="optim-div-small-num font-alatsi"> {{current_lpt}}°C </span>
+                </div>
+
+                <!-- Current thermal cycle time -->
+                <div class="optim-div-small">
+                    <span class="optim-div-small-text"> Thermal Cycle Time </span>
+
+                    <span class="optim-div-small-num font-alatsi"> {{current_tct}}s </span>
+                </div>
+            </div>
+            <div class="optim-sub-div font-alata">
+
+                <!-- Current width -->
+                <div class="optim-div-small">
+                    <span class="optim-div-small-text"> Width </span>
+
+                    <span class="optim-div-small-num font-alatsi"> {{current_width}} </span>
+                </div>
+
+                <!-- Current length -->
+                <div class="optim-div-small">
+                    <span class="optim-div-small-text"> Length </span>
+
+                    <span class="optim-div-small-num font-alatsi"> {{current_length}} </span>
+                </div>
             </div>
         </div>
 
-        <div class="optim-sub-div font-alata">
-            <div class="optim-div-small">
-                <span class="optim-div-small-text"> Lower Plate Temperature </span>
+        <!-- Values after optimization  -->
 
-                <span class="optim-div-small-num font-alatsi"> {{current_lpt}}°C </span>
+        <div class="optim-div" style="left: 15%">
+            <div class="optim-div-big font-alata">
+
+                <!-- The phase displayed on the UI changes in accordance to the sample -->
+                <span class="optim-div-big-text">
+                    {{optim_phrase}}
+                </span>
+
+
+                <!-- While the optimization model is running, loading images appear -->
+                <!-- When the model finishes, the values after the optimization are displayed -->
+
+                <!-- Defect score after optimization -->
+                <span class="optim-div-big-num font-alatsi" style="color:#48D706;">
+                    {% if defect_score_after_optim != "load" %}
+                    {{ defect_score_after_optim }}%
+                    {% else %}
+                    <div class="load-img-container">
+                        <img class="load-img"  src="{{ url_for('static', filename='images/loading.gif') }}">
+                    </div>
+                    {% endif %}
+                </span>
             </div>
 
-            <div class="optim-div-small">
-                <span class="optim-div-small-text"> Thermal Cycle Time </span>
+            <div class="optim-sub-div font-alata">
 
-                <span class="optim-div-small-num font-alatsi"> {{current_tct}}s </span>
-            </div>
-        </div>
-        <div class="optim-sub-div font-alata">
-            <div class="optim-div-small">
-                <span class="optim-div-small-text"> Width </span>
+                <!-- Upper plate temperature after optimization -->
+                <div class="optim-div-small">
+                    <span class="optim-div-small-text"> Upper Plate Temperature </span>
 
-                <span class="optim-div-small-num font-alatsi"> {{current_width}} </span>
-            </div>
-
-            <div class="optim-div-small">
-                <span class="optim-div-small-text"> Length </span>
-
-                <span class="optim-div-small-num font-alatsi"> {{current_length}} </span>
-            </div>
-        </div>
-    </div>
-
-    <!-- values after optimization  -->
-
-    <div class="optim-div" style="left: 15%">
-        <div class="optim-div-big font-alata">
-          <span class="optim-div-big-text">
-            {{optim_phrase}}
-          </span>
-
-          <span class="optim-div-big-num font-alatsi" style="color:#48D706;">
-            {% if defect_score_after_optim != "load" %}
-                {{ defect_score_after_optim }}%
-
-            {% else %}
-            <div class="load-img-container">
-              <img class="load-img"  src="{{ url_for('static', filename='images/loading.gif') }}">
-            </div>
-            {% endif %}
-
-          </span>
-        </div>
-
-        <div class="optim-sub-div font-alata">
-
-            <div class="optim-div-small">
-                <span class="optim-div-small-text"> Upper Plate Temperature </span>
-
-                <span class="optim-div-small-num font-alatsi" style="color:#805AFF;">
-                      {% if upt_after_optim != "load" %}
+                    <span class="optim-div-small-num font-alatsi" style="color:#805AFF;">
+                        {% if upt_after_optim != "load" %}
                         {{ upt_after_optim }}°C
 
                         {% else %}
                         <div class="load-img-container">
-                          <img class="load-img" src="{{ url_for('static', filename='images/loading.gif') }}">
+                            <img class="load-img" src="{{ url_for('static', filename='images/loading.gif') }}">
                         </div>
                         {% endif %}
-                </span>
-            </div>
+                    </span>
+                </div>
 
-            <div class="optim-div-small">
-                <span class="optim-div-small-text"> Pressure </span>
+                <!-- Pressure after optimization -->
+                <div class="optim-div-small">
+                    <span class="optim-div-small-text"> Pressure </span>
 
-                <span class="optim-div-small-num font-alatsi" style="color:#805AFF;">
-                    {% if pressure_after_optim != "load" %}
-                    {{ pressure_after_optim }}Pa
+                    <span class="optim-div-small-num font-alatsi" style="color:#805AFF;">
+                        {% if pressure_after_optim != "load" %}
+                        {{ pressure_after_optim }}Pa
 
-                    {% else %}
+                        {% else %}
                         <div class="load-img-container">
                             <img class="load-img" src="{{ url_for('static', filename='images/loading.gif') }}">
                         </div>
-                    {% endif %}
-                </span>
-            </div>
-
-        </div>
-
-        <div class="optim-sub-div font-alata">
-
-            <div class="optim-div-small">
-                <span class="optim-div-small-text"> Lower Plate Temperature </span>
-
-                <span class="optim-div-small-num font-alatsi" style="color:#805AFF;">
-                      {% if lpt_after_optim != "load" %}
-                      {{ lpt_after_optim }}°C
-
-                      {% else %}
-                      <div class="load-img-container">
-                          <img class="load-img" src="{{ url_for('static', filename='images/loading.gif') }}">
-                      </div>
-                    {% endif %}
-                </span>
+                        {% endif %}
+                    </span>
+                </div>
 
             </div>
 
-            <div class="optim-div-small">
-                <span class="optim-div-small-text"> Thermal Cycle Time </span>
+            <div class="optim-sub-div font-alata">
 
-                <span class="optim-div-small-num font-alatsi" style="color:#805AFF;">
-                    {% if tct_after_optim != "load" %}
-                    {{ tct_after_optim }}s
+                <!-- Lower plate temperature after optimization -->
+                <div class="optim-div-small">
+                    <span class="optim-div-small-text"> Lower Plate Temperature </span>
 
-                    {% else %}
+                    <span class="optim-div-small-num font-alatsi" style="color:#805AFF;">
+                        {% if lpt_after_optim != "load" %}
+                        {{ lpt_after_optim }}°C
+
+                        {% else %}
                         <div class="load-img-container">
                             <img class="load-img" src="{{ url_for('static', filename='images/loading.gif') }}">
                         </div>
-                    {% endif %}
-                </span>
+                        {% endif %}
+                    </span>
+
+                </div>
+
+                <!-- Thermal cycle time after optimization -->
+                <div class="optim-div-small">
+                    <span class="optim-div-small-text"> Thermal Cycle Time </span>
+
+                    <span class="optim-div-small-num font-alatsi" style="color:#805AFF;">
+                        {% if tct_after_optim != "load" %}
+                        {{ tct_after_optim }}s
+
+                        {% else %}
+                        <div class="load-img-container">
+                            <img class="load-img" src="{{ url_for('static', filename='images/loading.gif') }}">
+                        </div>
+                        {% endif %}
+                    </span>
+                </div>
             </div>
-        </div>
-        <div class="optim-div-big font-alata">
-          <span class="optim-div-big-text" style="font-size: 20px; margin-top: 2%;">
-           By Adjusting the  <br/>
-           Parameters, <span style="color:#805AFF;"> Reduce <br/>
-           Defect Probability  </span> Up To
-          </span>
 
-            <span class="optim-div-big-num font-alatsi" style="color:#805AFF;">
-                {% if reduce_percentage != "load" %}
-                {{ reduce_percentage }}%
+            <!-- Difference between defect score before and after optimization -->
+            <div class="optim-div-big font-alata">
 
-                {% else %}
+                <span class="optim-div-big-text" style="font-size: 20px; margin-top: 2%;">
+                    By Adjusting the Parameters,
+                    <span style="color:#805AFF;">Reduce Defect Probability</span> Up To
+                </span>
+
+                <span class="optim-div-big-num font-alatsi" style="color:#805AFF;">
+                    {% if reduce_percentage != "load" %}
+                    {{ reduce_percentage }}%
+                    {% else %}
                     <div class="load-img-container">
-                        <img class="load-img"  src="{{ url_for('static', filename='images/loading.gif') }}">
+                        <img class="load-img" src="{{ url_for('static', filename='images/loading.gif') }}">
                     </div>
-                {% endif %}
-            </span>
+                    {% endif %}
+                </span>
+
+            </div>
         </div>
-
     </div>
-</div>
-</div>
 
-<!-- **************************************************************** -->
-<!-- footer -->
-<!-- **************************************************************** -->
+    <!-- Footer -->
+    {% include 'footer.html' %}
 
-<div class="bg-ellipse">
-    <svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
-        <ellipse
-                cx="100"
-                cy="50"
-                rx="100"
-                ry="50"
-                fill="#0168CA"
-                fill-opacity="1"
-        />
-    </svg>
-</div>
 </body>
 
-<script>
-    setInterval(function () {
-        location.reload();
-    }, 2000); // auto reload
-</script>
+<script src="{{ url_for('static', filename='javascript/page_reload.js') }}"></script>
+<script src="{{ url_for('static', filename='javascript/update_date_time.js') }}"></script>
 
 </html>

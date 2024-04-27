@@ -2,7 +2,6 @@ import psycopg2
 from datetime import datetime
 import csv
 import os
-from __main__ import app
 
 # Database connection
 DB_HOST = 'db.fe.up.pt'

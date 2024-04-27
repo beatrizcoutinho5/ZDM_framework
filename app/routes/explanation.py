@@ -1,41 +1,44 @@
-import os
 import shap
-import joblib
-import random
-import logging
-import warnings
 import numpy as np
 import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
-import lime
 import lime.lime_tabular
+import matplotlib.pyplot as plt
 
-from scipy.optimize import dual_annealing
-from sklearn.metrics import mean_squared_error
-from sklearn.svm import SVC
-from datetime import datetime
-from sklearn import preprocessing
-from xgboost import XGBClassifier, DMatrix
-from joblib import dump, load
-from catboost import CatBoostClassifier
-from imblearn.over_sampling import SMOTE
-from sklearn.preprocessing import LabelEncoder
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import recall_score, precision_score, confusion_matrix, ConfusionMatrixDisplay
+from joblib import load
 
-from .dataprocessing import process_sample, sample_pre_processing
-from .prediction import sample_defect_prediction_model
-from __main__ import app
-
-# model = CatBoostClassifier()
-# model.load_model(r'models\binary\binary_catboost_model.cbm')
-
+# Load Model and train data
 model = load(r'models\binary\binary_random_forest_model.pkl')
+x_train = pd.read_excel(r'routes\binary_x_train_aug.xlsx')
 
-x_train = pd.read_excel(
-    r'routes\binary_x_train_aug.xlsx')
+# SHAP Explainer
+def shap_explainer(sample):
 
+    rf_explainer = shap.TreeExplainer(model)
+
+    # Get the feature names
+    sample_keys = list(sample.keys())
+
+    sample = list(sample.values())
+    sample = np.array(sample)
+
+    rf_shap_values = rf_explainer.shap_values(sample)
+
+    # Get SHAP values for the positive class (defect)
+    shap_values_for_class = rf_shap_values[:, 1]
+
+    shap_values_for_class = shap_values_for_class.reshape(-1, 1)
+    shap_values_for_class = shap_values_for_class.transpose()
+
+    sample = sample.reshape(-1, len(sample_keys))
+
+    # SHAP summary plot that shows the top features importance for the prediction result
+    fig, ax = plt.subplots(figsize=(25, 20))
+    shap.summary_plot(shap_values_for_class, features=sample, feature_names=sample_keys, plot_type='bar',show=False)
+
+    return fig
+
+
+# Initialize LIME explainer with train data
 explainer = lime.lime_tabular.LimeTabularExplainer(
         x_train.values,
         feature_names=x_train.columns,
@@ -44,46 +47,19 @@ explainer = lime.lime_tabular.LimeTabularExplainer(
         discretize_continuous=True
     )
 
-def init_explanation_routes(app):
-    @app.route('/shap_explainer', methods=['POST'])
-    def shap_explainer_route():
-        return shap_explainer()
-
-def shap_explainer(sample):
-
-    rf_explainer = shap.TreeExplainer(model)
-
-    sample_keys = list(sample.keys())
-
-    sample = list(sample.values())
-    sample = np.array(sample)
-
-    rf_shap_values = rf_explainer.shap_values(sample)
-
-    shap_values_for_class = rf_shap_values[:, 1]
-
-    shap_values_for_class = shap_values_for_class.reshape(-1, 1)
-    shap_values_for_class = shap_values_for_class.transpose()
-
-    sample = sample.reshape(-1, len(sample_keys))
-
-    fig, ax = plt.subplots(figsize=(25, 20))
-    shap.summary_plot(shap_values_for_class, features=sample, feature_names=sample_keys, plot_type='bar',
-                      show=False)
-    # plt.show()
-
-    return fig
-
+# LIME Explainer
 def lime_explainer(sample):
 
     sample_values = list(sample.values())
     sample_values = np.array(sample_values)
 
+    # Apply LIME explainer to the sample
     exp = explainer.explain_instance(
         sample_values,
         model.predict_proba
     )
 
+    # LIME plot that displays the rules guiding the prediction
     fig = exp.as_pyplot_figure(label=1)
     fig.set_size_inches(20, 10)
 
