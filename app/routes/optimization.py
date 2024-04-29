@@ -9,11 +9,6 @@ from sklearn.metrics import mean_squared_error
 # Model Load
 model = load(r'models\binary\binary_random_forest_model.pkl')
 
-# MUDAR ISTO
-data_path = r'binary_cleaned_data2022_2023_2024.xlsx'
-df = pd.read_excel(data_path)
-df = df.drop(["Recording Date", "Defect Code", "Group"], axis=1)
-
 # The names of the features that must be present after the sample is processed
 column_names = [
     'Production Line', 'Production Order Code', 'Production Order Opening', 'Length', 'Width',
@@ -42,6 +37,7 @@ def predict_defect_score(sample):
 
 # MSE fitness function for the optimizer
 def fitness_function(x, target_defect_score, features_space):
+
     x_concat = build_feature_array(x, features_space)
     current_defect_score = predict_defect_score(x_concat)
 
@@ -49,6 +45,7 @@ def fitness_function(x, target_defect_score, features_space):
 
 
 def build_feature_array(x, features_space):
+
     x_concat = np.zeros(len(features_space))
     x_list = list(x)
 
@@ -65,11 +62,6 @@ def build_feature_array(x, features_space):
 
 # Defect score optimization using Dual Annealing
 def optimize_params(features_space, x0, target_defect_score):
-
-    # print(features_space)
-    # for i, v in enumerate(features_space):
-    #     if v[1] is None:
-    #         features_space[i][1] = (df[v[0]].min(), df[v[0]].max())
 
     nff_idx, bounds = zip(*[(i, v[1]) for i, v in enumerate(features_space) if type(v[1]) == tuple])
     x0_filtered = [v for i, v in enumerate(x0) if i in set(nff_idx)]

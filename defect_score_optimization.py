@@ -55,7 +55,9 @@ df_09_95 = df[(df['Defect Score'] >= 0.9) & (df['Defect Score'] < 0.95)]
 df_95_99 = df[(df['Defect Score'] >= 0.95) & (df['Defect Score'] < 0.99)]
 df_99_1 = df[(df['Defect Score'] >= 0.99) & (df['Defect Score'] <= 1)]
 
-all_dfs = [df_01_03, df_03_05, df_05_06, df_06_07, df_07_08, df_08_09, df_09_95, df_95_99, df_99_1]
+all_dfs = [ df_07_08]
+
+# all_dfs = [df_01_03, df_03_05, df_05_06, df_06_07, df_07_08, df_08_09, df_09_95, df_95_99, df_99_1]
 
 for test_df in all_dfs:
     print(len(test_df))
@@ -85,21 +87,21 @@ for test_df in all_dfs:
 
 
     # # using MSE
-    # def fitness_function(x, target_defect_score, features_space):
-    #
-    #     x_concat = build_feature_array(x, features_space)
-    #     current_defect_score = defect_score(x_concat)
-    #
-    #     return mean_squared_error(current_defect_score, [target_defect_score])
+    def fitness_function(x, target_defect_score, features_space):
+
+        x_concat = build_feature_array(x, features_space)
+        current_defect_score = defect_score(x_concat)
+
+        return mean_squared_error(current_defect_score, [target_defect_score])
 
 
     # TESTE E SEM TER EM CONTA O TARGET DEFECT SCORE
-    def fitness_function(x, target_defect_score, features_space):
-        x_concat = build_feature_array(x, features_space)
-        current_defect_score = defect_score(x_concat)
-        # Return the mean squared error of the current defect score
-        # with respect to itself, effectively minimizing the defect score
-        return mean_squared_error(current_defect_score, [current_defect_score])
+    # def fitness_function(x, target_defect_score, features_space):
+    #     x_concat = build_feature_array(x, features_space)
+    #     current_defect_score = defect_score(x_concat)
+    #     # Return the mean squared error of the current defect score
+    #     # with respect to itself, effectively minimizing the defect score
+    #     return mean_squared_error(current_defect_score, [current_defect_score])
 
     # # using log-cosh loss
     # def fitness_function(x, target_defect_score, features_space):
@@ -124,6 +126,8 @@ for test_df in all_dfs:
 
     def build_feature_array(x, features_space):
 
+        print(x)
+
         x_concat = np.zeros(len(features_space))
         x_list = list(x)
         for i, v in enumerate(features_space):
@@ -132,6 +136,8 @@ for test_df in all_dfs:
 
             else:
                 x_concat[i] = x_list.pop(0)
+
+        print(x_concat)
         return x_concat
 
 
@@ -151,14 +157,21 @@ for test_df in all_dfs:
     # def minimize_callback(xk):
     #     # print(xk)
 
-    def optimize_params(features_space, x0, target_defect_score, cb=dual_annealing_callback):
+    def optimize_params(features_space, x0, target_defect_score, t, cb=dual_annealing_callback):
 
-        for i, v in enumerate(features_space):
-            if v[1] is None:
-                features_space[i][1] = (df[v[0]].min(), df[v[0]].max())
+
+        print(t)
+        print(features_space)
+
+        if t == 'com':
+            for i, v in enumerate(features_space):
+                if v[1] is None:
+                    features_space[i][1] = (df[v[0]].min(), df[v[0]].max())
 
         nff_idx, bounds = zip(*[(i, v[1]) for i, v in enumerate(features_space) if type(v[1]) == tuple])
         x0_filtered = [v for i, v in enumerate(x0) if i in set(nff_idx)]
+
+        print(bounds)
 
         if dual_annealing_optim == 1:
             result = dual_annealing(
@@ -291,7 +304,8 @@ for test_df in all_dfs:
         #
         # print(f"\nStarting optimization...")
 
-        target_defect_scores = [0, 0.1, 0.5]
+        # target_defect_scores = [0, 0.1, 0.5]
+        target_defect_scores = [0.5]
 
         def_aux_01 = 0
         time_aux_01 = 0
@@ -301,44 +315,53 @@ for test_df in all_dfs:
 
         for target_defect_score in target_defect_scores:
 
+            print('\n**********************************************')
+
             # target_defect_score = 0.5
 
             if test_df.equals(df_01_03) or test_df.equals(df_03_05):
                 target_defect_score = 0
 
             # to count the time that the optimization took (in seconds)
-            start_time = time.time()
 
-            best_params, mse = optimize_params(features_space, x0, target_defect_score)
+            teste = ['com', 'sem']
 
-            end_time = time.time()
-            elapsed_time = end_time - start_time
+            for t in teste:
 
-            final_defect_score = defect_score(best_params)
+                print('\n-------------------------------------------------')
 
-            best_params_selected = best_params[indices]
+                start_time = time.time()
 
-            reduction_percentage = (initial_defect_score - final_defect_score) * 100
+                best_params, mse = optimize_params(features_space, x0, target_defect_score, t)
 
-            if target_defect_score == 0.1:
-                def_aux_01 = reduction_percentage
-                time_aux_01 = elapsed_time
-            else:
-                def_aux_05 = reduction_percentage
-                time_aux_05 = elapsed_time
+                end_time = time.time()
+                elapsed_time = end_time - start_time
 
-            score_reducing.append(reduction_percentage)
-            time_spent.append(elapsed_time)
+                final_defect_score = defect_score(best_params)
 
-            # results
-            print('\n---- Optimization Results ----')
-            print('\nTarget Defect Score:   ', target_defect_score)
-            # print('Best Parameters:    ', best_params_selected.round(2))
-            print('Initial Defect Score:  ', initial_defect_score)
-            print('Final Defect Score:    ', final_defect_score)
-            print(f'Reduced Defect Score in {reduction_percentage}%')
-            print('Elapsed Time (in seconds):    ', round(elapsed_time, 2))
-            print('MSE:                ', mse.round(3))
+                best_params_selected = best_params[indices]
+
+                reduction_percentage = (initial_defect_score - final_defect_score) * 100
+
+                if target_defect_score == 0.1:
+                    def_aux_01 = reduction_percentage
+                    time_aux_01 = elapsed_time
+                else:
+                    def_aux_05 = reduction_percentage
+                    time_aux_05 = elapsed_time
+
+                score_reducing.append(reduction_percentage)
+                time_spent.append(elapsed_time)
+
+                # results
+                print('\n---- Optimization Results ----')
+                print('\nTarget Defect Score:   ', target_defect_score)
+                # print('Best Parameters:    ', best_params_selected.round(2))
+                print('Initial Defect Score:  ', initial_defect_score)
+                print('Final Defect Score:    ', final_defect_score)
+                print(f'Reduced Defect Score in {reduction_percentage}%')
+                # print('Elapsed Time (in seconds):    ', round(elapsed_time, 2))
+                # print('MSE:                ', mse.round(3))
 
         if def_aux_01 < def_aux_05:
             score_reducing.append(def_aux_01)

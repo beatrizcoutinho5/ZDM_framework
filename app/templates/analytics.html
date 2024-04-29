@@ -63,11 +63,14 @@
     {% include 'footer.html' %}
 </body>
 
-<script src="{{ url_for('static', filename='get_current_date_time.js') }}"></script>
-<script src="{{ url_for('static', filename='update_date_time.js') }}"></script>
-<script>
-    initializeDateTimeUpdate("update-analytics");
+<script src="{{ url_for('static', filename='javascript/get_current_date_time.js') }}"></script>
+
+<script src="{{ url_for('static', filename='javascript/update_date_time.js') }}"></script>
+
+<script src="{{ url_for('static', filename='javascript/selected_data_time_analytics.js') }}">
 </script>
+
+
 <script>
     // Get the data from {{defects_number_per_day_results}}
     const defectsData = JSON.parse("{{defects_number_per_day_results | tojson | safe}}");

@@ -13,6 +13,11 @@ def publish_data():
 
     print("reading df")
     df = pd.read_excel(r'dataset_jan_dec_2022_line410.xlsx')
+
+    # remove rows with missing value for test
+    df = df.dropna(how='any', axis=0)
+
+
     print("read df")
 
     while True:
