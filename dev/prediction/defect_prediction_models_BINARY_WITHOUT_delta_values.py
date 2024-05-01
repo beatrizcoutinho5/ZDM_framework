@@ -21,12 +21,12 @@ timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 make_plots = 1
 
 # Import test and train data?
-import_test_train_data = 0
+import_test_train_data = 1
 
 # Load models?
 # 0 -> train the models
 # 1 -> import trained models for metrics
-load_models = 0
+load_models = 1
 
 # Final data arrays
 
@@ -35,29 +35,29 @@ final_x_test = pd.DataFrame()
 final_y_train = pd.Series(dtype='float64')
 final_y_test = pd.Series(dtype='float64')
 
-clean_data_delta_path = r'data\clean_data\binary_cleaned_data2022_2023_2024.xlsx'
+clean_data_delta_path = r'../data/clean_data/binary_cleaned_data2022_2023_2024.xlsx'
 
 if import_test_train_data == 1:
     print(f'\nLoading test and train data...')
 
     x_train_aug = pd.read_excel(
-        r'data\split_train_test_data\without_delta_values\binary_data\binary_x_train_aug.xlsx')
+        r'dev\data\split_train_test_data\without_delta_values\binary_data\binary_x_train_aug.xlsx')
 
     y_train_aug = pd.read_excel(
-        r'data\split_train_test_data\without_delta_values\binary_data\binary_y_train_aug.xlsx')[
+        r'dev\data\split_train_test_data\without_delta_values\binary_data\binary_y_train_aug.xlsx')[
         'Defect Code']
 
     x_test = pd.read_excel(
-        r'data\split_train_test_data\without_delta_values\binary_data\binary_x_test.xlsx')
+        r'dev\data\split_train_test_data\without_delta_values\binary_data\binary_x_test.xlsx')
 
     final_y_test = pd.read_excel(
-        r'data\split_train_test_data\without_delta_values\binary_data\binary_y_test.xlsx')[
+        r'dev\data\split_train_test_data\without_delta_values\binary_data\binary_y_test.xlsx')[
         'Defect Code']
 
     print(f'Loaded test and train data!')
 
 # Configure logging file
-logging.basicConfig(filename=f'binary_prediction_model_metrics_log.txt', level=logging.INFO)
+logging.basicConfig(filename=f'../binary_prediction_model_metrics_log.txt', level=logging.INFO)
 logging.info(f"\nTimestamp: {timestamp}")
 file_name = os.path.splitext(os.path.basename(clean_data_delta_path))[0]
 logging.info(f"\nFile: {file_name}")
@@ -67,14 +67,14 @@ df = pd.read_excel(clean_data_delta_path)
 if import_test_train_data == 0:
 
     # Directory to save the resulting plots
-    plots_dir = "plots"
+    plots_dir = "../plots"
     os.makedirs(plots_dir, exist_ok=True)
 
     # # For binary classification
     # # new column where '0' is one class (no defect) and any other code is the second class (defect)
     # df['Binary Defect Code'] = np.where(df['Defect Code'] == 0, 0, 1)
 
-    df_line410_2022 = pd.read_excel(r'data\clean_data\binary_cleaned_data_2022_line410.xlsx')
+    df_line410_2022 = pd.read_excel(r'dev\data\clean_data\binary_cleaned_data_2022_line410.xlsx')
     # df_line410_2022['Binary Defect Code'] = np.where(df_line410_2022['Defect Code'] == 0, 0, 1)
 
     # # Split the df by year
@@ -155,26 +155,26 @@ if import_test_train_data == 0:
     # })
     #
     # scaling_params.to_excel(
-    #     r'data\split_train_test_data\without_delta_values\binary_data\binary_scaling_param.xlsx',
+    #     r'dev\data\split_train_test_data\without_delta_values\binary_data\binary_scaling_param.xlsx',
     #     index=False)
 
     # Save test and train data
     print(f'\nSaving test and train data...')
 
     pd.DataFrame(x_train_aug, columns=column_names).to_excel(
-        r'data\split_train_test_data\without_delta_values\binary_data\binary_x_train_aug.xlsx',
+        r'dev\data\split_train_test_data\without_delta_values\binary_data\binary_x_train_aug.xlsx',
         index=False)
 
     pd.Series(y_train_aug, name='Defect Code').to_excel(
-        r'data\split_train_test_data\without_delta_values\binary_data\binary_y_train_aug.xlsx',
+        r'dev\data\split_train_test_data\without_delta_values\binary_data\binary_y_train_aug.xlsx',
         index=False)
 
     pd.DataFrame(x_test, columns=column_names).to_excel(
-        r'data\split_train_test_data\without_delta_values\binary_data\binary_x_test.xlsx',
+        r'dev\data\split_train_test_data\without_delta_values\binary_data\binary_x_test.xlsx',
         index=False)
 
     pd.Series(final_y_test, name='Defect Code').to_excel(
-        r'data\split_train_test_data\without_delta_values\binary_data\binary_y_test.xlsx',
+        r'dev\data\split_train_test_data\without_delta_values\binary_data\binary_y_test.xlsx',
         index=False)
 
     print(f'\nSaved train and test data!')
@@ -192,7 +192,7 @@ print(f'\nStarting Random Forest...')
 rndforest = RandomForestClassifier(random_state=42)
 
 if load_models == 1:
-    rndforest = load(r'models\without_delta_values\binary\binary_random_forest_model.pkl')
+    rndforest = load(r'../models/without_delta_values/binary/binary_random_forest_model.pkl')
 else:
     rndforest.fit(x_train_aug, y_train_aug)
 
@@ -205,7 +205,7 @@ confusion_matrix_rf = confusion_matrix(final_y_test, y_pred_rf)
 disp_rf = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_rf, display_labels=rndforest.classes_)
 disp_rf.plot()
 plt.title('RF Confusion Matrix - with "Defect Class"')
-plt.savefig(r'plots\confusion_matrix\without_delta_values\binary\rf.png')
+plt.savefig(r'dev\plots\confusion_matrix\without_delta_values\binary\rf.png')
 plt.show()
 
 recall_score_rf = recall_score(final_y_test, y_pred_rf, average='weighted', zero_division=1)
@@ -220,7 +220,7 @@ logging.info(f"Precision: {precision_score_rf:.6f}")
 
 # Save
 if load_models == 0:
-    dump(rndforest, r'models\without_delta_values\binary\binary_random_forest_model.pkl')
+    dump(rndforest, r'../models/without_delta_values/binary/binary_random_forest_model.pkl')
 
 ###########
 # XGBOOST #
@@ -242,7 +242,7 @@ print(f'\nStarting XGBoost...')
 xgb_model = XGBClassifier(random_state=42)
 
 if load_models == 1:
-    xgb_model.load_model(r'models\without_delta_values\binary\xgb_model.model')
+    xgb_model.load_model(r'dev\models\without_delta_values\binary\xgb_model.model')
 else:
     xgb_model.fit(x_train_aug, y_train_aug_encoded)
 
@@ -259,7 +259,7 @@ confusion_matrix_xgb = confusion_matrix(final_y_test, y_pred_xgb)
 disp_xgb = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_xgb, display_labels=xgb_model.classes_)
 disp_xgb.plot()
 plt.title('XGBoost Confusion Matrix')
-plt.savefig(r'plots\confusion_matrix\without_delta_values\binary\xgboost.png')
+plt.savefig(r'dev\plots\confusion_matrix\without_delta_values\binary\xgboost.png')
 plt.show()
 
 recall_score_xgb = recall_score(final_y_test, y_pred_xgb, average='weighted', zero_division=1)
@@ -274,7 +274,7 @@ logging.info(f"Precision: {precision_score_xgb:.6f}")
 
 # Save
 if load_models == 0:
-    xgb_model.save_model(r'models\without_delta_values\binary\binary_xgb_model.json')
+    xgb_model.save_model(r'dev\models\without_delta_values\binary\binary_xgb_model.json')
 
 # #######
 # # SVM #
@@ -285,7 +285,7 @@ if load_models == 0:
 # svm_model = SVC(random_state=42, probability=True, decision_function_shape='ovo')
 #
 # if load_models == 1:
-#     svm_model = load(r'models\without_delta_values\binary\binary_svm_model.pkl')
+#     svm_model = load(r'dev\models\without_delta_values\binary\binary_svm_model.pkl')
 # else:
 #     svm_model.fit(x_train_aug, y_train_aug)
 #
@@ -298,7 +298,7 @@ if load_models == 0:
 # disp_svm = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_svm, display_labels=svm_model.classes_)
 # disp_svm.plot()
 # plt.title('SVM Confusion Matrix')
-# plt.savefig(r'plots\confusion_matrix\without_delta_values\binary\svm.png')
+# plt.savefig(r'dev\plots\confusion_matrix\without_delta_values\binary\svm.png')
 # plt.show()
 #
 # recall_score_svm = recall_score(final_y_test, y_pred_svm, average='weighted', zero_division=1)
@@ -313,7 +313,7 @@ if load_models == 0:
 #
 # # Save
 # if load_models == 0:
-#     dump(svm_model, r'models\without_delta_values\binary\binary_svm_model.pkl')
+#     dump(svm_model, r'dev\models\without_delta_values\binary\binary_svm_model.pkl')
 
 ############
 # CATBOOST #
@@ -325,7 +325,7 @@ catboost_model = CatBoostClassifier(loss_function='Logloss', verbose=False)
 
 if load_models == 1:
     catboost_model = CatBoostClassifier(loss_function='Logloss', verbose=False)
-    catboost_model.load_model(r'models\without_delta_values\binary\binary_catboost_model.cbm')
+    catboost_model.load_model(r'dev\models\without_delta_values\binary\binary_catboost_model.cbm')
 else:
     catboost_model.fit(x_train_aug, y_train_aug)
 
@@ -337,7 +337,7 @@ confusion_matrix_cat = confusion_matrix(final_y_test, y_pred_cat)
 disp_cat = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_cat, display_labels=catboost_model.classes_)
 disp_cat.plot()
 plt.title('CATBOOST Confusion Matrix')
-plt.savefig(r'plots\confusion_matrix\without_delta_values\binary\catboost.png')
+plt.savefig(r'dev\plots\confusion_matrix\without_delta_values\binary\catboost.png')
 plt.show()
 
 recall_score_cat = recall_score(final_y_test, y_pred_cat, average='weighted', zero_division=1)
@@ -352,4 +352,4 @@ logging.info(f"Precision: {precision_score_cat:.6f}")
 
 # Save
 if load_models == 0:
-    catboost_model.save_model(r'models\without_delta_values\binary\binary_catboost_model.cbm')
+    catboost_model.save_model(r'dev\models\without_delta_values\binary\binary_catboost_model.cbm')

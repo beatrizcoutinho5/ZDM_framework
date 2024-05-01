@@ -52,7 +52,7 @@
                 </div>
 
                 <!-- Bar chart of the number of defects per day for the select time period -->
-                <div class="anl-div-horizontal-ind" style="height: 59%; margin-top: 1%">
+                <div class="anl-div-horizontal-ind" style="height: 59%; margin-top: 1%; align-items: center;">
                     <canvas id="defectsChart"></canvas>
                 </div>
             </div>
@@ -64,44 +64,72 @@
 </body>
 
 <script src="{{ url_for('static', filename='javascript/get_current_date_time.js') }}"></script>
-
 <script src="{{ url_for('static', filename='javascript/update_date_time.js') }}"></script>
-
-<script src="{{ url_for('static', filename='javascript/selected_data_time_analytics.js') }}">
-</script>
-
+<script src="{{ url_for('static', filename='javascript/selected_data_time_analytics.js') }}"></script>
 
 <script>
-    // Get the data from {{defects_number_per_day_results}}
-    const defectsData = JSON.parse("{{defects_number_per_day_results | tojson | safe}}");
+    // Extract dates and defect counts
+    var defectData = JSON.parse('{{ defects_number_per_day_results | tojson | safe }}');
+    var dates = defectData.map(function(item) {
+        return item[0];
+    });
+    var counts = defectData.map(function(item) {
+        return item[1];
+    });
 
-    // Extract labels and values from the data
-    const labels = Object.keys(defectsData);
-    const values = Object.values(defectsData);
+    // Bar chart
+    var ctx = document.getElementById('defectsChart').getContext('2d');
 
-    // Create a bar chart
-    const ctx = document.getElementById("defectsChart").getContext("2d");
-    const defectsChart = new Chart(ctx, {
-        type: "bar",
+    var defectsChart = new Chart(ctx, {
+        type: 'bar',
         data: {
-            labels: labels,
+            labels: dates,
             datasets: [{
-                label: "Defects per Day",
-                data: values,
-                backgroundColor: "rgba(255, 99, 132, 0.2)",
-                borderColor: "rgba(255, 99, 132, 1)",
-                borderWidth: 1,
-            }, ],
+                label: 'Nº of Defects',
+                data: counts,
+                backgroundColor: '#0077DF',
+                borderRadius: 5,
+            }]
         },
         options: {
+
+            responsive: true,
             scales: {
-                yAxes: [{
-                    ticks: {
-                        beginAtZero: true,
+                x: {
+                    grid: {
+                        display: false
+                    }
+                },
+                y: {
+                    grid: {
+                        display: false
                     },
-                }, ],
+                    ticks: {
+                        callback: function(value, index, values) {
+                            if (Number.isInteger(value)) {
+                                return value;
+                            }
+                        }
+                    }
+                }
             },
-        },
+
+            plugins: {
+                legend: {
+
+                    display: true,
+                    position: 'right',
+                    labels: {
+                        boxWidth: 10,
+                        padding: 20,
+                        font: {
+                            family: "'Roboto', sans-serif",
+                            size: 12,
+                        }
+                    }
+                }
+            },
+        }
     });
 </script>
 
