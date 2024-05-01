@@ -19,16 +19,16 @@
     <div class="dashboard-buttons-container">
 
         <!-- Optimization dashboard -->
-        <div class="dashboard-buttons-container-div">
+        <div>
             <a href="{{ url_for('open_dashboard_optimization') }}" style="text-decoration: none">
-                <span class="font-alata page-buttons">Optimization</span>
+                <span class="font-alata dashboard-button">Optimization</span>
             </a>
         </div>
 
         <!-- Explanation dashboard -->
-        <div class="dashboard-buttons-container-div-selected">
+        <div>
             <a href="{{ url_for('open_dashboard_explanation') }}" style="text-decoration: none">
-                <span class="font-alata page-buttons">Explanation</span>
+                <span class="font-alata dashboard-button-selected">Explanation</span>
             </a>
         </div>
     </div>
@@ -115,7 +115,7 @@
 </body>
 
 <script src="{{ url_for('static', filename='javascript/fullscreen_image.js') }}"></script>
-<script src="{{ url_for('static', filename='javascript/page_reload.js') }}"></script>
+<!--<script src="{{ url_for('static', filename='javascript/page_reload.js') }}"></script>-->
 <script src="{{ url_for('static', filename='javascript/update_date_time.js') }}"></script>
 
 </html>

@@ -15,13 +15,13 @@ autocorrelation_analysis = 1
 conc = 0
 
 # Directory to save the resulting plots
-plots_dir = "plots"
+plots_dir = "../plots"
 os.makedirs(plots_dir, exist_ok=True)
 
-dataset_paths = [r'data\dataset_jan_dec_2022_line409.xlsx', r'data\dataset_jan_may_2023_line410.xlsx',
-                 r'data\dataset_jan_feb_2024_line410.xlsx']
+dataset_paths = [r'dev\data\dataset_jan_dec_2022_line409.xlsx', r'dev\data\dataset_jan_may_2023_line410.xlsx',
+                 r'dev\data\dataset_jan_feb_2024_line410.xlsx']
 
-# dataset_paths = [r'data\dataset_jan_dec_2022_line410.xlsx']
+# dataset_paths = [r'dev\data\dataset_jan_dec_2022_line410.xlsx']
 
 for dataset_path in dataset_paths:
 
@@ -254,7 +254,7 @@ for dataset_path in dataset_paths:
         print(f"Removed {np.abs(final_number_samples - initial_number_samples)} samples.")
 
         df.to_excel(
-            r'data\clean_data\cleaned_data_with_deltavalues_' + filename + '.xlsx',
+            r'dev\data\clean_data\cleaned_data_with_deltavalues_' + filename + '.xlsx',
             index=False)
 
         print("Saved clean data (with delta values)!")
@@ -275,7 +275,7 @@ for dataset_path in dataset_paths:
         print(f"Removed {np.abs(final_number_samples - initial_number_samples)} samples.")
 
         df.to_excel(
-            r'data\clean_data\cleaned_data_' + filename +  '.xlsx',
+            r'dev\data\clean_data\cleaned_data_' + filename +  '.xlsx',
             index=False)
 
         print("Saved clean data!")
@@ -288,27 +288,27 @@ if conc == 1:
 
     if autocorrelation_analysis == 1:
 
-        df_2022 = pd.read_excel(r'data\clean_data\cleaned_data_with_deltavalues_dataset_jan_dec_2022_line409.xlsx')
-        df_2023 = pd.read_excel(r'data\clean_data\cleaned_data_with_deltavalues_dataset_jan_may_2023_line410.xlsx')
-        df_2024 = pd.read_excel(r'data\clean_data\cleaned_data_with_deltavalues_dataset_jan_feb_2024_line410.xlsx')
+        df_2022 = pd.read_excel(r'dev\data\clean_data\cleaned_data_with_deltavalues_dataset_jan_dec_2022_line409.xlsx')
+        df_2023 = pd.read_excel(r'dev\data\clean_data\cleaned_data_with_deltavalues_dataset_jan_may_2023_line410.xlsx')
+        df_2024 = pd.read_excel(r'dev\data\clean_data\cleaned_data_with_deltavalues_dataset_jan_feb_2024_line410.xlsx')
 
         df = pd.concat([df_2022, df_2023, df_2024], axis=0)
 
         df.to_excel(
-            r'data\clean_data\cleaned_data_with_deltavalues_2022_2023_2024.xlsx',
+            r'dev\data\clean_data\cleaned_data_with_deltavalues_2022_2023_2024.xlsx',
             index=False)
         print("Saved final dataset!")
 
     else:
 
-        df_2022 = pd.read_excel(r'data\clean_data\cleaned_data_dataset_jan_dec_2022_line410.xlsx')
-        df_2023 = pd.read_excel(r'data\clean_data\cleaned_data_dataset_jan_may_2023_line410.xlsx')
-        df_2024 = pd.read_excel(r'data\clean_data\cleaned_data_dataset_jan_feb_2024_line410.xlsx')
+        df_2022 = pd.read_excel(r'dev\data\clean_data\cleaned_data_dataset_jan_dec_2022_line410.xlsx')
+        df_2023 = pd.read_excel(r'dev\data\clean_data\cleaned_data_dataset_jan_may_2023_line410.xlsx')
+        df_2024 = pd.read_excel(r'dev\data\clean_data\cleaned_data_dataset_jan_feb_2024_line410.xlsx')
 
         df = pd.concat([df_2022, df_2023, df_2024], axis=0)
 
         df.to_excel(
-            r'data\clean_data\cleaned_data_2022_2023_2024.xlsx',
+            r'dev\data\clean_data\cleaned_data_2022_2023_2024.xlsx',
             index=False)
         print("Saved final dataset!")
 

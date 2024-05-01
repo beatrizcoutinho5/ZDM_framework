@@ -7,12 +7,12 @@ from statsmodels.graphics.tsaplots import plot_acf
 from sklearn.preprocessing import LabelEncoder
 
 # Directory to save the resulting plots
-plots_dir = "plots"
+plots_dir = "../plots"
 os.makedirs(plots_dir, exist_ok=True)
 
-dataset_2022_path = r'data\dataset_jan_dec_2022_line409.xlsx'
-dataset_2023_path = r'data\dataset_jan_may_2023_line410.xlsx'
-dataset_2024_path = r'data\dataset_jan_feb_2024_line410.xlsx'
+dataset_2022_path = r'../data/dataset_jan_dec_2022_line409.xlsx'
+dataset_2023_path = r'../data/dataset_jan_may_2023_line410.xlsx'
+dataset_2024_path = r'../data/dataset_jan_feb_2024_line410.xlsx'
 
 df2022 = pd.read_excel(dataset_2022_path)
 df2023 = pd.read_excel(dataset_2023_path)
@@ -329,7 +329,7 @@ if autocorrelation_analysis == 1:
     print(f"Removed {np.abs(final_number_samples - initial_number_samples)} samples.")
 
     df.to_excel(
-        r'data\clean_data\cleaned_data_with_deltavalues2022_2023_2024.xlsx',
+        r'dev\data\clean_data\cleaned_data_with_deltavalues2022_2023_2024.xlsx',
         index=False)
     print("Saved clean data (with delta values)!")
 
@@ -348,6 +348,6 @@ if autocorrelation_analysis == 0:
     print(f"Removed {np.abs(final_number_samples - initial_number_samples)} samples.")
 
     df.to_excel(
-        r'data\clean_data\cleaned_data2022_2023_2024.xlsx',
+        r'dev\data\clean_data\cleaned_data2022_2023_2024.xlsx',
         index=False)
     print("Saved clean data!")

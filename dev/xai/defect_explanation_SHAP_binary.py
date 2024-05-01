@@ -25,19 +25,19 @@ from sklearn.metrics import recall_score, precision_score, confusion_matrix, Con
 # Suppress InconsistentVersionWarning
 warnings.filterwarnings("ignore", category=UserWarning)
 
-rf_model_path = r'models\without_delta_values\binary\binary_random_forest_model.pkl'
-xgb_model_path = r'models\without_delta_values\binary\binary_xgb_model.json'
-catboost_model_path = r'models\without_delta_values\binary\binary_catboost_model.cbm'
+rf_model_path = r'../models/without_delta_values/binary/binary_random_forest_model.pkl'
+xgb_model_path = r'../models/without_delta_values/binary/binary_xgb_model.json'
+catboost_model_path = r'../models/without_delta_values/binary/binary_catboost_model.cbm'
 
 # Load train and test data
 x_train = pd.read_excel(
-    r'data\split_train_test_data\without_delta_values\binary_data\binary_x_train_aug.xlsx')
+    r'..\data\split_train_test_data\without_delta_values\binary_data\binary_x_train_aug.xlsx')
 y_train = pd.read_excel(
-    r'data\split_train_test_data\without_delta_values\binary_data\binary_y_train_aug.xlsx')
+    r'..\data\split_train_test_data\without_delta_values\binary_data\binary_y_train_aug.xlsx')
 x_test = pd.read_excel(
-    r'data\split_train_test_data\without_delta_values\binary_data\binary_x_test.xlsx')
+    r'..\data\split_train_test_data\without_delta_values\binary_data\binary_x_test.xlsx')
 y_test = pd.read_excel(
-    r'data\split_train_test_data\without_delta_values\binary_data\binary_y_test.xlsx')
+    r'..\data\split_train_test_data\without_delta_values\binary_data\binary_y_test.xlsx')
 
 # Reduce data size to 1% of original (for the test to be faster since SHAP takes a long time)
 num_samples = int(0.0005 * len(x_train))
@@ -86,7 +86,7 @@ shap.summary_plot(shap_values_for_class, features=x_test, feature_names=x_test.c
                   show=False)
 
 ax.set_title(f"SHAP Summary Plot for Defect Class")
-plt.savefig(os.path.join(r'plots\shap\without_delta_values\binary\random_forest', f"shap_summary_plot_defect_rf.png"), dpi=300, bbox_inches='tight')
+plt.savefig(os.path.join(r'../plots/shap/without_delta_values/binary/random_forest', f"shap_summary_plot_defect_rf.png"), dpi=300, bbox_inches='tight')
 plt.show()
 #
 # ################
@@ -111,7 +111,7 @@ plt.show()
 #                   show=False)
 #
 # ax.set_title(f"SHAP Summary Plot for Defect Class")
-# plt.savefig(os.path.join(r'plots\shap\without_delta_values\binary\xgboost', f"shap_summary_plot_defect_xgb.png"), dpi=300, bbox_inches='tight')
+# plt.savefig(os.path.join(r'..\plots\shap\without_delta_values\binary\xgboost', f"shap_summary_plot_defect_xgb.png"), dpi=300, bbox_inches='tight')
 # plt.show()
 #
 #
@@ -135,5 +135,5 @@ plt.show()
 #                   show=False)
 #
 # ax.set_title(f"SHAP Summary Plot for Defect Class")
-# plt.savefig(os.path.join(r'plots\shap\without_delta_values\binary\catboost', f"shap_summary_plot_defect_catboost.png"), dpi=300, bbox_inches='tight')
+# plt.savefig(os.path.join(r'..\plots\shap\without_delta_values\binary\catboost', f"shap_summary_plot_defect_catboost.png"), dpi=300, bbox_inches='tight')
 # plt.show()

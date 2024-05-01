@@ -21,26 +21,27 @@
         <!-- Optimization dashboard -->
         <div class="dashboard-buttons-container-div-selected ">
             <a href="{{url_for('open_dashboard_optimization')}}" style="text-decoration: none;">
-                <span class="font-alata page-buttons"> Optimization </span>
+                <span class="font-alata dashboard-button-selected"> Optimization </span>
             </a>
         </div>
 
         <!-- Only allows to go to the explanation page when the product is likely to be a defect -->
         <!-- Since the XAI models are set to explain the reason why the sample was predicted -->
         <!-- to be in the defect class (1) -->
-        {% set prediction_int = prediction | int %}
-        {% if (prediction_int >= 50 and explanation == 1) %}
-
+        {% if explanation == 1 %}
         <div class="dashboard-buttons-container-div ">
             <a href="{{url_for('open_dashboard_explanation')}}" style="text-decoration: none;">
-                <span class="font-alata page-buttons"> Explanation </span>
+                <span class="font-alata dashboard-button" style="left:35px"> Explanation </span>
             </a>
         </div>
-
         {% else %}
-        <div></div>
-
+        <div>
+            <a  href="{{url_for('open_dashboard_explanation')}}" style="text-decoration: none;">
+                <span class="font-alata dashboard-button">   </span>
+            </a>
+        </div>
         {% endif %}
+
     </div>
 
     <div class="date-time font-alata" id="dateTimeDisplay">

@@ -70,17 +70,20 @@ csv_done = 0
 
 # when a mqqt message is received
 def on_message(client, userdata, message):
+
     global prediction, defect_score_after_optim, optim_phrase, reduction_percentage
     global current_lpt, current_upt, current_pressure, current_tct, current_width, current_length
     global pressure_after_optim, upt_after_optim, lpt_after_optim, tct_after_optim
     global explanation, shap_fig, lime_fig, line_status
 
-    # # variable initialization
-    # prediction = "-"
-    # defect_score_after_optim = "-"
-    # optim_phrase = "Defect Probability After Optimization"
-    # reduction_percentage = "-"
-    # explanation = 0
+    # Variable initialization
+    prediction = "-"
+    defect_score_after_optim = "-"
+    optim_phrase = "Defect Probability After Optimization"
+    reduction_percentage = "-"
+    explanation = 0
+    shap_fig = None
+    lime_fig = None
 
     payload = json.loads(message.payload.decode())
     recording_date = str(payload.get("Recording Date"))
@@ -130,19 +133,20 @@ def on_message(client, userdata, message):
         # Generate explanation if sample likely to be a defect
         if prediction >= 50:
 
+            print("\ngenerating explanation...")
+
+            explanation = 1
+
             shap_fig = shap_explainer(processed_sample)
             lime_fig = lime_explainer(processed_sample)
 
             shap_fig.savefig('static/images/shap_plot')
             lime_fig.savefig('static/images/lime_plot')
 
-            explanation = 1
-
             plt.close(shap_fig)
             plt.close(lime_fig)
 
         else:
-
             shap_fig = None
             lime_fig = None
 

@@ -17,7 +17,7 @@ nelder_mead_optim = 0
 basinhopping_optim = 0
 warnings.filterwarnings("ignore")
 
-data_path = r'data\clean_data\binary_cleaned_data_2022_line410.xlsx'
+data_path = r'../data/clean_data/binary_cleaned_data_2022_line410.xlsx'
 
 df = pd.read_excel(data_path)
 
@@ -26,9 +26,9 @@ df = pd.read_excel(data_path)
 
 df = df.drop(["Recording Date", "Defect Code", "Group"], axis=1)
 
-rf_model_path = r'models\without_delta_values\binary\binary_random_forest_model.pkl'
-xgb_model_path = r'models\without_delta_values\binary\binary_xgb_model.json'
-catboost_model_path = r'models\without_delta_values\binary\binary_catboost_model.cbm'
+rf_model_path = r'../models/without_delta_values/binary/binary_random_forest_model.pkl'
+xgb_model_path = r'../models/without_delta_values/binary/binary_xgb_model.json'
+catboost_model_path = r'../models/without_delta_values/binary/binary_catboost_model.cbm'
 
 # load models
 rf_model = joblib.load(rf_model_path)

@@ -29,6 +29,6 @@ def predict_defect(processed_sample):
     prediction = prediction*100
 
     prediction = round(prediction, 1)
-    print(f'Prediction: {prediction}')
+    print(f'\nPrediction: {prediction}')
 
     return prediction

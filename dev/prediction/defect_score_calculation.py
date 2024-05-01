@@ -10,15 +10,15 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error
 from xgboost import XGBClassifier
 from catboost import CatBoostClassifier
 
-data_path = r'data\clean_data\binary_cleaned_data_2022_line410.xlsx'
+data_path = r'../data/clean_data/binary_cleaned_data_2022_line410.xlsx'
 warnings.filterwarnings("ignore", category=UserWarning)
 
 df = pd.read_excel(data_path)
 df = df.drop(["Recording Date", "Group", "Defect Code"], axis=1)
 
-rf_model_path = r'models\without_delta_values\binary\binary_random_forest_model.pkl'
-xgb_model_path = r'models\without_delta_values\binary\binary_xgb_model.json'
-catboost_model_path = r'models\without_delta_values\binary\binary_catboost_model.cbm'
+rf_model_path = r'../models/without_delta_values/binary/binary_random_forest_model.pkl'
+xgb_model_path = r'../models/without_delta_values/binary/binary_xgb_model.json'
+catboost_model_path = r'../models/without_delta_values/binary/binary_catboost_model.cbm'
 
 rf_model = joblib.load(rf_model_path)
 xgb_model = XGBClassifier()
@@ -42,4 +42,4 @@ df["Defect Score"] = avg_defect_score
 # df = df[cols]
 
 df["Recording Date"] = pd.read_excel(data_path)["Recording Date"]
-df.to_excel(r'data\split_train_test_data\defect_score_binary_cleaned_data_2022_line410.xlsx', index=False)
+df.to_excel(r'dev\data\split_train_test_data\defect_score_binary_cleaned_data_2022_line410.xlsx', index=False)

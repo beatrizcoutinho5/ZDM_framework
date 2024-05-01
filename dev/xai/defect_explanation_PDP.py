@@ -18,13 +18,13 @@ warnings.filterwarnings("ignore", category=UserWarning)
 
 # Load train and test data
 x_train = pd.read_excel(
-    r'data\split_train_test_data\with_delta_values\binary_data\NOTNORM_binary_x_train_aug.xlsx')
+    r'..\data\split_train_test_data\with_delta_values\binary_data\NOTNORM_binary_x_train_aug.xlsx')
 y_train = pd.read_excel(
-    r'data\split_train_test_data\with_delta_values\binary_data\NOTNORM_binary_y_train_aug.xlsx')
+    r'..\data\split_train_test_data\with_delta_values\binary_data\NOTNORM_binary_y_train_aug.xlsx')
 x_test = pd.read_excel(
-    r'data\split_train_test_data\with_delta_values\binary_data\NOTNORM_binary_x_test.xlsx')
+    r'..\data\split_train_test_data\with_delta_values\binary_data\NOTNORM_binary_x_test.xlsx')
 y_test = pd.read_excel(
-    r'data\split_train_test_data\with_delta_values\binary_data\NOTNORM_binary_y_test.xlsx')
+    r'..\data\split_train_test_data\with_delta_values\binary_data\NOTNORM_binary_y_test.xlsx')
 
 print("Loaded data!")
 

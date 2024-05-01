@@ -35,7 +35,7 @@ def publish_data():
         publish.single(MQTT_TOPIC, json.dumps(sample_dict), hostname=MQTT_BROKER_HOST, port=MQTT_BROKER_PORT)
         print(f'Data published: {sample_dict}')
 
-        # publish samples with 1 min interval
-        time.sleep(40)
+        # publish samples with interval
+        time.sleep(70)
 
 publish_data()
