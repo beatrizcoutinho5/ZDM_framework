@@ -322,14 +322,14 @@ if autocorrelation_analysis == 1:
     final_number_samples = len(df)
 
     print("WITH AUTO-CORRELATION ANALYSIS:")
-    print(f"\nFinal Number of Features: {final_number_features}")
+    print(f"/nFinal Number of Features: {final_number_features}")
     print(f"Final Number of Samples: {final_number_samples}")
 
-    print(f"\nRemoved {np.abs(final_number_features - initial_number_features)} features.")
+    print(f"/nRemoved {np.abs(final_number_features - initial_number_features)} features.")
     print(f"Removed {np.abs(final_number_samples - initial_number_samples)} samples.")
 
     df.to_excel(
-        r'dev\data\clean_data\cleaned_data_with_deltavalues2022_2023_2024.xlsx',
+        r'../data/clean_data/cleaned_data_with_deltavalues2022_2023_2024.xlsx',
         index=False)
     print("Saved clean data (with delta values)!")
 
@@ -344,10 +344,10 @@ if autocorrelation_analysis == 0:
     print(f"\nFinal Number of Features: {final_number_features}")
     print(f"Final Number of Samples: {final_number_samples}")
 
-    # print(f"\nRemoved {np.abs(final_number_features - initial_number_features)} features.")
+    # print(f"/nRemoved {np.abs(final_number_features - initial_number_features)} features.")
     print(f"Removed {np.abs(final_number_samples - initial_number_samples)} samples.")
 
     df.to_excel(
-        r'dev\data\clean_data\cleaned_data2022_2023_2024.xlsx',
+        r'../data/clean_data/cleaned_data2022_2023_2024.xlsx',
         index=False)
     print("Saved clean data!")

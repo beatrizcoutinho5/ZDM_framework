@@ -11,8 +11,8 @@ plots_dir = "../plots"
 os.makedirs(plots_dir, exist_ok=True)
 
 dataset_path = r'../data/dataset_jan_dec_2022_line410.xlsx'
-# dataset_path = r'dev\data\dataset_jan_may_2023_line410.xlsx'
-# dataset_path = r'dev\data\dataset_jan_feb_2024_line410.xlsx'
+# dataset_path = r'..\data\dataset_jan_may_2023_line410.xlsx'
+# dataset_path = r'..\data\dataset_jan_feb_2024_line410.xlsx'
 
 df = pd.read_excel(dataset_path)
 
@@ -331,13 +331,13 @@ if autocorrelation_analysis == 1:
     print(f"Removed {np.abs(final_number_samples - initial_number_samples)} samples.")
 
     df.to_excel(
-        r'dev\data\clean_data\cleaned_data_with_deltavalues_2022_line410.xlsx',
+        r'..\data\clean_data\cleaned_data_with_deltavalues_2022_line410.xlsx',
         index=False)
     # df.to_excel(
-    #     r'dev\data\clean_data\cleaned_data_with_deltavalues_2023_line410.xlsx',
+    #     r'..\data\clean_data\cleaned_data_with_deltavalues_2023_line410.xlsx',
     #     index=False)
     # df.to_excel(
-    #     r'dev\data\clean_data\cleaned_data_with_deltavalues_2024_line410.xlsx',
+    #     r'..\data\clean_data\cleaned_data_with_deltavalues_2024_line410.xlsx',
     #     index=False)
     print("Saved clean data (with delta values)!")
 
@@ -356,6 +356,6 @@ if autocorrelation_analysis == 0:
     print(f"Removed {np.abs(final_number_samples - initial_number_samples)} samples.")
 
     df.to_excel(
-        r'dev\data\clean_data\cleaned_data_2022_line410.xlsx',
+        r'..\data\clean_data\cleaned_data_2022_line410.xlsx',
         index=False)
     print("Saved clean data!")

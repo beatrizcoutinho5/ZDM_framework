@@ -16,9 +16,9 @@ warnings.filterwarnings("ignore", category=UserWarning)
 df = pd.read_excel(data_path)
 df = df.drop(["Recording Date", "Group", "Defect Code"], axis=1)
 
-rf_model_path = r'../models/without_delta_values/binary/binary_random_forest_model.pkl'
-xgb_model_path = r'../models/without_delta_values/binary/binary_xgb_model.json'
-catboost_model_path = r'../models/without_delta_values/binary/binary_catboost_model.cbm'
+rf_model_path = r'models/binary/binary_random_forest_model.pkl'
+xgb_model_path = r'models/binary/binary_xgb_model.json'
+catboost_model_path = r'models/binary/binary_catboost_model.cbm'
 
 rf_model = joblib.load(rf_model_path)
 xgb_model = XGBClassifier()
