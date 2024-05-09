@@ -30,8 +30,8 @@ catboost_model.load_model(catboost_model_path)
 
 # Select the optimization method
 dual_annealing_optim = 0
-powell_optim = 1
-nelder_mead_optim = 0
+powell_optim = 0
+nelder_mead_optim = 1
 basinhopping_optim = 0
 
 method_name = ''

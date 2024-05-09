@@ -29,8 +29,8 @@ catboost_model = CatBoostClassifier()
 catboost_model.load_model(catboost_model_path)
 
 # Select the optimization method
-dual_annealing_optim = 0
-powell_optim = 1
+dual_annealing_optim = 1
+powell_optim = 0
 nelder_mead_optim = 0
 basinhopping_optim = 0
 

@@ -24,7 +24,7 @@ df = pd.concat([df2022, df2023, df2024], axis=0)
 make_plots = 0
 
 # Autocorrelation and Time Series Analysis?
-autocorrelation_analysis = 0
+autocorrelation_analysis = 1
 
 # Print initial dataset characteristics
 initial_number_features = len(df.columns)
@@ -309,7 +309,7 @@ if autocorrelation_analysis == 1:
 
     # Remove redundant features after the autocorrelation process
 
-    for col in (high_autocorr_columns + ["Recording Date"] + ["Quantity"]):
+    for col in (high_autocorr_columns + ["Recording Date"]):
         df = df.drop("{}-1".format(col), axis=1)
 
     # removing the quantity feature as a defect always has quantity = 1
@@ -327,6 +327,8 @@ if autocorrelation_analysis == 1:
 
     print(f"/nRemoved {np.abs(final_number_features - initial_number_features)} features.")
     print(f"Removed {np.abs(final_number_samples - initial_number_samples)} samples.")
+
+    df['Defect Code'] = df['Defect Code'].apply(lambda x: 1 if x != 0 else 0)
 
     df.to_excel(
         r'../data/clean_data/cleaned_data_with_deltavalues2022_2023_2024.xlsx',

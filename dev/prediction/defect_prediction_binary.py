@@ -29,7 +29,7 @@ import_test_train_data = 0
 load_models = 0
 
 # Data Augmentation?
-augmentation = 1
+augmentation = 0
 print(f"Data Augmentation: {augmentation}")
 
 # Final data arrays

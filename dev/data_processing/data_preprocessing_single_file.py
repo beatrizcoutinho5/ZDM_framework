@@ -130,7 +130,7 @@ updated_category_numerical_df = updated_category_numerical_df[~updated_category_
 
 
 updated_category_numerical_df.to_excel('categorical_to_numeric_representations.xlsx', index=False)
-updated_category_numerical_df.to_excel(r'app\static\categorical_to_numeric_representations.xlsx', index=False)
+updated_category_numerical_df.to_excel(r'..\..\app\static\categorical_to_numeric_representations.xlsx', index=False)
 
 category_numerical_df = pd.read_excel('categorical_to_numeric_representations.xlsx')
 category_to_numerical_loaded = dict(zip(category_numerical_df['Category'], category_numerical_df['Numerical Value']))
