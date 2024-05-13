@@ -86,6 +86,8 @@ def on_message(client, userdata, message):
     lime_fig = None
 
     payload = json.loads(message.payload.decode())
+
+    print(payload)
     recording_date = str(payload.get("Recording Date"))
 
     # Start timer

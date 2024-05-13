@@ -29,8 +29,8 @@ catboost_model = CatBoostClassifier()
 catboost_model.load_model(catboost_model_path)
 
 # Select the optimization method
-dual_annealing_optim = 0
-powell_optim = 1
+dual_annealing_optim = 1
+powell_optim = 0
 nelder_mead_optim = 0
 basinhopping_optim = 0
 
@@ -47,9 +47,9 @@ if basinhopping_optim == 1:
     method_name = 'basinhopping'
 
 # Select the fitness function
-mse_ff = 1
+mse_ff = 0
 logcosh_ff = 0
-mae_ff = 0
+mae_ff = 1
 mse_wts_ff = 0
 
 ff_name = ''
@@ -349,11 +349,11 @@ for test_df in all_dfs:
 
         # initial_parameters = [sample[0][index] for index in indices]
 
-        print('Initial Parameters:')
-        for feature in real_time_features:
-            index = indices_dict[feature]
-            initial_value = features_space[index][1]
-            print(f"    {feature}: {initial_value.round(2)}")
+        # print('Initial Parameters:')
+        # for feature in real_time_features:
+        #     index = indices_dict[feature]
+        #     initial_value = features_space[index][1]
+        #     print(f"    {feature}: {initial_value.round(2)}")
 
 
         for feature, value in features_space:
@@ -424,15 +424,15 @@ for test_df in all_dfs:
         # print('Best Parameters:    ', best_params_selected.round(2))
 
 
-        print("Best Parameters:")
-        for i, feature in enumerate(real_time_features):
-            print(f"    {feature}: {best_params_selected[i].round(2)}")
+        # print("Best Parameters:")
+        # for i, feature in enumerate(real_time_features):
+        #     print(f"    {feature}: {best_params_selected[i].round(2)}")
 
         print('Initial Defect Score:  ', initial_defect_score)
         print('Final Defect Score:    ', best_final_defect_score)
         print('Reduced Defect Score in:    ', best_reduction_percentage, '%')
         print('Elapsed Time (in seconds):    ', round(best_elapsed_time, 2))
-        print('MSE:                ', best_mse.round(3))
+        # print('MSE:                ', best_mse.round(3))
 
         # Update total values for averages with the best result from the three target scores
         total_initial_defect_score += initial_defect_score

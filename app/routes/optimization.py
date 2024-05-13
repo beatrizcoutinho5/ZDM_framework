@@ -97,27 +97,70 @@ def feature_space_pre_processing(sample):
     # Intervals for the features that can be adjusted in real-time
     # the rest of the features can't be adjusted
     intervals = {
-        'Thermal Cycle Time': (10, 150),
-        'Pressure': (250, 350),
-        'Lower Plate Temperature': (160, 210),
-        'Upper Plate Temperature': (160, 210)
+        'Thermal Cycle Time': (0, 2300),
+        'Pressure': (0, 2300),
+        'Lower Plate Temperature': (0, 2300),
+        'Upper Plate Temperature': (0, 2300),
+        'Cycle Time': (0, 300),
+        'Mechanical Cycle Time': (0, 300),
+        'Carriage Speed': (0, 2300),
+        'Press Input Table Speed': (0, 2300),
+        'Scraping Cycle': (0, 23),
+        'Transverse Saw Cycle': (0, 2300),
     }
 
-    # Updates the values (bounds) for the real time features in the features_space
-    for i, (f, v) in enumerate(features_space):
-        if f in intervals:
-            features_space[i] = (f, intervals[f])
+    # # Updates the values (bounds) for the real time features in the features_space
+    # for i, (f, v) in enumerate(features_space):
+    #     if f in intervals:
+    #         features_space[i] = (f, intervals[f])
+    #
+    # # Indices of the real time features in the features_space
+    # thermal_cycle_time_index = [i for i, (feature, _) in enumerate(features_space) if feature == 'Thermal Cycle Time'][
+    #     0]
+    # pressure_index = [i for i, (feature, _) in enumerate(features_space) if feature == 'Pressure'][0]
+    # lower_plate_temp_index = \
+    #     [i for i, (feature, _) in enumerate(features_space) if feature == 'Lower Plate Temperature'][0]
+    # upper_plate_temp_index = \
+    #     [i for i, (feature, _) in enumerate(features_space) if feature == 'Upper Plate Temperature'][0]
+    #
+    # indices = [thermal_cycle_time_index, pressure_index, lower_plate_temp_index, upper_plate_temp_index]
+
+    real_time_features = ['Thermal Cycle Time', 'Pressure', 'Lower Plate Temperature', 'Upper Plate Temperature',
+                          'Cycle Time', 'Mechanical Cycle Time', 'Carriage Speed', 'Press Input Table Speed',
+                          'Scraping Cycle', 'Transverse Saw Cycle']
 
     # Indices of the real time features in the features_space
-    thermal_cycle_time_index = [i for i, (feature, _) in enumerate(features_space) if feature == 'Thermal Cycle Time'][
-        0]
-    pressure_index = [i for i, (feature, _) in enumerate(features_space) if feature == 'Pressure'][0]
-    lower_plate_temp_index = \
-        [i for i, (feature, _) in enumerate(features_space) if feature == 'Lower Plate Temperature'][0]
-    upper_plate_temp_index = \
-        [i for i, (feature, _) in enumerate(features_space) if feature == 'Upper Plate Temperature'][0]
+    indices_dict = {}
+    for feature in real_time_features:
+        indices_dict[feature] = [i for i, (feat, _) in enumerate(features_space) if feat == feature][0]
 
-    indices = [thermal_cycle_time_index, pressure_index, lower_plate_temp_index, upper_plate_temp_index]
+    indices = list(indices_dict.values())
+
+    for feature, value in features_space:
+
+        if feature in intervals:
+
+            min_val, max_val = intervals[feature]
+
+            # The optimization range is the actual value +/- 20%, to allow a realistic adjustment
+            adjustment = value * 0.2
+
+            new_min = max(min_val, value - adjustment)
+            new_max = min(max_val, value + adjustment)
+
+            # If the actual value is zero, the maximum is set to 10% of the upper bound defined in 'intervals'
+            if value == 0 or new_max == 0:
+                new_max = 0.1 * max_val
+
+            # To ensure the adjusted values stay within the interval bounds
+            new_min = max(new_min, min_val)
+            new_max = min(new_max, max_val)
+
+            if value > max_val:
+                new_max = value
+                new_min = max(min_val, new_max - adjustment)
+
+            features_space[features_space.index([feature, value])] = [feature, (new_min, new_max)]
 
     return features_space, indices
 
@@ -139,10 +182,16 @@ def optimize_defect_score(sample):
 
     # Get sample's initial real-time features values
     initial_parameters = [sample[0][index] for index in indices]
-    current_tct = round(initial_parameters[0])
-    current_pressure = round(initial_parameters[1])
-    current_lpt = round(initial_parameters[2])
-    current_upt = round(initial_parameters[3])
+    # current_tct = round(initial_parameters[0])
+    # current_pressure = round(initial_parameters[1])
+    # current_lpt = round(initial_parameters[2])
+    # current_upt = round(initial_parameters[3])
+    # current_ct = round(initial_parameters[0])
+    # current_mct = round(initial_parameters[0])
+    # current_cs = round(initial_parameters[0])
+    # current_pits = round(initial_parameters[0])
+    # current_sc = round(initial_parameters[0])
+    # current_tsc = round(initial_parameters[0])
 
     # If the defect score is under 10%, an optimization is not needed
     if initial_defect_score <= 0.1:
