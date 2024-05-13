@@ -40,6 +40,13 @@ current_lpt = "-"
 current_upt = "-"
 current_pressure = "-"
 current_tct = "-"
+current_ct = "-"
+current_mct = "-"
+current_cs = "-"
+current_pits = "-"
+current_sc = "-"
+current_tsc = "-"
+
 current_width = "-"
 current_length = "-"
 
@@ -47,6 +54,12 @@ pressure_after_optim = "-"
 upt_after_optim = "-"
 lpt_after_optim = "-"
 tct_after_optim = "-"
+ct_after_optim = "-"
+mct_after_optim = "-"
+cs_after_optim = "-"
+pits_after_optim = "-"
+sc_after_optim = "-"
+tsc_after_optim = "-"
 
 explanation = 0
 
@@ -70,10 +83,9 @@ csv_done = 0
 
 # when a mqqt message is received
 def on_message(client, userdata, message):
-
     global prediction, defect_score_after_optim, optim_phrase, reduction_percentage
-    global current_lpt, current_upt, current_pressure, current_tct, current_width, current_length
-    global pressure_after_optim, upt_after_optim, lpt_after_optim, tct_after_optim
+    global current_lpt, current_upt, current_pressure, current_tct, current_width, current_length, current_ct, current_mct, current_cs, current_pits, current_sc, current_tsc
+    global pressure_after_optim, upt_after_optim, lpt_after_optim, tct_after_optim, ct_after_optim, mct_after_optim, cs_after_optim, pits_after_optim, sc_after_optim, tsc_after_optim
     global explanation, shap_fig, lime_fig, line_status
 
     # Variable initialization
@@ -107,9 +119,15 @@ def on_message(client, userdata, message):
         current_upt = "-"
         current_pressure = "-"
         current_tct = "-"
+        current_ct = "-"
+        current_mct = "-"
+        current_cs = "-"
+        current_pits = "-"
+        current_sc = "-"
+        current_tsc = "-"
         current_width = "-"
         current_length = "-"
-        defect_score_after_optim = reduction_percentage = tct_after_optim = pressure_after_optim = lpt_after_optim = upt_after_optim = "-"
+        defect_score_after_optim = reduction_percentage = tct_after_optim = pressure_after_optim = lpt_after_optim = upt_after_optim = ct_after_optim = mct_after_optim = cs_after_optim = pits_after_optim = sc_after_optim =  tsc_after_optim = "-"
 
     elif processed_sample != -1:
 
@@ -118,6 +136,13 @@ def on_message(client, userdata, message):
         current_upt = processed_sample.get('Upper Plate Temperature')
         current_pressure = processed_sample.get('Pressure')
         current_tct = processed_sample.get('Thermal Cycle Time')
+        current_ct = processed_sample.get('Cycle Time')
+        current_mct = processed_sample.get('Mechanical Cycle Time')
+        current_cs = processed_sample.get('Carriage Speed')
+        current_pits = processed_sample.get('Press Input Table Speed')
+        current_sc = processed_sample.get('Scraping Cycle')
+        current_tsc = processed_sample.get('Transverse Saw Cycle')
+
         current_width = processed_sample.get('Width')
         current_length = processed_sample.get('Length')
 
@@ -126,16 +151,14 @@ def on_message(client, userdata, message):
 
         # Set the "load" condition to display a loading image on the UI while the optimization model is running,
         # as it can take up to 1 minute to complete
-        defect_score_after_optim = reduction_percentage = tct_after_optim = pressure_after_optim = lpt_after_optim = upt_after_optim = "load"
+        defect_score_after_optim = reduction_percentage = tct_after_optim = pressure_after_optim = lpt_after_optim = upt_after_optim = ct_after_optim = mct_after_optim = cs_after_optim = pits_after_optim = sc_after_optim = tsc_after_optim = "load"
 
         # Optimize defect score
-        optim_phrase, defect_score_after_optim, reduction_percentage, tct_after_optim, pressure_after_optim, lpt_after_optim, upt_after_optim = optimize_defect_score(
+        optim_phrase, defect_score_after_optim, reduction_percentage, tct_after_optim, pressure_after_optim, lpt_after_optim, upt_after_optim, ct_after_optim, mct_after_optim, cs_after_optim, pits_after_optim, sc_after_optim, tsc_after_optim = optimize_defect_score(
             processed_sample)
 
         # Generate explanation if sample likely to be a defect
         if prediction >= 50:
-
-            print("\ngenerating explanation...")
 
             explanation = 1
 
@@ -152,13 +175,11 @@ def on_message(client, userdata, message):
             shap_fig = None
             lime_fig = None
 
-
     # Calculate and print the elapsed time for the processing, prediction, optimization, and explanation pipeline
     elapsed_time = time.time() - start_time
     print(f"\nTotal Elapsed Time for sample: {elapsed_time}")
 
     if processed_sample != -1:
-
         # Save processed sample and prediction to database
         db_save_sample(processed_sample, recording_date, prediction)
 
@@ -168,7 +189,6 @@ def on_message(client, userdata, message):
 # Endpoint to update the analytics page values
 @app.route('/update-analytics')
 def update_analytics():
-
     global defects_number_result, produced_panels_result, percentage_defect, defects_number_per_day_results
 
     # Get the start and end dates entered by the user
@@ -189,7 +209,6 @@ def update_analytics():
 # Endpoint to update the historic data page values
 @app.route('/update-historic-data')
 def update_historic_data():
-
     global historic_data, csv_done
     csv_done = 0
 
@@ -209,7 +228,6 @@ def update_historic_data():
 
 # MQTT client
 def mqtt_loop():
-
     mqtt_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
     mqtt_client.on_message = on_message
     mqtt_client.connect(MQTT_BROKER_HOST, MQTT_BROKER_PORT)
@@ -224,30 +242,34 @@ mqtt_thread.start()
 # Render page templates
 @app.route('/open_dashboard_explanation')
 def open_dashboard_explanation():
-
     return render_template('dashboard_explanation.html', shap_fig=shap_fig, lime_fig=lime_fig, active_page='dashboard')
+
 
 @app.route('/open_dashboard_optimization')
 def open_dashboard_optimization():
-
     return render_template('dashboard_optimization.html', prediction=prediction, optim_phrase=optim_phrase,
                            defect_score_after_optim=defect_score_after_optim, reduce_percentage=reduction_percentage,
                            current_lpt=current_lpt, current_upt=current_upt, current_pressure=current_pressure,
                            current_width=current_width, current_length=current_length, current_tct=current_tct,
+                           current_ct=current_ct, current_mct=current_mct, current_cs=current_cs,
+                           current_pits=current_pits, current_sc=current_sc, current_tsc=current_tsc,
                            lpt_after_optim=lpt_after_optim, upt_after_optim=upt_after_optim,
-                           tct_after_optim=tct_after_optim, pressure_after_optim=pressure_after_optim,
+                           tct_after_optim=tct_after_optim, ct_after_optim=ct_after_optim,
+                           mct_after_optim=mct_after_optim, cs_after_optim=cs_after_optim,
+                           pits_after_optim=pits_after_optim, sc_after_optim=sc_after_optim,
+                           tsc_after_optim=tsc_after_optim,  pressure_after_optim=pressure_after_optim,
                            explanation=explanation, active_page='dashboard')
+
 
 @app.route('/open_analytics')
 def open_analytics():
-
     return render_template('analytics.html', defects_number_result=defects_number_result,
                            produced_panels_result=produced_panels_result, percentage_defect=percentage_defect,
                            defects_number_per_day_results=defects_number_per_day_results, active_page='analytics')
 
+
 @app.route('/open_historic_data')
 def open_historic_data():
-
     return render_template('historic_data.html', historic_data=historic_data, csv_done=csv_done,
                            active_page='historic_data')
 
@@ -255,14 +277,18 @@ def open_historic_data():
 # Default page - Optimization Dashboard
 @app.route('/')
 def home():
-
     return render_template('dashboard_optimization.html', prediction=prediction, optim_phrase=optim_phrase,
                            defect_score_after_optim=defect_score_after_optim, reduce_percentage=reduction_percentage,
                            current_lpt=current_lpt, current_upt=current_upt, current_pressure=current_pressure,
                            current_width=current_width, current_length=current_length, current_tct=current_tct,
+                           current_ct=current_ct, current_mct=current_mct, current_cs=current_cs,
+                           current_pits=current_pits, current_sc=current_sc, current_tsc=current_tsc,
                            lpt_after_optim=lpt_after_optim, upt_after_optim=upt_after_optim,
-                           tct_after_optim=tct_after_optim, pressure_after_optim=pressure_after_optim,
-                           active_page='dashboard')
+                           tct_after_optim=tct_after_optim, ct_after_optim=ct_after_optim,
+                           mct_after_optim=mct_after_optim, cs_after_optim=cs_after_optim,
+                           pits_after_optim=pits_after_optim, sc_after_optim=sc_after_optim,
+                           tsc_after_optim=tsc_after_optim,  pressure_after_optim=pressure_after_optim,
+                           explanation=explanation, active_page='dashboard')
 
 # Run app
 if __name__ == '__main__':

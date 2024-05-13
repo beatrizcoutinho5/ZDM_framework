@@ -109,22 +109,6 @@ def feature_space_pre_processing(sample):
         'Transverse Saw Cycle': (0, 2300),
     }
 
-    # # Updates the values (bounds) for the real time features in the features_space
-    # for i, (f, v) in enumerate(features_space):
-    #     if f in intervals:
-    #         features_space[i] = (f, intervals[f])
-    #
-    # # Indices of the real time features in the features_space
-    # thermal_cycle_time_index = [i for i, (feature, _) in enumerate(features_space) if feature == 'Thermal Cycle Time'][
-    #     0]
-    # pressure_index = [i for i, (feature, _) in enumerate(features_space) if feature == 'Pressure'][0]
-    # lower_plate_temp_index = \
-    #     [i for i, (feature, _) in enumerate(features_space) if feature == 'Lower Plate Temperature'][0]
-    # upper_plate_temp_index = \
-    #     [i for i, (feature, _) in enumerate(features_space) if feature == 'Upper Plate Temperature'][0]
-    #
-    # indices = [thermal_cycle_time_index, pressure_index, lower_plate_temp_index, upper_plate_temp_index]
-
     real_time_features = ['Thermal Cycle Time', 'Pressure', 'Lower Plate Temperature', 'Upper Plate Temperature',
                           'Cycle Time', 'Mechanical Cycle Time', 'Carriage Speed', 'Press Input Table Speed',
                           'Scraping Cycle', 'Transverse Saw Cycle']
@@ -136,10 +120,12 @@ def feature_space_pre_processing(sample):
 
     indices = list(indices_dict.values())
 
+    # Update the optimization bounds for the real time features
     for feature, value in features_space:
 
-        if feature in intervals:
+        if feature in real_time_features:
 
+            # Get the current value of the feature
             min_val, max_val = intervals[feature]
 
             # The optimization range is the actual value +/- 20%, to allow a realistic adjustment
@@ -148,19 +134,22 @@ def feature_space_pre_processing(sample):
             new_min = max(min_val, value - adjustment)
             new_max = min(max_val, value + adjustment)
 
-            # If the actual value is zero, the maximum is set to 10% of the upper bound defined in 'intervals'
+            # If the current/actual value is zero, the maximum is set to 10% of the upper bound defined in 'intervals'
             if value == 0 or new_max == 0:
                 new_max = 0.1 * max_val
 
-            # To ensure the adjusted values stay within the interval bounds
+            # Ensure the adjusted values stay within the interval bounds
             new_min = max(new_min, min_val)
             new_max = min(new_max, max_val)
 
+            # If the current/actual value is larger than the defined maximum value, the
+            # upper bound is set to the current value
             if value > max_val:
                 new_max = value
                 new_min = max(min_val, new_max - adjustment)
 
-            features_space[features_space.index([feature, value])] = [feature, (new_min, new_max)]
+            index = features_space.index((feature, value))
+            features_space[index] = (feature, (new_min, new_max))
 
     return features_space, indices
 
@@ -182,20 +171,20 @@ def optimize_defect_score(sample):
 
     # Get sample's initial real-time features values
     initial_parameters = [sample[0][index] for index in indices]
-    # current_tct = round(initial_parameters[0])
-    # current_pressure = round(initial_parameters[1])
-    # current_lpt = round(initial_parameters[2])
-    # current_upt = round(initial_parameters[3])
-    # current_ct = round(initial_parameters[0])
-    # current_mct = round(initial_parameters[0])
-    # current_cs = round(initial_parameters[0])
-    # current_pits = round(initial_parameters[0])
-    # current_sc = round(initial_parameters[0])
-    # current_tsc = round(initial_parameters[0])
+    current_tct = round(initial_parameters[0])
+    current_pressure = round(initial_parameters[1])
+    current_lpt = round(initial_parameters[2])
+    current_upt = round(initial_parameters[3])
+    current_ct = round(initial_parameters[4])
+    current_mct = round(initial_parameters[5])
+    current_cs = round(initial_parameters[6])
+    current_pits = round(initial_parameters[7])
+    current_sc = round(initial_parameters[8])
+    current_tsc = round(initial_parameters[9])
 
     # If the defect score is under 10%, an optimization is not needed
     if initial_defect_score <= 0.1:
-        return "Defect probability is too low, no need for optimization!", "-", "-", current_tct, current_pressure, current_lpt, current_upt
+        return "Defect probability is too low, no need for optimization!", "-", "-", current_tct, current_pressure, current_lpt, current_upt, current_ct, current_mct, current_cs, current_pits, current_sc, current_tsc
 
     # Defining the target defect scores for the optimizer
     target_defect_scores = [0.01, 0.5]
@@ -238,7 +227,7 @@ def optimize_defect_score(sample):
 
         initial_defect_score_p = initial_defect_score[0] * 100
 
-        return "Parameters can't be optimized!", initial_defect_score_p, "0", current_tct, current_pressure, current_lpt, current_upt
+        return "Parameters can't be optimized!", initial_defect_score_p, "0", current_tct, current_pressure, current_lpt, current_upt, current_ct, current_mct, current_cs, current_pits, current_sc, current_tsc
 
     else:
 
@@ -246,7 +235,7 @@ def optimize_defect_score(sample):
         print('\n**** Optimization Results ****')
         print('Target Defect Score:   ', best_target_defect_score)
         print('Initial Parameters:    ', initial_parameters)
-        print('Best Parameters:    ', best_params_selected.round(2))
+        print('Best Parameters:    ', best_params_selected.round(0))
         print('Initial Defect Score:  ', initial_defect_score)
         print('Final Defect Score:    ', best_final_defect_score)
         print('Reduced Defect Score in:    ', best_reduction_percentage, '%')
@@ -267,5 +256,11 @@ def optimize_defect_score(sample):
     pressure_after_optim = round(best_params_selected[1], 1)  # Pressure
     lpt_after_optim = round(best_params_selected[2], 1)  # Lower Plate Temperature
     upt_after_optim = round(best_params_selected[3], 1)  # Upper Plate Temperature
+    ct_after_optim = round(best_params_selected[4], 1)  # Cycle Time
+    mct_after_optim = round(best_params_selected[5], 1)  # Mechanical Cycle Time
+    cs_after_optim = round(best_params_selected[6], 1)  # Carriage Speed
+    pits_after_optim = round(best_params_selected[7], 1)  # Press Input Table Speed
+    sc_after_optim = round(best_params_selected[8], 1)  # Scraping Cycle
+    tsc_after_optim = round(best_params_selected[9], 1)  # Transverse Saw Cycle
 
-    return "Defect Probability After Optimization", best_final_defect_score, best_reduction_percentage, tct_after_optim, pressure_after_optim, lpt_after_optim, upt_after_optim
+    return "Defect Probability After Optimization", best_final_defect_score, best_reduction_percentage, tct_after_optim, pressure_after_optim, lpt_after_optim, upt_after_optim, ct_after_optim, mct_after_optim, cs_after_optim, pits_after_optim, sc_after_optim, tsc_after_optim

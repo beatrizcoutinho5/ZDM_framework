@@ -239,7 +239,7 @@
   /* Container for optimization dashboard */
   position: relative;
   height: 90%;
-  width: 35%;
+  width: 40%;
   margin: 2%;
   display: flex;
   flex-direction: column;
@@ -254,7 +254,7 @@
 
 .optim-div-big {
   /* Bigger rectangular division */
-  height: 25%;
+  height: 22%;
   width: 98%;
   background-color: white;
   border-radius: 10px;
@@ -266,10 +266,11 @@
 
 .optim-div-big-text {
   /* Text style for bigger rectangular division */
-  font-size: 23px;
+  font-size: 20px;
   color: #031a6b;
-  margin-top: 2%;
+  margin-top: 3%;
   margin-left: 3%;
+  text-align: left;
   padding: 2%;
   width: 50%;
 }
@@ -280,7 +281,7 @@
   font-size: 65px;
   color: #ea4646;
   margin-top: -1%;
-  margin-left: 245px;
+  margin-left: 300px;
   padding: 2%;
   text-align: center;
   justify-content: center;
@@ -289,7 +290,7 @@
 .optim-div-small {
   /* Smaller square division */
   flex: 1;
-  height: 65%;
+  height: 60%;
   background-color: white;
   border-radius: 10px;
   margin: 1%;
@@ -302,28 +303,44 @@
 
 .optim-div-small-text {
   /* Text style for smaller square division */
-  font-size: 13px;
+  font-size: 11px;
   color: #031a6b;
-  margin-top: 4%;
+  margin-top: 3%;
 }
 
 .optim-div-small-num {
   /* Number style for smaller square division */
-  font-size: 50px;
+  margin-top: 4%;
+  font-size: 30px;
   color: #0168ca;
+}
+
+.reduce-div{
+  /* Sub division */
+  width: 65%;
+  height: 59%;
+  margin-right: 1%;
+  margin-left: 1%;
+  margin-top: 1%;
+  bottom: 5%;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .load-img-container {
   /* Loading image container */
-  height: 40px;
-  width: 40px;
+  margin-top: 1%;
+  height: 35px;
+  width: 35px;
   align-items: center;
 }
 
 .load-img {
   /* Loading image style */
-  height: 40px;
-  width: 40px;
+  margin-top: 3%;
+  height: 30px;
+  width: 30px;
 }
 
 /* Explanation dashboard */

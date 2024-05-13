@@ -37,8 +37,6 @@ def shap_explainer(sample):
     fig, ax = plt.subplots(figsize=(25, 20))
     shap.summary_plot(shap_values_for_class, features=sample, feature_names=sample_keys, plot_type='bar',show=False)
 
-    print("shap done")
-
     return fig
 
 
@@ -73,8 +71,6 @@ def lime_explainer(sample):
     # LIME plot that displays the rules guiding the prediction
     fig = exp.as_pyplot_figure(label=1)
     fig.set_size_inches(20, 10)
-
-    print("lime done")
 
     return fig
 

@@ -52,7 +52,7 @@
 
     <div class="bg-rect">
 
-        <div class="optim-div" style="left: 5%">
+        <div class="optim-div" style="left: 2%">
 
             <!-- Current values (before optimization) -->
 
@@ -63,9 +63,11 @@
                     of Current Panel
                 </span>
 
-                <span class="optim-div-big-num font-alatsi">
+                <span class="optim-div-big-num font-alatsi" style="color:{% if prediction | int > 50 %}#ea4646{% else %}#48D706{% endif %};">
                     {{prediction}}%
                 </span>
+
+
             </div>
 
             <div class="optim-sub-div font-alata">
@@ -74,15 +76,24 @@
                 <div class="optim-div-small">
                     <span class="optim-div-small-text"> Upper Plate Temperature </span>
 
-                    <span class="optim-div-small-num font-alatsi"> {{current_upt}}°C </span>
+                    <span class="optim-div-small-num font-alatsi"> {{current_upt}} <span style="font-size: 15px;"> °C </span> </span>
                 </div>
 
                 <!-- Current pressure -->
                 <div class="optim-div-small">
                     <span class="optim-div-small-text"> Pressure </span>
 
-                    <span class="optim-div-small-num font-alatsi"> {{current_pressure}}Pa </span>
+                    <span class="optim-div-small-num font-alatsi"> {{current_pressure}} <span style="font-size: 15px;"> Pa </span> </span>
                 </div>
+
+                <!-- Current cycle time -->
+                <div class="optim-div-small">
+                    <span class="optim-div-small-text"> Cycle Time </span>
+
+                    <span class="optim-div-small-num font-alatsi"> {{current_ct}} <span style="font-size: 15px;"> s </span> </span>
+                </div>
+
+
             </div>
 
             <div class="optim-sub-div font-alata">
@@ -91,37 +102,71 @@
                 <div class="optim-div-small">
                     <span class="optim-div-small-text"> Lower Plate Temperature </span>
 
-                    <span class="optim-div-small-num font-alatsi"> {{current_lpt}}°C </span>
+                    <span class="optim-div-small-num font-alatsi"> {{current_lpt}} <span style="font-size: 15px;"> °C </span> </span>
                 </div>
 
                 <!-- Current thermal cycle time -->
                 <div class="optim-div-small">
                     <span class="optim-div-small-text"> Thermal Cycle Time </span>
 
-                    <span class="optim-div-small-num font-alatsi"> {{current_tct}}s </span>
+                    <span class="optim-div-small-num font-alatsi"> {{current_tct}} <span style="font-size: 15px;"> s </span> </span>
                 </div>
+
+                <!-- Current mechinal cycle time -->
+                <div class="optim-div-small">
+                    <span class="optim-div-small-text"> Mechanical Cycle Time </span>
+
+                    <span class="optim-div-small-num font-alatsi"> {{current_mct}} <span style="font-size: 15px;"> s </span> </span>
+                </div>
+
             </div>
             <div class="optim-sub-div font-alata">
 
-                <!-- Current width -->
+                <!-- Current carriage speed -->
                 <div class="optim-div-small">
-                    <span class="optim-div-small-text"> Width </span>
+                    <span class="optim-div-small-text"> Carriage Speed </span>
 
-                    <span class="optim-div-small-num font-alatsi"> {{current_width}} </span>
+                    <span class="optim-div-small-num font-alatsi"> {{current_cs}} <span style="font-size: 15px;"> rpm </span></span>
                 </div>
 
                 <!-- Current length -->
                 <div class="optim-div-small">
-                    <span class="optim-div-small-text"> Length </span>
+                    <span class="optim-div-small-text"> Scraping Cycle </span>
 
-                    <span class="optim-div-small-num font-alatsi"> {{current_length}} </span>
+                    <span class="optim-div-small-num font-alatsi"> {{current_sc}} <span style="font-size: 15px;"> s </span> </span>
                 </div>
+
+                <!-- Current length -->
+                <div class="optim-div-small">
+                    <span class="optim-div-small-text"> Transverse Saw Cycle </span>
+
+                    <span class="optim-div-small-num font-alatsi"> {{current_tsc}} <span style="font-size: 15px;"> s </span> </span>
+                </div>
+
+            </div>
+
+            <div class="optim-sub-div font-alata">
+
+                <!-- Current Press Input Table Speed  -->
+                <div class="optim-div-small" >
+                    <span class="optim-div-small-text"> Press Input Table Speed </span>
+
+                    <span class="optim-div-small-num font-alatsi"> {{current_pits}} <span style="font-size: 15px;"> rpm </span></span>
+                </div>
+
+                <div class="optim-div-small" style="background-color: transparent; box-shadow:none;">
+                </div>
+
+                <div class="optim-div-small" style="background-color: transparent; box-shadow:none;">
+                </div>
+
+
             </div>
         </div>
 
         <!-- Values after optimization  -->
 
-        <div class="optim-div" style="left: 15%">
+        <div class="optim-div" style="left: 9.3%">
             <div class="optim-div-big font-alata">
 
                 <!-- The phase displayed on the UI changes in accordance to the sample -->
@@ -134,7 +179,7 @@
                 <!-- When the model finishes, the values after the optimization are displayed -->
 
                 <!-- Defect score after optimization -->
-                <span class="optim-div-big-num font-alatsi" style="color:#48D706;">
+                <span class="optim-div-big-num font-alatsi" style="color:{% if defect_score_after_optim | int > 50 %}#ea4646{% else %}#48D706{% endif %};">
                     {% if defect_score_after_optim != "load" %}
                     {{ defect_score_after_optim }}%
                     {% else %}
@@ -153,7 +198,7 @@
 
                     <span class="optim-div-small-num font-alatsi" style="color:#805AFF;">
                         {% if upt_after_optim != "load" %}
-                        {{ upt_after_optim }}°C
+                        {{ upt_after_optim }}<span style="font-size: 15px;"> °C </span>
 
                         {% else %}
                         <div class="load-img-container">
@@ -169,7 +214,23 @@
 
                     <span class="optim-div-small-num font-alatsi" style="color:#805AFF;">
                         {% if pressure_after_optim != "load" %}
-                        {{ pressure_after_optim }}Pa
+                        {{ pressure_after_optim }} <span style="font-size: 15px;"> Pa </span>
+
+                        {% else %}
+                        <div class="load-img-container">
+                            <img class="load-img" src="{{ url_for('static', filename='images/loading.gif') }}">
+                        </div>
+                        {% endif %}
+                    </span>
+                </div>
+
+                <!-- Cycle time after optimization -->
+                <div class="optim-div-small">
+                    <span class="optim-div-small-text"> Cycle Time </span>
+
+                    <span class="optim-div-small-num font-alatsi" style="color:#805AFF;">
+                        {% if ct_after_optim != "load" %}
+                        {{ ct_after_optim }} <span style="font-size: 15px;"> Pa </span>
 
                         {% else %}
                         <div class="load-img-container">
@@ -189,7 +250,7 @@
 
                     <span class="optim-div-small-num font-alatsi" style="color:#805AFF;">
                         {% if lpt_after_optim != "load" %}
-                        {{ lpt_after_optim }}°C
+                        {{ lpt_after_optim }} <span style="font-size: 15px;"> °C </span>
 
                         {% else %}
                         <div class="load-img-container">
@@ -206,7 +267,7 @@
 
                     <span class="optim-div-small-num font-alatsi" style="color:#805AFF;">
                         {% if tct_after_optim != "load" %}
-                        {{ tct_after_optim }}s
+                        {{ tct_after_optim }} <span style="font-size: 15px;"> s </span>
 
                         {% else %}
                         <div class="load-img-container">
@@ -215,25 +276,121 @@
                         {% endif %}
                     </span>
                 </div>
+
+                <!-- Mechanical cycle time after optimization -->
+                <div class="optim-div-small">
+                    <span class="optim-div-small-text"> Mechanical Cycle Time </span>
+
+                    <span class="optim-div-small-num font-alatsi" style="color:#805AFF;">
+                        {% if mct_after_optim != "load" %}
+                        {{ mct_after_optim }} <span style="font-size: 15px;"> s </span>
+
+                        {% else %}
+                        <div class="load-img-container">
+                            <img class="load-img" src="{{ url_for('static', filename='images/loading.gif') }}">
+                        </div>
+                        {% endif %}
+                    </span>
+                </div>
+
             </div>
 
-            <!-- Difference between defect score before and after optimization -->
-            <div class="optim-div-big font-alata">
+            <div class="optim-sub-div font-alata">
 
-                <span class="optim-div-big-text" style="font-size: 20px; margin-top: 2%;">
-                    By Adjusting the Parameters,
-                    <span style="color:#805AFF;">Reduce Defect Probability</span> Up To
-                </span>
+                <!-- carriage speed after optimization -->
+                <div class="optim-div-small">
+                    <span class="optim-div-small-text"> Carriage Speed </span>
 
-                <span class="optim-div-big-num font-alatsi" style="color:#805AFF;">
-                    {% if reduce_percentage != "load" %}
-                    {{ reduce_percentage }}%
-                    {% else %}
-                    <div class="load-img-container">
-                        <img class="load-img" src="{{ url_for('static', filename='images/loading.gif') }}">
-                    </div>
-                    {% endif %}
-                </span>
+                    <span class="optim-div-small-num font-alatsi" style="color:#805AFF;">
+                        {% if cs_after_optim != "load" %}
+                        {{ cs_after_optim }} <span style="font-size: 15px;"> rpm </span>
+
+                        {% else %}
+                        <div class="load-img-container">
+                            <img class="load-img" src="{{ url_for('static', filename='images/loading.gif') }}">
+                        </div>
+                        {% endif %}
+                    </span>
+
+                </div>
+
+                <!-- Scrapping cycle after optimization -->
+                <div class="optim-div-small">
+                    <span class="optim-div-small-text"> Scrapping Cycle </span>
+
+                    <span class="optim-div-small-num font-alatsi" style="color:#805AFF;">
+                        {% if sc_after_optim != "load" %}
+                        {{ sc_after_optim }} <span style="font-size: 15px;"> s </span>
+
+                        {% else %}
+                        <div class="load-img-container">
+                            <img class="load-img" src="{{ url_for('static', filename='images/loading.gif') }}">
+                        </div>
+                        {% endif %}
+                    </span>
+                </div>
+
+                <!-- Transverse saw cycle after optimization -->
+                <div class="optim-div-small">
+                    <span class="optim-div-small-text"> Transverse Saw Cycle </span>
+
+                    <span class="optim-div-small-num font-alatsi" style="color:#805AFF;">
+                        {% if tsc_after_optim != "load" %}
+                        {{ tsc_after_optim }} <span style="font-size: 15px;"> s </span>
+
+                        {% else %}
+                        <div class="load-img-container">
+                            <img class="load-img" src="{{ url_for('static', filename='images/loading.gif') }}">
+                        </div>
+                        {% endif %}
+                    </span>
+                </div>
+
+            </div>
+
+
+            <div class="optim-sub-div font-alata">
+
+                <!-- Press Input Table Speed after optimization -->
+                <div class="optim-div-small" >
+
+                    <span class="optim-div-small-text"> Press Input Table Speed </span>
+
+                    <span class="optim-div-small-num font-alatsi" style="color:#805AFF;">
+                        {% if pits_after_optim != "load" %}
+                        {{ pits_after_optim }} <span style="font-size: 15px;"> rpm </span>
+
+                        {% else %}
+                        <div class="load-img-container">
+                            <img class="load-img" src="{{ url_for('static', filename='images/loading.gif') }}">
+                        </div>
+                        {% endif %}
+                    </span>
+                </div>
+
+                <!-- Difference between defect score before and after optimization -->
+                <div class="reduce-div">
+
+                    <span class="optim-div-big-text" style="font-size: 15px;">
+                        <div style="margin-left: 2%; margin-top:-3%;">
+                            By Adjusting the Parameters, <br>
+                            <span style="color:#0077DF; font-weight: bolder" >    Reduce Defect Probability</span>
+                            <br>    Up To
+                        </div>
+
+                    </span>
+
+                    <span class="optim-div-big-num font-alatsi" style="color:#031A6B; font-size: 40px; margin-left: 230px; padding: 0; margin-top:-4.5%;">
+                        {% if reduce_percentage != "load" %}
+                        {{ reduce_percentage }}%
+                        {% else %}
+                        <div class="load-img-container">
+                            <img class="load-img" src="{{ url_for('static', filename='images/loading.gif') }}">
+                        </div>
+                        {% endif %}
+                    </span>
+
+                </div>
 
             </div>
         </div>
