@@ -1,0 +1,1 @@
+The resulting binary classification models are stored in this folder. 

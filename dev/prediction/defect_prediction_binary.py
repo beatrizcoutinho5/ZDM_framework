@@ -20,13 +20,13 @@ from sklearn.metrics import recall_score, precision_score, confusion_matrix, Con
 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 # Make plots and prints?
-make_plots = 1
+make_plots = 0
 
 # Import test and train data?
-import_test_train_data = 0
+import_test_train_data = 1
 
 # Load models?
-load_models = 0
+load_models = 1
 
 # Data Augmentation?
 augmentation = 0
@@ -353,6 +353,8 @@ logging.info(f"Precision: {precision_score_cat:.6f}")
 if load_models == 0:
     catboost_model.save_model(r'models\binary\binary_catboost_model.cbm')
 
+load_models = 0
+
 #####################
 # ENSEMBLE / VOTING #
 #####################
@@ -374,6 +376,11 @@ else:
     voting_classifier.fit(x_train, y_train)
 
 y_pred_ensemble = voting_classifier.predict(x_test)
+
+print(f"X_Test: {x_test.shape}")
+print(f"y_Test: {y_test.shape}")
+print(f"y_pred_ensemble: {y_pred_ensemble.shape}")
+
 
 # Evaluation
 confusion_matrix_en = confusion_matrix(y_test, y_pred_ensemble)

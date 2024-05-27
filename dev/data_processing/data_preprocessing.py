@@ -9,7 +9,7 @@ from statsmodels.graphics.tsaplots import plot_acf
 make_plots = 0
 
 # Autocorrelation and Time Series Analysis?
-autocorrelation_analysis = 1
+autocorrelation_analysis = 0
 
 # Concatenate the individual dataset together?
 conc = 0

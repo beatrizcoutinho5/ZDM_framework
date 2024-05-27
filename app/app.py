@@ -99,6 +99,9 @@ def on_message(client, userdata, message):
 
     payload = json.loads(message.payload.decode())
 
+    # Processing timer
+    processing_timer = time.time()
+
     print(payload)
     recording_date = str(payload.get("Recording Date"))
 
@@ -111,6 +114,9 @@ def on_message(client, userdata, message):
 
     # Process the raw data received
     processed_sample = prepare_sample(payload)
+
+    processing_timer = time.time() - processing_timer
+    print(f"Elapsed Time to receive and process raw sample: {processing_timer}s")
 
     if processed_sample == -1:
 
@@ -146,16 +152,31 @@ def on_message(client, userdata, message):
         current_width = processed_sample.get('Width')
         current_length = processed_sample.get('Length')
 
+        # Prediction timer
+        prediction_timer = time.time()
+
         # Predict defect probability
         prediction = predict_defect(processed_sample)
+
+        prediction_timer = time.time() - prediction_timer
+        print(f"Elapsed Time to perform prediction: {prediction_timer}s")
 
         # Set the "load" condition to display a loading image on the UI while the optimization model is running,
         # as it can take up to 1 minute to complete
         defect_score_after_optim = reduction_percentage = tct_after_optim = pressure_after_optim = lpt_after_optim = upt_after_optim = ct_after_optim = mct_after_optim = cs_after_optim = pits_after_optim = sc_after_optim = tsc_after_optim = "load"
 
+        # Optimization timer
+        optim_timer = time.time()
+
         # Optimize defect score
         optim_phrase, defect_score_after_optim, reduction_percentage, tct_after_optim, pressure_after_optim, lpt_after_optim, upt_after_optim, ct_after_optim, mct_after_optim, cs_after_optim, pits_after_optim, sc_after_optim, tsc_after_optim = optimize_defect_score(
             processed_sample)
+
+        optim_timer = time.time() - optim_timer
+        print(f"Elapsed Time to perform optimization: {optim_timer}s")
+
+        # Explanation timer
+        exp_timer = time.time()
 
         # Generate explanation if sample likely to be a defect
         if prediction >= 50:
@@ -170,6 +191,9 @@ def on_message(client, userdata, message):
 
             plt.close(shap_fig)
             plt.close(lime_fig)
+
+            exp_timer = time.time() - exp_timer
+            print(f"Elapsed Time to generate explanation: {exp_timer}s")
 
         else:
             shap_fig = None

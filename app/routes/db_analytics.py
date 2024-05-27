@@ -1,5 +1,6 @@
 import csv
 import os
+import time
 import psycopg2
 
 from datetime import datetime
@@ -13,6 +14,8 @@ DB_USER = 'sie2338'
 DB_PASSWORD = 'logan123'
 
 def db_save_sample(processed_sample, recording_date, prediction):
+
+    elapsed_time = time.time()
 
     conn = psycopg2.connect(
         dbname=DB_NAME,
@@ -59,6 +62,9 @@ def db_save_sample(processed_sample, recording_date, prediction):
     conn.commit()
     cursor.close()
     conn.close()
+
+    elapsed_time = time.time() - elapsed_time
+    print(f"\nTotal Elapsed Time to save sample: {elapsed_time}")
 
     print(f"\nSaved sample data to database!")
 

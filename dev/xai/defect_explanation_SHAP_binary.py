@@ -63,7 +63,7 @@ print("Loaded models!")
 feature_names = x_test.columns
 feature_names = feature_names.astype(str)
 class_names = y_test['Defect Code'].unique()
-fig_size = (20, 10)
+fig_size = (16, 9)
 
 #################
 # Random Forest #
@@ -79,10 +79,16 @@ print(f'rf_shap_values : {rf_shap_values.shape}')
 print("Plotting and saving SHAP summary plots...")
 
 shap_values_for_class = rf_shap_values[:, :, 1]
-print(f'shap_values_for_class : {shap_values_for_class.shape}')
+
+mean_abs_shap_values = np.mean(np.abs(shap_values_for_class), axis=0)
+
+top_features_indices = np.argsort(mean_abs_shap_values)[-10:]
+
+top_features_shap_values = shap_values_for_class[:, top_features_indices]
+top_features = x_test.iloc[:, top_features_indices]
 
 fig, ax = plt.subplots(figsize=fig_size)
-shap.summary_plot(shap_values_for_class, features=x_test, feature_names=x_test.columns, plot_type='bar',
+shap.summary_plot(top_features_shap_values, features=top_features, feature_names=top_features.columns, plot_type='bar',
                   show=False)
 
 ax.set_title(f"SHAP Summary Plot for Defect Class")

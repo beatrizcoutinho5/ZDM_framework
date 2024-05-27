@@ -21,10 +21,10 @@ df2024 = pd.read_excel(dataset_2024_path)
 df = pd.concat([df2022, df2023, df2024], axis=0)
 
 # Make plots and prints?
-make_plots = 0
+make_plots = 1
 
 # Autocorrelation and Time Series Analysis?
-autocorrelation_analysis = 1
+autocorrelation_analysis = 0
 
 # Print initial dataset characteristics
 initial_number_features = len(df.columns)

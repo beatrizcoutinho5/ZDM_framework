@@ -20,13 +20,13 @@ from sklearn.metrics import recall_score, precision_score, confusion_matrix, Con
 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 # Make plots and prints?
-make_plots = 1
+make_plots = 0
 
 # Import test and train data?
-import_test_train_data = 0
+import_test_train_data = 1
 
 # Load models?
-load_models = 0
+load_models = 1
 
 # Data Augmentation?
 augmentation = 1
@@ -358,19 +358,21 @@ logging.info(f"Precision: {precision_score_cat:.6f}")
 if load_models == 0:
     catboost_model.save_model(r'models\just_defects\just_defects_catboost_model.cbm')
 
-# #####################
-# # ENSEMBLE / VOTING #
-# #####################
-#
-# print(f'\nStarting Ensemble...')
-#
+load_models = 0
+#####################
+# ENSEMBLE / VOTING #
+#####################
+
+print(f'\nStarting Ensemble...')
+
 # estimators = [
 #     ('random_forest', rndforest),
 #     ('xgboost', xgb_model),
 #     ('catboost', catboost_model)
 # ]
 #
-# voting_classifier = VotingClassifier(estimators, voting='hard')
+#
+# voting_classifier = VotingClassifier(estimators, voting='hard', flatten_transform=True)
 #
 # if load_models == 1:
 #     voting_classifier = load(r'models\just_defects\just_defects_voting_model.pkl')
@@ -378,26 +380,62 @@ if load_models == 0:
 # else:
 #     voting_classifier.fit(x_train, y_train)
 #
+# print(f"X_Test: {x_test.shape}")
+# print(f"y_Test: {y_test.shape}")
+#
 # y_pred_ensemble = voting_classifier.predict(x_test)
 #
-# # Evaluation
-# confusion_matrix_en = confusion_matrix(y_test, y_pred_ensemble)
-# disp_en = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_en, display_labels=voting_classifier.classes_)
-# disp_en.plot()
-# plt.title('Ensemble Model Confusion Matrix')
-# plt.savefig(os.path.join(r'..\plots\confusion_matrix\just_defects', 'ensemble.png'))
-# plt.show()
 #
-# recall_score_en = recall_score(y_test, y_pred_ensemble, average='weighted', zero_division=1)
-# print(f'Recall: {recall_score_en:.6f}')
-#
-# precision_score_en = precision_score(y_test, y_pred_ensemble, average='weighted', zero_division=1)
-# print(f'Precision: {precision_score_en:.6f}')
-#
-# logging.info("\nEnsemble Metrics:")
-# logging.info(f"Recall: {recall_score_en:.6f}")
-# logging.info(f"Precision: {precision_score_en:.6f}")
-#
-# # Save
-# if load_models == 0:
-#     dump(voting_classifier, r'models\just_defects\just_defects_voting_model.pkl')
+# print(f"y_pred_ensemble: {y_pred_ensemble.shape}")
+
+class CustomVotingClassifier(VotingClassifier):
+    def _predict(self, X):
+        predictions = [est.predict(X).reshape(-1) for est in self.estimators_]
+        return np.asarray(predictions).T
+
+# Define your estimators
+estimators = [
+    ('random_forest', rndforest),
+    ('xgboost', xgb_model),
+    ('catboost', catboost_model)
+]
+
+# Use the custom voting classifier
+voting_classifier = CustomVotingClassifier(estimators, voting='hard', flatten_transform=True)
+
+# Load or train the model
+if load_models == 1:
+    voting_classifier = load(r'models\just_defects\just_defects_voting_model.pkl')
+else:
+    voting_classifier.fit(x_train, y_train)
+
+print(f"X_Test: {x_test.shape}")
+print(f"y_Test: {y_test.shape}")
+
+# Make predictions
+y_pred_ensemble = voting_classifier.predict(x_test)
+
+print(f"y_pred_ensemble: {y_pred_ensemble.shape}")
+
+
+# Evaluation
+confusion_matrix_en = confusion_matrix(y_test, y_pred_ensemble)
+disp_en = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_en, display_labels=voting_classifier.classes_)
+disp_en.plot()
+plt.title('Ensemble Model Confusion Matrix')
+plt.savefig(os.path.join(r'..\plots\confusion_matrix\just_defects', 'ensemble.png'))
+plt.show()
+
+recall_score_en = recall_score(y_test, y_pred_ensemble, average='weighted', zero_division=1)
+print(f'Recall: {recall_score_en:.6f}')
+
+precision_score_en = precision_score(y_test, y_pred_ensemble, average='weighted', zero_division=1)
+print(f'Precision: {precision_score_en:.6f}')
+
+logging.info("\nEnsemble Metrics:")
+logging.info(f"Recall: {recall_score_en:.6f}")
+logging.info(f"Precision: {precision_score_en:.6f}")
+
+# Save
+if load_models == 0:
+    dump(voting_classifier, r'models\just_defects\just_defects_voting_model.pkl')

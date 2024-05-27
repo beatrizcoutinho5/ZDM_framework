@@ -20,16 +20,16 @@ from sklearn.metrics import recall_score, precision_score, confusion_matrix, Con
 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 # Make plots and prints?
-make_plots = 1
+make_plots = 0
 
 # Import test and train data?
 import_test_train_data = 0
 
 # Load models?
-load_models = 0
+load_models = 1
 
 # Data Augmentation?
-augmentation = 1
+augmentation = 0
 print(f"Data Augmentation: {augmentation}")
 
 # Final data arrays
@@ -66,7 +66,7 @@ if import_test_train_data == 1:
     x_test = pd.read_excel(r'..\data\split_train_test_data\defect_groups\defect_groups_x_test.xlsx')
 
     y_test = pd.read_excel(r'..\data\split_train_test_data\defect_groups\defect_groups_y_test.xlsx')[
-        'Defect Code']
+        'Group']
 
     print(f'Loaded test and train data!')
 
@@ -95,11 +95,11 @@ if import_test_train_data == 0:
     df_test = df_test[df_test["Defect Code"] != 0]
 
     # Removing the Recording Date and targets from the data
-    x_train = df_train.drop(["Recording Date", "Defect Code", "Group"], axis=1)
-    x_test = df_test.drop(["Recording Date", "Defect Code", "Group"], axis=1)
-
     y_train = df_train["Group"]
     y_test = df_test["Group"]
+
+    x_train = df_train.drop(["Recording Date", "Defect Code", "Group"], axis=1)
+    x_test = df_test.drop(["Recording Date", "Defect Code", "Group"], axis=1)
 
     print(f'Test and train data done!')
 
@@ -127,13 +127,13 @@ if import_test_train_data == 0:
             # Number of occurrences for each class of defects before augmentation
             sns.barplot(x=defect_count.index, y=defect_count.values, palette="magma", ax=axes[0])
             axes[0].set_title("ORIGINAL - Quantity of the different defect codes in train data")
-            axes[0].set_xlabel("Defect Code")
+            axes[0].set_xlabel("Group")
             axes[0].set_ylabel("Quantity")
 
             # Number of occurrences for each class of defects after augmentation
             sns.barplot(x=defect_count_aug.index, y=defect_count_aug.values, palette="magma", ax=axes[1])
             axes[1].set_title("AUGMENTED - Quantity of the different defect codes in train data")
-            axes[1].set_xlabel("Defect Code")
+            axes[1].set_xlabel("Group")
             axes[1].set_ylabel("Quantity")
 
             output_path = os.path.join(aug_plots_dir, 'defect_groups_before_and_after.png')
@@ -157,7 +157,7 @@ if import_test_train_data == 0:
             r'..\data\split_train_test_data\defect_groups\defect_groups_x_train_aug.xlsx',
             index=False)
 
-        pd.Series(y_train, name='Defect Code').to_excel(
+        pd.Series(y_train, name='Group').to_excel(
             r'..\data\split_train_test_data\defect_groups\defect_groups_y_train_aug.xlsx',
             index=False)
 
@@ -167,7 +167,7 @@ if import_test_train_data == 0:
             r'..\data\split_train_test_data\defect_groups\defect_groups_x_train.xlsx',
             index=False)
 
-        pd.Series(y_train, name='Defect Code').to_excel(
+        pd.Series(y_train, name='Group').to_excel(
             r'..\data\split_train_test_data\defect_groups\defect_groups_y_train.xlsx',
             index=False)
 
@@ -175,7 +175,7 @@ if import_test_train_data == 0:
         r'..\data\split_train_test_data\defect_groups\defect_groups_x_test.xlsx',
         index=False)
 
-    pd.Series(y_test, name='Defect Code').to_excel(
+    pd.Series(y_test, name='Group').to_excel(
         r'..\data\split_train_test_data\defect_groups\defect_groups_y_test.xlsx',
         index=False)
 
@@ -354,12 +354,12 @@ logging.info(f"Precision: {precision_score_cat:.6f}")
 if load_models == 0:
     catboost_model.save_model(r'models\defect_groups\defect_groups_catboost_model.cbm')
 
-# #####################
-# # ENSEMBLE / VOTING #
-# #####################
-#
-# print(f'\nStarting Ensemble...')
-#
+#####################
+# ENSEMBLE / VOTING #
+#####################
+
+print(f'\nStarting Ensemble...')
+
 # estimators = [
 #     ('random_forest', rndforest),
 #     ('xgboost', xgb_model),
@@ -376,7 +376,35 @@ if load_models == 0:
 #
 # x_test_reshaped = x_test.reshape(-1)
 # y_pred_ensemble = voting_classifier.predict(x_test_reshaped)
-#
+
+class CustomVotingClassifier(VotingClassifier):
+    def _predict(self, X):
+        predictions = [est.predict(X).reshape(-1) for est in self.estimators_]
+        return np.asarray(predictions).T
+
+# Define your estimators
+estimators = [
+    ('random_forest', rndforest),
+    ('xgboost', xgb_model),
+    ('catboost', catboost_model)
+]
+
+# Use the custom voting classifier
+voting_classifier = CustomVotingClassifier(estimators, voting='hard', flatten_transform=True)
+
+# Load or train the model
+if load_models == 1:
+    voting_classifier = load(r'models\just_defects\just_defects_voting_model.pkl')
+else:
+    voting_classifier.fit(x_train, y_train)
+
+# Make predictions
+y_pred_ensemble = voting_classifier.predict(x_test)
+
+# To ensure all labels are strings
+# y_test = y_test.astype(str)
+# y_pred_ensemble = y_pred_ensemble.astype(str)
+
 # # Evaluation
 # confusion_matrix_en = confusion_matrix(y_test, y_pred_ensemble)
 # disp_en = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_en, display_labels=voting_classifier.classes_)
@@ -384,17 +412,17 @@ if load_models == 0:
 # plt.title('Ensemble Model Confusion Matrix')
 # plt.savefig(os.path.join(r'..\plots\confusion_matrix\defect_groups', 'ensemble.png'))
 # plt.show()
-#
-# recall_score_en = recall_score(y_test, y_pred_ensemble, average='weighted', zero_division=1)
-# print(f'Recall: {recall_score_en:.6f}')
-#
-# precision_score_en = precision_score(y_test, y_pred_ensemble, average='weighted', zero_division=1)
-# print(f'Precision: {precision_score_en:.6f}')
-#
-# logging.info("\nEnsemble Metrics:")
-# logging.info(f"Recall: {recall_score_en:.6f}")
-# logging.info(f"Precision: {precision_score_en:.6f}")
-#
-# # Save
-# if load_models == 0:
-#     dump(voting_classifier, r'models\defect_groups\defect_groups_voting_model.pkl')
+
+recall_score_en = recall_score(y_test, y_pred_ensemble, average='weighted', zero_division=1)
+print(f'Recall: {recall_score_en:.6f}')
+
+precision_score_en = precision_score(y_test, y_pred_ensemble, average='weighted', zero_division=1)
+print(f'Precision: {precision_score_en:.6f}')
+
+logging.info("\nEnsemble Metrics:")
+logging.info(f"Recall: {recall_score_en:.6f}")
+logging.info(f"Precision: {precision_score_en:.6f}")
+
+# Save
+if load_models == 0:
+    dump(voting_classifier, r'models\defect_groups\defect_groups_voting_model.pkl')

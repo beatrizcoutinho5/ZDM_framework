@@ -1,0 +1,1 @@
+The resulting binary data with and without data-balancing, using SMOTE, is stored in this folder. Contains defective (1 class) and non-defective (0 class) samples.

@@ -1,0 +1,1 @@
+After train-test splitting, the files are stored in this folder.

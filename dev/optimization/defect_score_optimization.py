@@ -29,8 +29,8 @@ catboost_model = CatBoostClassifier()
 catboost_model.load_model(catboost_model_path)
 
 # Select the optimization method
-dual_annealing_optim = 1
-powell_optim = 0
+dual_annealing_optim = 0
+powell_optim = 1
 nelder_mead_optim = 0
 basinhopping_optim = 0
 
@@ -49,8 +49,8 @@ if basinhopping_optim == 1:
 # Select the fitness function
 mse_ff = 0
 logcosh_ff = 0
-mae_ff = 1
-mse_wts_ff = 0
+mae_ff = 0
+mse_wts_ff = 1
 
 ff_name = ''
 
@@ -66,6 +66,11 @@ if mse_wts_ff == 1:
 # Use random indexes for the sample -> 1
 # Use the same sample indexes (for consistency when comparing results) -> 0
 random_index = 0
+
+if random_index == 1:
+    # To clean the file previous contents
+    with open('optimization_df_indexes.csv', 'w') as file:
+        pass
 
 # To store the average optimization result for each defect score range
 average_results = []
@@ -131,11 +136,15 @@ for test_df in all_dfs:
     # Select 50 random samples and save their indexes in a file
     if random_index == 1:
 
+        print("\n Selecting random indexes...")
+
         sample_size = min(50, len(test_df))
         random_defect_indexes = np.random.choice(test_df.index, size=sample_size, replace=False)
 
         random_index_df = pd.DataFrame({'DF': [df_name], 'Indexes': [','.join(map(str, random_defect_indexes))]})
         random_index_df.to_csv('optimization_df_indexes.csv', mode='a', header=False, index=False)
+
+        print("Indexes saved!")
 
 
     # Use the indexes already stored in the file (for consistency when comparing results between methods - always using
@@ -170,26 +179,27 @@ for test_df in all_dfs:
 
 
     # Fitness Functions
+    def fitness_function(x, target_defect_score, features_space):
 
-    # Using MSE
-    if mse_ff == 1:
-        def fitness_function(x, target_defect_score, features_space):
+        # Using MSE
+        if mse_ff == 1:
+
             x_concat = build_feature_array(x, features_space)
             current_defect_score = defect_score(x_concat)
 
             return mean_squared_error(current_defect_score, [target_defect_score])
 
-    # MSE without any target score
-    if mse_wts_ff == 1:
-        def fitness_function(x, target_defect_score, features_space):
+        # MSE without any target score
+        if mse_wts_ff == 1:
+
             x_concat = build_feature_array(x, features_space)
             current_defect_score = defect_score(x_concat)
 
             return mean_squared_error(current_defect_score, [current_defect_score])
 
-    # Using Log-Cosh Loss
-    if logcosh_ff == 1:
-        def fitness_function(x, target_defect_score, features_space):
+        # Using Log-Cosh Loss
+        if logcosh_ff == 1:
+
             x_concat = build_feature_array(x, features_space)
             current_defect_score = defect_score(x_concat)
 
@@ -199,9 +209,9 @@ for test_df in all_dfs:
 
             return np.mean(loss)
 
-    # Using Absolute Error ([M]AE)
-    if mae_ff == 1:
-        def fitness_function(x, target_defect_score, features_space):
+        # Using Absolute Error ([M]AE)
+        if mae_ff == 1:
+
             x_concat = build_feature_array(x, features_space)
             current_defect_score = defect_score(x_concat)
 
