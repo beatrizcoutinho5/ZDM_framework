@@ -6,12 +6,12 @@ import psycopg2
 from datetime import datetime
 
 # Database connection
-DB_HOST = 'db.fe.up.pt'
-DB_PORT = '5432'
-DB_NAME = 'sie2338'
-DB_SCHEMA = 'zdm_framework'
-DB_USER = 'sie2338'
-DB_PASSWORD = 'logan123'
+DB_HOST = 'xxxx'
+DB_PORT = 'xxxx'
+DB_NAME = 'xxxx'
+DB_SCHEMA = 'xxxx'
+DB_USER = 'xxxx'
+DB_PASSWORD = 'xxxx'
 
 def db_save_sample(processed_sample, recording_date, prediction):
 
