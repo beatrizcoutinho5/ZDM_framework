@@ -54,6 +54,16 @@ The decision-support framework aims to bring improvements in modern manufacturin
 
 ## ML Models and Optimization Results
 
+### Prediction Using ML Models
+
+Supervised learning methods were implemented, focusing on classification tasks. The SMOTE algorithm was applied to the training data to deal with imbalanced data. The resuls are presented in the table bellow:
+
+### Optimization
+
+Four optimisation algorithms were tested to find optimal process parameters: Dual Annealing, Nelder-Mead, Powell, and Basin Hopping. Each algorithm requires a fitness function to minimise the defect probability. Three types of functions were compared: Mean Squared Error (MSE), LogCosh, and Mean Absolute Error (MAE), each evaluated with different target defect probability values (0%, 10%, and 50%). Additionally, MSE was evaluated without a specific target defect probability. The resuls are presented in the table bellow:
+
+![image](https://github.com/beatrizcoutinho5/ZDM_framework/assets/61502014/9f23325a-188c-4bc9-b03a-eadff00a5d1d)
+
 ## **Repository Organization**
 
 The repository is organized as follows:
