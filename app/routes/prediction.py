@@ -1,10 +1,11 @@
 import numpy as np
 
 from joblib import load
-
+from catboost import CatBoostClassifier
 
 # Load model
-model = load(r'models\binary\binary_random_forest_model.pkl')
+model = CatBoostClassifier()
+model.load_model(r'models\binary\binary_catboost_model.cbm')
 
 # model = CatBoostClassifier()
 # model.load_model(r'models\binary\binary_catboost_model.cbm')

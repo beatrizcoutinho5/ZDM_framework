@@ -101,8 +101,6 @@ def on_message(client, userdata, message):
 
     # Processing timer
     processing_timer = time.time()
-
-    print(payload)
     recording_date = str(payload.get("Recording Date"))
 
     # Start timer

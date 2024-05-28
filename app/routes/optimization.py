@@ -5,9 +5,12 @@ import pandas as pd
 from joblib import load
 from scipy.optimize import dual_annealing
 from sklearn.metrics import mean_squared_error
+from catboost import CatBoostClassifier
 
-# Model Load
-model = load(r'models\binary\binary_random_forest_model.pkl')
+# Load model
+model = CatBoostClassifier()
+model.load_model(r'models\binary\binary_catboost_model.cbm')
+# model = load(r'models\binary\binary_random_forest_model.pkl')
 
 # The names of the features that must be present after the sample is processed
 column_names = [
@@ -28,6 +31,7 @@ column_names = [
 
 # Defect score = Model probability
 def predict_defect_score(sample):
+
     sample_values = sample.reshape(1, -1)
     prediction = model.predict_proba(sample_values)
     defect_score = prediction[:, 1]
@@ -187,7 +191,8 @@ def optimize_defect_score(sample):
         return "Defect probability is too low, no need for optimization!", "-", "-", current_tct, current_pressure, current_lpt, current_upt, current_ct, current_mct, current_cs, current_pits, current_sc, current_tsc
 
     # Defining the target defect scores for the optimizer
-    target_defect_scores = [0.01, 0.5]
+    # target_defect_scores = [0.01, 0.5]
+    target_defect_scores = [0]
 
     # Reference sample to start the optimization (very low defect score)
     x0 = [

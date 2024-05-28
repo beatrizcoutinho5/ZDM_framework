@@ -69,77 +69,80 @@ fig_size = (16, 9)
 # Random Forest #
 #################
 
-print(f'------- Random Forest -------')
+# print(f'------- Random Forest -------')
+#
+# print("Calculating and Computing SHAP values...")
+# rf_explainer = shap.TreeExplainer(rf_model)
+# rf_shap_values = rf_explainer.shap_values(x_test)
+# print(f'rf_shap_values : {rf_shap_values.shape}')
+#
+# print("Plotting and saving SHAP summary plots...")
+#
+# shap_values_for_class = rf_shap_values[:, :, 1]
+#
+# mean_abs_shap_values = np.mean(np.abs(shap_values_for_class), axis=0)
+#
+# top_features_indices = np.argsort(mean_abs_shap_values)[-10:]
+#
+# top_features_shap_values = shap_values_for_class[:, top_features_indices]
+# top_features = x_test.iloc[:, top_features_indices]
+#
+# fig, ax = plt.subplots(figsize=fig_size)
+# shap.summary_plot(top_features_shap_values, features=top_features, feature_names=top_features.columns, plot_type='bar',
+#                   show=False)
+#
+# ax.set_title(f"SHAP Summary Plot for Defect Class")
+# plt.savefig(os.path.join(r'../plots/shap/binary/random_forest', f"shap_summary_plot_defect_rf.png"), dpi=300, bbox_inches='tight')
+# plt.show()
+# #
+# # ################
+# # #   XGBoost    #
+# # ################
+# #
+# # print(f'------- XGBoost -------')
+# #
+# # print("Calculating and Computing SHAP values for XGBoost...")
+# # dtest = DMatrix(x_test)
+# # xgb_explainer = shap.TreeExplainer(xgb_model)
+# # xgb_shap_values = xgb_explainer.shap_values(dtest)
+# #
+# # print("Plotting and saving SHAP summary plots for XGBoost...")
+# #
+# # shap_values_for_class = xgb_shap_values[1]
+# #
+# # shap_values_for_class_reshaped = shap_values_for_class.reshape(len(xgb_shap_values), -1)
+# #
+# # fig, ax = plt.subplots(figsize=fig_size)
+# # shap.summary_plot(shap_values_for_class_reshaped, features=x_test, feature_names=x_test.columns, plot_type='bar',
+# #                   show=False)
+# #
+# # ax.set_title(f"SHAP Summary Plot for Defect Class")
+# # plt.savefig(os.path.join(r'..\plots\shap\binary\xgboost', f"shap_summary_plot_defect_xgb.png"), dpi=300, bbox_inches='tight')
+# # plt.show()
+# #
+# #
+################
+#   CatBoost   #
+################
 
-print("Calculating and Computing SHAP values...")
-rf_explainer = shap.TreeExplainer(rf_model)
-rf_shap_values = rf_explainer.shap_values(x_test)
-print(f'rf_shap_values : {rf_shap_values.shape}')
+print(f'------- CatBoost -------')
 
-print("Plotting and saving SHAP summary plots...")
+print("Calculating and Computing SHAP values for CatBoost...")
+catboost_explainer = shap.Explainer(catboost_model)
+catboost_shap_values = catboost_explainer.shap_values(x_test)
 
-shap_values_for_class = rf_shap_values[:, :, 1]
+print("Plotting and saving SHAP summary plots for CatBoost...")
 
-mean_abs_shap_values = np.mean(np.abs(shap_values_for_class), axis=0)
+shap_values_for_class = catboost_shap_values[:, 1]
+print(shap_values_for_class)
 
-top_features_indices = np.argsort(mean_abs_shap_values)[-10:]
-
-top_features_shap_values = shap_values_for_class[:, top_features_indices]
-top_features = x_test.iloc[:, top_features_indices]
+shap_values_for_class_reshaped = shap_values_for_class.reshape(len(catboost_shap_values), -1)
 
 fig, ax = plt.subplots(figsize=fig_size)
-shap.summary_plot(top_features_shap_values, features=top_features, feature_names=top_features.columns, plot_type='bar',
+
+shap.summary_plot(shap_values_for_class_reshaped, features=x_test, feature_names=x_test.columns, plot_type='bar',
                   show=False)
 
 ax.set_title(f"SHAP Summary Plot for Defect Class")
-plt.savefig(os.path.join(r'../plots/shap/binary/random_forest', f"shap_summary_plot_defect_rf.png"), dpi=300, bbox_inches='tight')
+plt.savefig(os.path.join(r'..\plots\shap\binary\catboost', f"shap_summary_plot_defect_catboost.png"), dpi=300, bbox_inches='tight')
 plt.show()
-#
-# ################
-# #   XGBoost    #
-# ################
-#
-# print(f'------- XGBoost -------')
-#
-# print("Calculating and Computing SHAP values for XGBoost...")
-# dtest = DMatrix(x_test)
-# xgb_explainer = shap.TreeExplainer(xgb_model)
-# xgb_shap_values = xgb_explainer.shap_values(dtest)
-#
-# print("Plotting and saving SHAP summary plots for XGBoost...")
-#
-# shap_values_for_class = xgb_shap_values[1]
-#
-# shap_values_for_class_reshaped = shap_values_for_class.reshape(len(xgb_shap_values), -1)
-#
-# fig, ax = plt.subplots(figsize=fig_size)
-# shap.summary_plot(shap_values_for_class_reshaped, features=x_test, feature_names=x_test.columns, plot_type='bar',
-#                   show=False)
-#
-# ax.set_title(f"SHAP Summary Plot for Defect Class")
-# plt.savefig(os.path.join(r'..\plots\shap\binary\xgboost', f"shap_summary_plot_defect_xgb.png"), dpi=300, bbox_inches='tight')
-# plt.show()
-#
-#
-# ################
-# #   CatBoost   #
-# ################
-#
-# print(f'------- CatBoost -------')
-#
-# print("Calculating and Computing SHAP values for CatBoost...")
-# catboost_explainer = shap.TreeExplainer(catboost_model)
-# catboost_shap_values = catboost_explainer.shap_values(x_test)
-#
-# print("Plotting and saving SHAP summary plots for CatBoost...")
-#
-# shap_values_for_class = catboost_shap_values[:, :, 1]
-# shap_values_for_class_reshaped = shap_values_for_class.reshape(len(catboost_shap_values), -1)
-#
-# fig, ax = plt.subplots(figsize=fig_size)
-# shap.summary_plot(shap_values_for_class_reshaped, features=x_test, feature_names=x_test.columns, plot_type='bar',
-#                   show=False)
-#
-# ax.set_title(f"SHAP Summary Plot for Defect Class")
-# plt.savefig(os.path.join(r'..\plots\shap\binary\catboost', f"shap_summary_plot_defect_catboost.png"), dpi=300, bbox_inches='tight')
-# plt.show()

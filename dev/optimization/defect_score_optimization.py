@@ -30,9 +30,9 @@ catboost_model.load_model(catboost_model_path)
 
 # Select the optimization method
 dual_annealing_optim = 0
-powell_optim = 1
+powell_optim = 0
 nelder_mead_optim = 0
-basinhopping_optim = 0
+basinhopping_optim = 1
 
 method_name = ''
 df_name = ''
@@ -47,10 +47,10 @@ if basinhopping_optim == 1:
     method_name = 'basinhopping'
 
 # Select the fitness function
-mse_ff = 0
+mse_ff = 1
 logcosh_ff = 0
 mae_ff = 0
-mse_wts_ff = 1
+mse_wts_ff = 0
 
 ff_name = ''
 
@@ -81,7 +81,7 @@ xgb_prob = xgb_model.predict_proba(df)
 catboost_prob = catboost_model.predict_proba(df)
 
 avg_defect_score = np.mean([rf_prob[:, 1], xgb_prob[:, 1], catboost_prob[:, 1]], axis=0)
-df["Defect Score"] = avg_defect_score
+df["Defect Score"] = catboost_prob[:, 1]
 
 # Separate the sample with different defect score ranges
 df_01_03 = df[(df['Defect Score'] >= 0.1) & (df['Defect Score'] < 0.3)]
@@ -168,12 +168,13 @@ for test_df in all_dfs:
     def defect_score(x):
 
         x = x.reshape(1, -1)
-
-        rf_prob = rf_model.predict_proba(x)
-        xgb_prob = xgb_model.predict_proba(x)
+        #
+        # rf_prob = rf_model.predict_proba(x)
+        # xgb_prob = xgb_model.predict_proba(x)
         catboost_prob = catboost_model.predict_proba(x)
 
-        avg_defect_score = np.mean([rf_prob[:, 1], xgb_prob[:, 1], catboost_prob[:, 1]], axis=0)
+        # avg_defect_score = np.mean([rf_prob[:, 1], xgb_prob[:, 1], catboost_prob[:, 1]], axis=0)
+        avg_defect_score = catboost_prob[:, 1]
 
         return avg_defect_score
 

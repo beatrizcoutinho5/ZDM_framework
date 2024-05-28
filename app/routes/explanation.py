@@ -7,48 +7,44 @@ import lime.lime_tabular
 import matplotlib.pyplot as plt
 
 from joblib import load
+from catboost import CatBoostClassifier
 
-# Load Model and train data
-model = load(r'models\binary\binary_random_forest_model.pkl')
-x_train = pd.read_excel(r'routes\binary_x_train_aug.xlsx')
+# Load model
+model = CatBoostClassifier()
+model.load_model(r'models\binary\binary_catboost_model.cbm')
 
 # SHAP Explainer
 def shap_explainer(sample):
 
-    rf_explainer = shap.TreeExplainer(model)
+    explainer = shap.TreeExplainer(model)
 
     # Get the feature names
     sample_keys = list(sample.keys())
 
-    sample = list(sample.values())
-    sample = np.array(sample)
+    # Get the feature values
+    sample_values = list(sample.values())
+    sample_array = np.array([sample_values])
 
-    rf_shap_values = rf_explainer.shap_values(sample)
+    # Perform the explainer on the sample
+    sample = pd.DataFrame(sample_array, columns=sample_keys)
+    shap_values_list = explainer.shap_values(sample)
 
-    # Get SHAP values for the positive class (defect)
-    shap_values_for_class = rf_shap_values[:, 1]
+    # Format shap values for plotting
+    shap_values_for_class = shap_values_list[0]
+    shap_values_for_class = shap_values_for_class.reshape(1, -1)
+    shap_values_for_class = np.array([shap_values_for_class])
+    shap_values_for_class = shap_values_for_class[:, 0, :]
 
-    shap_values_for_class = shap_values_for_class.reshape(-1, 1)
-    shap_values_for_class = shap_values_for_class.transpose()
-
-    sample = sample.reshape(-1, len(sample_keys))
+    # Format sample values for plotting
+    sample_array = sample_array[0]
+    sample_array = sample_array.reshape(-1, 1)
+    sample_array = sample_array.transpose()
 
     # SHAP summary plot that shows the top features importance for the prediction result
     fig, ax = plt.subplots(figsize=(25, 20))
-    shap.summary_plot(shap_values_for_class, features=sample, feature_names=sample_keys, plot_type='bar',show=False)
+    shap.summary_plot(shap_values_for_class, features=sample_array, feature_names=sample_keys, plot_type='bar',show=False)
 
     return fig
-
-
-# Initialize LIME explainer with train data
-# explainer = lime.lime_tabular.LimeTabularExplainer(
-#         x_train.values,
-#         feature_names=x_train.columns,
-#         class_names=['0', '1'],
-#         mode='classification',
-#         discretize_continuous=True
-#     )
-
 
 
 # LIME Explainer

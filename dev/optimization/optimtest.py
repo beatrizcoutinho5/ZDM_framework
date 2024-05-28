@@ -30,6 +30,7 @@ catboost_model.load_model(catboost_model_path)
 
 
 def defect_score(x):
+
     x = x.reshape(1, -1)
 
     rf_prob = rf_model.predict_proba(x)
@@ -42,27 +43,30 @@ def defect_score(x):
 
 
 # Sample Before
-sample_before = df.iloc[5203]
-print(sample_before)
+sample_before = df.iloc[13603]
+# print('Sample Before Optimization:')
+# print(sample_before)
 
 defect_score_before = defect_score(sample_before.values)
-print(defect_score_before)
+print(f'Sample Score Before Optimization:' + {defect_score_before[0]*100} + '%')
+
 
 # After Optim
-sample_after = df.iloc[5203].copy()
+sample_after = df.iloc[13603].copy()
 
-sample_after['Thermal Cycle Time'] = 16.1
-sample_after['Pressure'] = 317.35
-sample_after['Lower Plate Temperature'] = 183.67
-sample_after['Upper Plate Temperature'] = 193.13
-sample_after['Cycle Time'] = 29.54
-sample_after['Mechanical Cycle Time'] = 14.24
-sample_after['Carriage Speed'] = 1797.2
-sample_after['Press Input Table Speed'] = 1352.18
-sample_after['Scraping Cycle'] = 63609.12
-sample_after['Transverse Saw Cycle'] = 87.85
+sample_after['Thermal Cycle Time'] = 24
+sample_after['Pressure'] = 280
+sample_after['Lower Plate Temperature'] = 169
+sample_after['Upper Plate Temperature'] = 191
+sample_after['Cycle Time'] = 38
+sample_after['Mechanical Cycle Time'] = 14.8
+sample_after['Carriage Speed'] = 1400
+sample_after['Press Input Table Speed'] = 1200
+sample_after['Scraping Cycle'] = 65521.0
+sample_after['Transverse Saw Cycle'] = 0.0
 
-sample_after_df = pd.DataFrame(sample_after).transpose()
+# print('Sample After Optimization:')
+# print(sample_after)
 
-defect_score_after = defect_score(sample_after_df.values)
-print(defect_score_after)
+defect_score_after = defect_score(sample_after.values)
+print(f'Sample Score After Optimization:' + {defect_score_after[0]*100} + '%')

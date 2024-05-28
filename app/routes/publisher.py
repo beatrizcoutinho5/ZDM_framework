@@ -17,7 +17,6 @@ def publish_data():
     # remove rows with missing value for test
     df = df.dropna(how='any', axis=0)
 
-
     print("read df")
 
     while True:
@@ -36,6 +35,6 @@ def publish_data():
         print(f'Data published: {sample_dict}')
 
         # publish samples with interval
-        time.sleep(70)
+        time.sleep(20)
 
 publish_data()
