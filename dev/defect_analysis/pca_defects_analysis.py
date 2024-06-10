@@ -1,6 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import random
+import os
 
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
@@ -19,20 +20,15 @@ df = df[df["Defect Code"] != 0]
 
 # 1 -> analysis by defect group
 # 0 -> analysis by defect code
-defect_group_analysis = 1
+defect_group_analysis = 0
+
+pca_plots_dir = r'..\plots\pca'
 
 if defect_group_analysis == 1:
 
     ###########################################################
     #### using the defect group instead of the defect code ####
     ###########################################################
-
-    # Features
-    x = df.drop(["Defect Code", "Group"], axis=1)
-    x = StandardScaler().fit_transform(x)
-
-    # Target
-    y = df["Group"]
 
     # PCA analysis
 
@@ -46,26 +42,36 @@ if defect_group_analysis == 1:
     # plt.title('Scree Plot')
     # plt.show()
 
-    pca = PCA(n_components=7)
+    # Features
+    x = df.drop(["Defect Code", "Group"], axis=1)
+    x = StandardScaler().fit_transform(x)
+
+    # Target
+    y = df["Group"]
+
+    # PCA analysis
+    pca = PCA(n_components=2)
     principalComponents = pca.fit_transform(x)
 
-    principalDf = pd.DataFrame(data=principalComponents, columns=[f'principal component {i+1}' for i in range(7)])
+    principalDf = pd.DataFrame(data=principalComponents, columns=['principal component 1', 'principal component 2'])
 
     df.reset_index(drop=True, inplace=True)
     finalDf = pd.concat([principalDf, df[['Group']]], axis=1)
 
+    # Plotting
     fig = plt.figure(figsize=(10, 8))
 
     plt.xlabel('Principal Component 1', fontsize=15)
     plt.ylabel('Principal Component 2', fontsize=15)
-    plt.title('PCA by Group', fontsize=15)
+    plt.title('2 component PCA by Defect Category', fontsize=15)
 
+    # Define colors for each target
     targets = finalDf["Group"].unique()
-
     colors = {}
     for target in targets:
         colors[target] = "#" + "%06x" % random.randint(0, 0xFFFFFF)
 
+    # Scatter plot for each target
     for target in targets:
         indicesToKeep = finalDf['Group'] == target
         plt.scatter(finalDf.loc[indicesToKeep, 'principal component 1'],
@@ -76,7 +82,10 @@ if defect_group_analysis == 1:
 
     plt.legend(targets)
     plt.grid(True)
-    plt.savefig(r'..\plots\pca\pca_2d_by_group.png')
+
+    # Save and show the plot
+    output_path = os.path.join(pca_plots_dir, 'pca_groups.png')
+    plt.savefig(output_path)
     plt.show()
 
 ###############################
@@ -85,7 +94,10 @@ if defect_group_analysis == 1:
 
 else:
 
-    top_defects = [27, 134, 105, 106, 29] # top 5 defects
+    # Define the top 5 defect codes
+    top_defects = [27, 134, 105, 106, 29]
+
+    # Filter the dataframe to include only the top 5 defect codes
     df = df[df["Defect Code"].isin(top_defects)]
 
     # Features
@@ -96,47 +108,45 @@ else:
     y = df["Defect Code"]
 
     # PCA analysis
-
-    pca = PCA(n_components=3)
+    pca = PCA(n_components=2)
     principalComponents = pca.fit_transform(x)
 
-    # principalDf = pd.DataFrame(data=principalComponents,
-    #                            columns=['principal component 1', 'principal component 2'])
+    principalDf = pd.DataFrame(data=principalComponents, columns=['principal component 1', 'principal component 2'])
 
-    principalDf = pd.DataFrame(data=principalComponents, columns=['principal component 1', 'principal component 2'
-        , 'principal component 3'])
+    # Reset the index of df[['Defect Code']]
+    df_defect_codes = df[['Defect Code']].reset_index(drop=True)
 
-    finalDf = pd.concat([principalDf, df[['Defect Code']].reset_index(drop=True)], axis=1)
+    # Concatenate principalDf and df_defect_codes
+    finalDf = pd.concat([principalDf, df_defect_codes], axis=1)
 
-    # fig = plt.figure(figsize=(8, 8))
-    # ax = fig.add_subplot(1, 1, 1)
 
-    fig = plt.figure(figsize=(10, 8))
-    ax = fig.add_subplot(111, projection='3d')
+    # Plotting
+    fig = plt.figure(figsize=(8, 8))
+    ax = fig.add_subplot(1, 1, 1)
 
     ax.set_xlabel('Principal Component 1', fontsize=15)
     ax.set_ylabel('Principal Component 2', fontsize=15)
-    ax.set_zlabel('Principal Component 3', fontsize=10)
-    ax.set_title('3 component PCA', fontsize=15)
+    ax.set_title('2 component PCA by Defect Category', fontsize=20)
 
-    # ax.set_title('2 component PCA', fontsize=20)
-
+    # Define colors for each target
     targets = finalDf["Defect Code"].unique()
-
     colors = {}
     for target in targets:
         colors[target] = "#" + "%06x" % random.randint(0, 0xFFFFFF)
 
+    # Scatter plot for each target
     for target in targets:
         indicesToKeep = finalDf['Defect Code'] == target
         ax.scatter(finalDf.loc[indicesToKeep, 'principal component 1'],
                    finalDf.loc[indicesToKeep, 'principal component 2'],
-                   finalDf.loc[indicesToKeep, 'principal component 3'],
                    c=colors[target],
                    s=50,
                    label=target)
 
     ax.legend(targets)
     ax.grid(True)
-    plt.savefig(r'..\plots\pca\pca_3d_top5defects_by_code.png')
+
+    # Save and show the plot
+    output_path = os.path.join(pca_plots_dir, 'pca_codes.png')
+    plt.savefig(output_path)
     plt.show()

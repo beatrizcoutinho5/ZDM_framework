@@ -18,13 +18,14 @@ df = pd.read_excel(data_path)
 df = df.drop(["Recording Date", "Defect Code", "Group"], axis=1)
 
 # Load Prediction Models
-rf_model_path = r'../prediction/models/binary/binary_random_forest_model.pkl'
-xgb_model_path = r'../prediction/models/binary/binary_xgb_model.json'
+
+# rf_model_path = r'../prediction/models/binary/binary_random_forest_model.pkl'
+# xgb_model_path = r'../prediction/models/binary/binary_xgb_model.json'
 catboost_model_path = r'../prediction/models/binary/binary_catboost_model.cbm'
 
-rf_model = joblib.load(rf_model_path)
-xgb_model = XGBClassifier()
-xgb_model.load_model(xgb_model_path)
+# rf_model = joblib.load(rf_model_path)
+# xgb_model = XGBClassifier()
+# xgb_model.load_model(xgb_model_path)
 catboost_model = CatBoostClassifier()
 catboost_model.load_model(catboost_model_path)
 
@@ -76,11 +77,12 @@ if random_index == 1:
 average_results = []
 
 # Calculate the defect score for the all sample to be separate into the different ranges
-rf_prob = rf_model.predict_proba(df)
-xgb_prob = xgb_model.predict_proba(df)
+
+# rf_prob = rf_model.predict_proba(df)
+# xgb_prob = xgb_model.predict_proba(df)
 catboost_prob = catboost_model.predict_proba(df)
 
-avg_defect_score = np.mean([rf_prob[:, 1], xgb_prob[:, 1], catboost_prob[:, 1]], axis=0)
+# avg_defect_score = np.mean([rf_prob[:, 1], xgb_prob[:, 1], catboost_prob[:, 1]], axis=0)
 df["Defect Score"] = catboost_prob[:, 1]
 
 # Separate the sample with different defect score ranges
@@ -168,7 +170,7 @@ for test_df in all_dfs:
     def defect_score(x):
 
         x = x.reshape(1, -1)
-        #
+
         # rf_prob = rf_model.predict_proba(x)
         # xgb_prob = xgb_model.predict_proba(x)
         catboost_prob = catboost_model.predict_proba(x)
@@ -252,6 +254,7 @@ for test_df in all_dfs:
                 bounds=bounds,
                 args=[target_defect_score, features_space],
                 maxfun=1e3,
+                # maxiter=1000,
                 seed=16
             )
 
@@ -274,6 +277,7 @@ for test_df in all_dfs:
                               tol=1e-6)
         # Basin Hopping
         if basinhopping_optim == 1:
+
             minimizer_kwargs = {
                 'method': 'L-BFGS-B',
                 'bounds': bounds,

@@ -25,7 +25,7 @@ for feature in real_time_features:
     if (feature == 'Mechanical Cycle Time') or (feature == 'Cycle Time'):
 
         values = df[feature]
-        plt.hist(values, bins=np.arange(0, 1001, 50), color='hotpink')
+        plt.hist(values, bins=np.arange(0, 1001, 50), color='orange')
         plt.xlabel(feature)
         plt.ylabel('Frequency')
         plt.title(f'Distribution of {feature}')
@@ -35,7 +35,7 @@ for feature in real_time_features:
     else:
 
         values = df[feature]
-        plt.hist(values, bins='auto', color='hotpink')
+        plt.hist(values, bins='auto', color='orange')
         plt.xlabel(feature)
         plt.ylabel('Frequency')
         plt.title(f'Distribution of {feature}')
@@ -45,7 +45,7 @@ for feature in real_time_features:
 for feature in real_time_features_delta:
 
     values = df_delta[feature]
-    plt.hist(values, bins=np.arange(0, 1001, 50), color='hotpink')
+    plt.hist(values, bins=np.arange(0, 1001, 50), color='orange')
     plt.xlabel(feature)
     plt.ylabel('Frequency')
     plt.title(f'Distribution of {feature}')

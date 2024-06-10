@@ -1,1 +1,1 @@
-The resulting data with and without data-balancing, using SMOTE, is stored in this folder. In this data, the 'y' is the Defect Code, and it only contains non-defective and defective samples.
+The resulting data with and without data-balancing, using SMOTE, is stored in this folder. 

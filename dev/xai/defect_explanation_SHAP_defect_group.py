@@ -10,7 +10,6 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 from scipy.optimize import dual_annealing
-
 from sklearn.metrics import mean_squared_error
 from sklearn.svm import SVC
 from datetime import datetime
@@ -90,53 +89,3 @@ for class_index, class_name in enumerate(class_names):
     # Add label indicating the class
     ax.set_title(f"SHAP Summary Plot for Class {class_name}")
     plt.savefig(os.path.join(r'../plots/shap/defect_groups/random_forest', f"shap_summary_plot_group_{class_name}.png"), dpi=300, bbox_inches='tight')
-
-
-# ###########
-# # XGBoost #
-# ###########
-#
-# print(f'------- XGBoost -------')
-#
-# print("Calculating and Computing SHAP values...")
-# xgb_explainer = shap.TreeExplainer(xgb_model)
-# xgb_shap_values = xgb_explainer.shap_values(x_test)
-#
-# print("Plotting and saving SHAP summary plots...")
-#
-# # Feature importance taking into account all the classes at the same time (their average values)
-# # Aggregate the SHAP values across all classes and calculate their average
-# abs_shap_values_xgb = np.abs(xgb_shap_values)
-# mean_abs_shap_values_xgb = np.mean(abs_shap_values_xgb, axis=2)
-# mean_abs_shap_values_reshaped_xgb = mean_abs_shap_values_xgb.reshape(len(xgb_shap_values), -1)
-#
-# fig, ax = plt.subplots(figsize=fig_size)
-# shap.summary_plot(mean_abs_shap_values_reshaped_xgb, features=x_test, feature_names=x_test.columns, plot_type='bar', show=True)
-# ax.set_title("Mean Absolute SHAP Summary Plot for All Classes")
-# plt.savefig(os.path.join(r'..\plots\shap\defect_groups\xgboost', "mean_abs_shap_summary_plot.png"), dpi=300, bbox_inches='tight')
-#
-#
-# ###########
-# # CatBoost #
-# ###########
-#
-# print(f'\n------- CatBoost -------')
-#
-# print("Calculating and Computing SHAP values...")
-# catboost_explainer = shap.TreeExplainer(catboost_model)
-# catboost_shap_values = catboost_explainer.shap_values(x_test)
-#
-# print("Plotting and saving SHAP summary plots...")
-#
-# # Feature importance taking into account all the classes at the same time (their average values)
-# # Aggregate the SHAP values across all classes and calculate their average
-# abs_shap_values_catboost = np.abs(catboost_shap_values)
-# mean_abs_shap_values_catboost = np.mean(abs_shap_values_catboost, axis=2)
-# mean_abs_shap_values_reshaped_catboost = mean_abs_shap_values_catboost.reshape(len(rf_shap_values), -1)
-#
-# fig, ax = plt.subplots(figsize=fig_size)
-# shap.summary_plot(mean_abs_shap_values_reshaped_catboost, features=x_test, feature_names=x_test.columns, plot_type='bar', show=True)
-# ax.set_title("Mean Absolute SHAP Summary Plot for All Classes")
-# plt.savefig(os.path.join(r'..\plots\shap\defect_groups\catboost', "mean_abs_shap_summary_plot.png"), dpi=300, bbox_inches='tight')
-#
-# print(f'\nAll SHAP plots saved!')

@@ -6,69 +6,70 @@ import psycopg2
 from datetime import datetime
 
 # Database connection
-DB_HOST = 'xxxx'
-DB_PORT = 'xxxx'
-DB_NAME = 'xxxx'
-DB_SCHEMA = 'xxxx'
-DB_USER = 'xxxx'
-DB_PASSWORD = 'xxxx'
+DB_HOST = 'db.fe.up.pt'
+DB_PORT = '5432'
+DB_NAME = 'xxx'
+DB_SCHEMA = 'zdm_framework'
+DB_USER = 'xxx'
+DB_PASSWORD = 'xxx'
 
 def db_save_sample(processed_sample, recording_date, prediction):
+    try:
+        elapsed_time = time.time()
 
-    elapsed_time = time.time()
+        conn = psycopg2.connect(
+            dbname=DB_NAME,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            host=DB_HOST,
+            port=DB_PORT
+        )
+        cursor = conn.cursor()
 
-    conn = psycopg2.connect(
-        dbname=DB_NAME,
-        user=DB_USER,
-        password=DB_PASSWORD,
-        host=DB_HOST,
-        port=DB_PORT
-    )
-    cursor = conn.cursor()
+        # Order of the features
+        order = ["Production Line", "Production Order Code", "Production Order Opening", "Length", "Width", "Thickness",
+                 "Lot Size",
+                 "Cycle Time", "Mechanical Cycle Time", "Thermal Cycle Time", "Control Panel with Micro Stop",
+                 "Control Panel Delay Time", "Sandwich Preparation Time", "Carriage Time", "Lower Plate Temperature",
+                 "Upper Plate Temperature",
+                 "Pressure", "Roller Start Time", "Liston 1 Speed", "Liston 2 Speed", "Floor 1", "Floor 2",
+                 "Bridge Platform", "Floor 1 Blow Time",
+                 "Floor 2 Blow Time", "Centering Table", "Conveyor Belt Speed Station 1", "Quality Inspection Cycle",
+                 "Conveyor Belt Speed Station 2",
+                 "Transverse Saw Cycle", "Right Jaw Discharge", "Left Jaw Discharge", "Simultaneous Jaw Discharge",
+                 "Carriage Speed", "Take-off Path",
+                 "Stacking Cycle", "Lowering Time", "Take-off Time", "High Pressure Input Time",
+                 "Press Input Table Speed", "Scraping Cycle", "Paper RC",
+                 "Paper VC", "Paper Shelf Life", "GFFTT_cat", "Finishing Top_cat", "Reference Top_cat"]
 
-    # Order of the features
-    order = ["Production Line", "Production Order Code", "Production Order Opening", "Length", "Width", "Thickness",
-             "Lot Size",
-             "Cycle Time", "Mechanical Cycle Time", "Thermal Cycle Time", "Control Panel with Micro Stop",
-             "Control Panel Delay Time", "Sandwich Preparation Time", "Carriage Time", "Lower Plate Temperature",
-             "Upper Plate Temperature",
-             "Pressure", "Roller Start Time", "Liston 1 Speed", "Liston 2 Speed", "Floor 1", "Floor 2",
-             "Bridge Platform", "Floor 1 Blow Time",
-             "Floor 2 Blow Time", "Centering Table", "Conveyor Belt Speed Station 1", "Quality Inspection Cycle",
-             "Conveyor Belt Speed Station 2",
-             "Transverse Saw Cycle", "Right Jaw Discharge", "Left Jaw Discharge", "Simultaneous Jaw Discharge",
-             "Carriage Speed", "Take-off Path",
-             "Stacking Cycle", "Lowering Time", "Take-off Time", "High Pressure Input Time",
-             "Press Input Table Speed", "Scraping Cycle", "Paper RC",
-             "Paper VC", "Paper Shelf Life", "GFFTT_cat", "Finishing Top_cat", "Reference Top_cat"]
+        # Order the processed sample
+        ordered_processed_sample = {key: processed_sample[key] for key in order if key in processed_sample}
 
-    # Order the processed sample
-    ordered_processed_sample = {key: processed_sample[key] for key in order if key in processed_sample}
+        # SQL query
+        columns = ['"Recording Date"', '"Defect Prediction"'] + [f'"{col}"' for col in ordered_processed_sample.keys()]
+        placeholders = ', '.join(['%s'] * (len(ordered_processed_sample) + 2))
+        query = f"INSERT INTO zdm_framework.ProductionData ({', '.join(columns)}) VALUES ({placeholders})"
 
-    # SQL query
-    columns = ', '.join(['"Recording Date"' if recording_date else '',
-                         '"Defect Prediction"' if prediction else ''] +
-                        [f'"{col}"' for col in ordered_processed_sample.keys()])
-    placeholders = ', '.join(['%s'] * (len(ordered_processed_sample) + 2))
-    query = f"INSERT INTO zdm_framework.ProductionData ({columns}) VALUES ({placeholders})"
+        # Values from the processed sample
+        values = [recording_date, prediction] + list(ordered_processed_sample.values())
 
-    # Values from the processed sample
-    values = list(ordered_processed_sample.values())
-    values.insert(0, recording_date)
-    values.insert(1, prediction)
+        cursor.execute(query, values)
 
-    cursor.execute(query, values)
+        conn.commit()
+        cursor.close()
+        conn.close()
 
-    conn.commit()
-    cursor.close()
-    conn.close()
+        elapsed_time = time.time() - elapsed_time
+        print(f"\nTotal Elapsed Time to save sample: {elapsed_time}")
 
-    elapsed_time = time.time() - elapsed_time
-    print(f"\nTotal Elapsed Time to save sample: {elapsed_time}")
+        print(f"\nSaved sample data to database!")
 
-    print(f"\nSaved sample data to database!")
+    except (Exception, psycopg2.DatabaseError) as error:
+        return
 
 def db_get_defects_number(start_time=None, end_time=None):
+
+    elapsed_time = time.time()
 
     conn = psycopg2.connect(
         dbname=DB_NAME,
@@ -130,11 +131,16 @@ def db_get_defects_number(start_time=None, end_time=None):
     cursor.close()
     conn.close()
 
+    elapsed_time = time.time() - elapsed_time
+    print(f"\nTotal Elapsed Time to get stats: {elapsed_time}")
+
     return defects_number_result, produced_panels_result, percentage_defect, defects_number_per_day_results
 
 
 # Get the historic data between the selected dates, but only 3 samples and with a few features for UI display
 def db_get_historic_data(start_time=None, end_time=None):
+
+    elapsed_time = time.time()
 
     conn = psycopg2.connect(
         dbname=DB_NAME,
@@ -168,10 +174,15 @@ def db_get_historic_data(start_time=None, end_time=None):
     cursor.close()
     conn.close()
 
+    elapsed_time = time.time() - elapsed_time
+    print(f"\nTotal Elapsed Time to get historical samples: {elapsed_time}")
+
     return historic_data
 
 # Get the historic data between the selected dates with all sample and features for download
 def db_download_historic_data(start_time=None, end_time=None):
+
+    elapsed_time = time.time()
 
     conn = psycopg2.connect(
         dbname=DB_NAME,
@@ -217,74 +228,10 @@ def db_download_historic_data(start_time=None, end_time=None):
         # Write data
         csv_writer.writerows(historic_data)
 
+        elapsed_time = time.time() - elapsed_time
+        print(f"\nTotal Elapsed Time to get historical samples (download): {elapsed_time}")
+
     return 1
-
-# def db_get_avg_feature_values():
-#
-#     conn = psycopg2.connect(
-#         dbname=DB_NAME,
-#         user=DB_USER,
-#         password=DB_PASSWORD,
-#         host=DB_HOST,
-#         port=DB_PORT
-#     )
-#     cursor = conn.cursor()
-#
-#     query_lpt = ("SELECT AVG(\"Lower Plate Temperature\") "
-#                  "FROM zdm_framework.ProductionData "
-#                  "WHERE \"Defect Prediction\" = '1'")
-#
-#     query_upt = ("SELECT AVG(\"Upper Plate Temperature\") "
-#                  "FROM zdm_framework.ProductionData "
-#                  "WHERE \"Defect Prediction\" = '1'")
-#
-#     query_length = ("SELECT AVG(\"Length\") "
-#                     "FROM zdm_framework.ProductionData "
-#                     "WHERE \"Defect Prediction\" = '1'")
-#
-#     query_width = ("SELECT AVG(\"Width\") "
-#                    "FROM zdm_framework.ProductionData "
-#                    "WHERE \"Defect Prediction\" = '1'")
-#
-#     query_thickness = ("SELECT AVG(\"Thickness\") "
-#                        "FROM zdm_framework.ProductionData "
-#                        "WHERE \"Defect Prediction\" = '1'")
-#
-#     query_pressure = ("SELECT AVG(\"Pressure\") "
-#                       "FROM zdm_framework.ProductionData "
-#                       "WHERE \"Defect Prediction\" = '1'")
-#
-#     query_tct = ("SELECT AVG(\"Thermal Cycle Time\") "
-#                  "FROM zdm_framework.ProductionData "
-#                  "WHERE \"Defect Prediction\" = '1'")
-#
-#     cursor.execute(query_lpt)
-#     lpt_result = cursor.fetchone()[0]
-#
-#     cursor.execute(query_upt)
-#     upt_result = cursor.fetchone()[0]
-#
-#     cursor.execute(query_length)
-#     length_result = cursor.fetchone()[0]
-#
-#     cursor.execute(query_width)
-#     width_result = cursor.fetchone()[0]
-#
-#     cursor.execute(query_thickness)
-#     thickness_result = cursor.fetchone()[0]
-#
-#     cursor.execute(query_pressure)
-#     pressure_result = cursor.fetchone()[0]
-#
-#     cursor.execute(query_tct)
-#     tct_result = cursor.fetchone()[0]
-#
-#     cursor.close()
-#     conn.close()
-#
-#     return lpt_result, upt_result, length_result, width_result, thickness_result, pressure_result, tct_result
-
-
 
 
 

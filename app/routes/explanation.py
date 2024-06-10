@@ -16,7 +16,7 @@ model.load_model(r'models\binary\binary_catboost_model.cbm')
 # SHAP Explainer
 def shap_explainer(sample):
 
-    explainer = shap.TreeExplainer(model)
+    explainer = shap.Explainer(model)
 
     # Get the feature names
     sample_keys = list(sample.keys())
@@ -27,22 +27,30 @@ def shap_explainer(sample):
 
     # Perform the explainer on the sample
     sample = pd.DataFrame(sample_array, columns=sample_keys)
-    shap_values_list = explainer.shap_values(sample)
 
-    # Format shap values for plotting
-    shap_values_for_class = shap_values_list[0]
-    shap_values_for_class = shap_values_for_class.reshape(1, -1)
-    shap_values_for_class = np.array([shap_values_for_class])
-    shap_values_for_class = shap_values_for_class[:, 0, :]
+    shap_values_list = explainer(sample)
 
-    # Format sample values for plotting
-    sample_array = sample_array[0]
-    sample_array = sample_array.reshape(-1, 1)
-    sample_array = sample_array.transpose()
 
-    # SHAP summary plot that shows the top features importance for the prediction result
-    fig, ax = plt.subplots(figsize=(25, 20))
-    shap.summary_plot(shap_values_for_class, features=sample_array, feature_names=sample_keys, plot_type='bar',show=False)
+    # # To plot the SHAP mean importance plot
+
+    # shap_values_list = explainer.shap_values(sample)
+    #
+    # shap_values_for_class = shap_values_list[0]
+    # shap_values_for_class = shap_values_for_class.reshape(1, -1)
+    # shap_values_for_class = np.array([shap_values_for_class])
+    # shap_values_for_class = shap_values_for_class[:, 0, :]
+    #
+    # sample_array = sample_array[0]
+    # sample_array = sample_array.reshape(-1, 1)
+    # sample_array = sample_array.transpose()
+    #
+    # shap.summary_plot(shap_values_for_class, features=sample_array, feature_names=sample_keys, plot_type='bar',show=False)
+
+
+    # SHAP waterfall
+    fig, ax = plt.subplots(figsize=(35, 20))
+    shap.plots.waterfall(shap_values_list[0], show=False)
+    plt.tight_layout()
 
     return fig
 
@@ -50,7 +58,8 @@ def shap_explainer(sample):
 # LIME Explainer
 def lime_explainer(sample):
 
-    explainer_path = r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\app\static\lime_explainer.pkl'
+    # explainer_path = r'C:\Users\beatr\OneDrive\Ambiente de Trabalho\FACULDADE\MESTRADO\2º ANO\TESE\Código\zdm_framework\app\static\lime_explainer.pkl'
+    explainer_path = r'../static/lime_explainer.pkl'
 
     with open(explainer_path, "rb") as f:
         explainer = dill.load(f)
@@ -67,6 +76,11 @@ def lime_explainer(sample):
     # LIME plot that displays the rules guiding the prediction
     fig = exp.as_pyplot_figure(label=1)
     fig.set_size_inches(20, 10)
+
+    ax = plt.gca()
+    ax.xaxis.label.set_fontsize(40)
+    ax.yaxis.label.set_fontsize(40)
+    plt.tight_layout()
 
     return fig
 

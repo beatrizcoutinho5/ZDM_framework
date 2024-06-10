@@ -129,7 +129,10 @@ print(f'------- CatBoost -------')
 
 print("Calculating and Computing SHAP values for CatBoost...")
 catboost_explainer = shap.Explainer(catboost_model)
-catboost_shap_values = catboost_explainer.shap_values(x_test)
+
+testar = x_test.iloc[54]
+
+catboost_shap_values = catboost_explainer.shap_values(testar)
 
 print("Plotting and saving SHAP summary plots for CatBoost...")
 
@@ -140,9 +143,12 @@ shap_values_for_class_reshaped = shap_values_for_class.reshape(len(catboost_shap
 
 fig, ax = plt.subplots(figsize=fig_size)
 
-shap.summary_plot(shap_values_for_class_reshaped, features=x_test, feature_names=x_test.columns, plot_type='bar',
-                  show=False)
+# shap.summary_plot(shap_values_for_class_reshaped, features=x_test, feature_names=x_test.columns, plot_type='bar',
+#                   show=False)
+#
+# ax.set_title(f"SHAP Summary Plot for Defect Class")
+# plt.savefig(os.path.join(r'..\plots\shap\binary\catboost', f"shap_summary_plot_defect_catboost.png"), dpi=300, bbox_inches='tight')
 
-ax.set_title(f"SHAP Summary Plot for Defect Class")
-plt.savefig(os.path.join(r'..\plots\shap\binary\catboost', f"shap_summary_plot_defect_catboost.png"), dpi=300, bbox_inches='tight')
+shap.plots.waterfall(shap_values_for_class_reshaped, max_display=10, show=True)
+
 plt.show()

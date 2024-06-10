@@ -1,6 +1,5 @@
 import time
 import numpy as np
-import pandas as pd
 
 from joblib import load
 from scipy.optimize import dual_annealing
@@ -10,7 +9,6 @@ from catboost import CatBoostClassifier
 # Load model
 model = CatBoostClassifier()
 model.load_model(r'models\binary\binary_catboost_model.cbm')
-# model = load(r'models\binary\binary_random_forest_model.pkl')
 
 # The names of the features that must be present after the sample is processed
 column_names = [
@@ -158,7 +156,6 @@ def feature_space_pre_processing(sample):
     return features_space, indices
 
 
-# @app.route('/optimize_defect_score')
 def optimize_defect_score(sample):
 
     # Start timer to record the time the optimization took, from receiving the sample to providing
@@ -191,7 +188,6 @@ def optimize_defect_score(sample):
         return "Defect probability is too low, no need for optimization!", "-", "-", current_tct, current_pressure, current_lpt, current_upt, current_ct, current_mct, current_cs, current_pits, current_sc, current_tsc
 
     # Defining the target defect scores for the optimizer
-    # target_defect_scores = [0.01, 0.5]
     target_defect_scores = [0]
 
     # Reference sample to start the optimization (very low defect score)

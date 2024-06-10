@@ -47,7 +47,6 @@ catboost_model.load_model(catboost_model_path)
 
 print("Loaded models!")
 
-# Explainer using Random Forest
 
 explainer = lime.lime_tabular.LimeTabularExplainer(
     x_train.values,
@@ -64,35 +63,8 @@ with open(explainer_path, "wb") as f:
     dill.dump(explainer, f)
 print("Saved!")
 
-
-# with open(explainer_path, "rb") as f:
-#     explainer = dill.load(f)
-
 exp = explainer.explain_instance(
     x_test.iloc[26],
     rf_model.predict_proba
 )
 
-# fig = exp.as_pyplot_figure(label=1)
-# fig.set_size_inches(20, 10)
-# plt.savefig(r'../plots/lime/binary/lime_rf.png')
-# plt.show()
-
-# # Explainer using CatBoost
-# explainer = lime.lime_tabular.LimeTabularExplainer(
-#     x_train.values,
-#     feature_names=x_train.columns,
-#     class_names=['0', '1'],
-#     mode='classification',
-#     discretize_continuous=True
-# )
-#
-# exp = explainer.explain_instance(
-#     x_test.iloc[26],
-#     catboost_model.predict_proba
-# )
-#
-# fig = exp.as_pyplot_figure(label=1)
-# fig.set_size_inches(20, 10)
-# plt.savefig(r'../plots/lime/binary/lime_catboost.png')
-# plt.show()

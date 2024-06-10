@@ -1,1 +1,1 @@
-The resulting multiclass classification models, considering defective and non-defective samples and Defect Code as target, are stored in this folder. 
+The resulting multiclass classification models are stored in this folder. 

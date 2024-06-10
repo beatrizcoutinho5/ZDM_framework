@@ -145,19 +145,24 @@ df = df.dropna(how='any', axis=0)
 # Pearson Correlation factor
 
 numeric_columns = df.select_dtypes(include=['number'])
+print(numeric_columns.columns)
 correlation_matrix = numeric_columns.corr()
 
 if make_plots == 1:
+    # Matrix before removing correlated features
     mask = np.triu(np.ones_like(correlation_matrix, dtype=bool))
 
-    plt.figure(figsize=(12, 8))
+    plt.figure(figsize=(20, 16))
     heatmap_plot = sns.heatmap(correlation_matrix, mask=mask, center=0, annot=False, fmt='.2f', square=True,
                                cmap='coolwarm')
+
+    heatmap_plot.set_xticklabels(heatmap_plot.get_xticklabels(), fontsize=10)
+    heatmap_plot.set_yticklabels(heatmap_plot.get_yticklabels(), fontsize=10)
 
     pearson_subdirectory_path = os.path.join(plots_dir, 'pearson_correlation')
     os.makedirs(pearson_subdirectory_path, exist_ok=True)
 
-    output_path = os.path.join(pearson_subdirectory_path, 'pearson_correlation_matrix.png')
+    output_path = os.path.join(pearson_subdirectory_path, 'pearson_correlation_matrix_before.png')
     plt.savefig(output_path, bbox_inches='tight')
 
 threshold = 0.9
@@ -179,9 +184,30 @@ for col in columns_remove_correlated:
     if col in df.columns:
         df = df.drop(col, axis=1)
 
-###################################
-# Data Analysis and Visualization #
-###################################
+# Matrix after removing correlated features
+numeric_columns = df.select_dtypes(include=['number'])
+print(numeric_columns.columns)
+correlation_matrix = numeric_columns.corr()
+
+if make_plots == 1:
+    mask = np.triu(np.ones_like(correlation_matrix, dtype=bool))
+
+    plt.figure(figsize=(20, 16))
+    heatmap_plot = sns.heatmap(correlation_matrix, mask=mask, center=0, annot=False, fmt='.2f', square=True,
+                               cmap='coolwarm')
+
+    heatmap_plot.set_xticklabels(heatmap_plot.get_xticklabels(), fontsize=10)
+    heatmap_plot.set_yticklabels(heatmap_plot.get_yticklabels(), fontsize=10)
+
+    pearson_subdirectory_path = os.path.join(plots_dir, 'pearson_correlation')
+    os.makedirs(pearson_subdirectory_path, exist_ok=True)
+
+    output_path = os.path.join(pearson_subdirectory_path, 'pearson_correlation_matrix_after.png')
+    plt.savefig(output_path, bbox_inches='tight')
+
+# ###################################
+# # Data Analysis and Visualization #
+# ###################################
 
 categorical_features = ["Production Order Code", "Production Order Opening", "Defect Code",
                         "Control Panel with Micro Stop", "Floor 1", "Floor 2", "Bridge Platform", "Floor 1 Blow Time",
@@ -208,7 +234,7 @@ if make_plots == 1:
 
     for i, feature in enumerate(continuous_features, 1):
         plt.figure(figsize=(8, 5))
-        sns.boxplot(x=df[feature])
+        sns.boxplot(x=df[feature], color='orange')
         plt.title(f'Box Plot for {feature}')
         plt.xlabel(feature)
         plt.ylabel('Values')

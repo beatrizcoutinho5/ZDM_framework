@@ -184,8 +184,8 @@ def on_message(client, userdata, message):
             shap_fig = shap_explainer(processed_sample)
             lime_fig = lime_explainer(processed_sample)
 
-            shap_fig.savefig('static/images/shap_plot')
-            lime_fig.savefig('static/images/lime_plot')
+            shap_fig.savefig('static/images/shap_plot', bbox_inches='tight')
+            lime_fig.savefig('static/images/lime_plot', bbox_inches='tight')
 
             plt.close(shap_fig)
             plt.close(lime_fig)

@@ -1,14 +1,10 @@
 import numpy as np
 
-from joblib import load
 from catboost import CatBoostClassifier
 
 # Load model
 model = CatBoostClassifier()
 model.load_model(r'models\binary\binary_catboost_model.cbm')
-
-# model = CatBoostClassifier()
-# model.load_model(r'models\binary\binary_catboost_model.cbm')
 
 def sample_defect_prediction_model(sample):
 
@@ -22,7 +18,7 @@ def sample_defect_prediction_model(sample):
 
     return prediction
 
-# @app.route('/predict_defect')
+
 def predict_defect(processed_sample):
 
     prediction = sample_defect_prediction_model(processed_sample)
