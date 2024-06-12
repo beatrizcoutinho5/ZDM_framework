@@ -3,12 +3,11 @@
 function formatDate(date) {
 
     const day = date.getDate();
-    const month = date.toLocaleString('default', { month: 'long' });
+    const month = date.toLocaleString('en-GB', { month: 'long' });
     const year = date.getFullYear();
     const suffix = getNumberSuffix(day);
 
     return `${day}${suffix} ${month} ${year}`;
-
 }
 
 // Function to get the suffix for a number
