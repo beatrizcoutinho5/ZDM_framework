@@ -59,17 +59,17 @@ The decision-support framework aims to bring improvements in modern manufacturin
 
 ### Prediction Using ML Models
 
-Supervised learning methods were implemented, focusing on classification tasks. The SMOTE algorithm was applied to the training data to deal with imbalanced data. The resuls are presented in the file bellow:
+Supervised learning methods were implemented, focusing on classification tasks. The SMOTE algorithm was applied to the training data to deal with imbalanced data. The resuls are presented in the table bellow:
+![prediction_results](https://github.com/beatrizcoutinho5/ZDM_framework/assets/61502014/875850c8-9901-4587-b918-94d512b67b9c)
 
-[prediction_results.pdf](https://github.com/user-attachments/files/15875375/prediction_results.pdf)
 
 
 
 ### Optimization
 
-Four optimisation algorithms were tested to find optimal process parameters: Dual Annealing, Nelder-Mead, Powell, and Basin Hopping. Each algorithm requires a fitness function to minimise the defect probability. Three types of functions were compared: Mean Squared Error (MSE), LogCosh, and Mean Absolute Error (MAE), each evaluated with different target defect probability values (0%, 10%, and 50%). Additionally, MSE was evaluated without a specific target defect probability. The resuls are presented in the file bellow:
+Four optimisation algorithms were tested to find optimal process parameters: Dual Annealing, Nelder-Mead, Powell, and Basin Hopping. Each algorithm requires a fitness function to minimise the defect probability. Three types of functions were compared: Mean Squared Error (MSE), LogCosh, and Mean Absolute Error (MAE), each evaluated with different target defect probability values (0%, 10%, and 50%). Additionally, MSE was evaluated without a specific target defect probability. The resuls are presented in the table bellow:
+![optimisation_results](https://github.com/beatrizcoutinho5/ZDM_framework/assets/61502014/07931979-290b-45f0-8a31-1ecc24d2c6b3)
 
-[optimisation_results.pdf](https://github.com/user-attachments/files/15875380/optimisation_results.pdf)
 
 ## **Repository Organization**
 
