@@ -24,7 +24,10 @@ The framework structure is depicted in the figure below:
 
 <img src="https://github.com/beatrizcoutinho5/ZDM_framework/assets/61502014/10241287-0718-4f96-b149-d41daaa8dbcf" alt="framework_scheme" width="400">
 
-The prediction, explanation, and optimization features were developed as seperate modules. To enhance the decision-making process, a Flask web application was developed to integrate the the three modules. The MQTT protocol was implemented to ensure communication between the manufacturing site and the application. 
+The prediction, explanation, and optimization features were developed as seperate modules. To enhance the decision-making process, a Flask web application was developed to integrate the the three modules. The MQTT protocol was implemented to ensure communication between the manufacturing site and the application. The UML sequence diagram illustrates the interactions between the various framework modules within the web application:
+
+![uml_sequence_diagram_new](https://github.com/beatrizcoutinho5/ZDM_framework/assets/61502014/30acf1d2-d2d2-4d28-a7e1-ccf6a0902f0e)
+
 
 ## Key Features and Implementation
 
@@ -56,13 +59,17 @@ The decision-support framework aims to bring improvements in modern manufacturin
 
 ### Prediction Using ML Models
 
-Supervised learning methods were implemented, focusing on classification tasks. The SMOTE algorithm was applied to the training data to deal with imbalanced data. The resuls are presented in the table bellow:
+Supervised learning methods were implemented, focusing on classification tasks. The SMOTE algorithm was applied to the training data to deal with imbalanced data. The resuls are presented in the file bellow:
+
+[prediction_results.pdf](https://github.com/user-attachments/files/15875375/prediction_results.pdf)
+
+
 
 ### Optimization
 
-Four optimisation algorithms were tested to find optimal process parameters: Dual Annealing, Nelder-Mead, Powell, and Basin Hopping. Each algorithm requires a fitness function to minimise the defect probability. Three types of functions were compared: Mean Squared Error (MSE), LogCosh, and Mean Absolute Error (MAE), each evaluated with different target defect probability values (0%, 10%, and 50%). Additionally, MSE was evaluated without a specific target defect probability. The resuls are presented in the table bellow:
+Four optimisation algorithms were tested to find optimal process parameters: Dual Annealing, Nelder-Mead, Powell, and Basin Hopping. Each algorithm requires a fitness function to minimise the defect probability. Three types of functions were compared: Mean Squared Error (MSE), LogCosh, and Mean Absolute Error (MAE), each evaluated with different target defect probability values (0%, 10%, and 50%). Additionally, MSE was evaluated without a specific target defect probability. The resuls are presented in the file bellow:
 
-![image](https://github.com/beatrizcoutinho5/ZDM_framework/assets/61502014/9f23325a-188c-4bc9-b03a-eadff00a5d1d)
+[optimisation_results.pdf](https://github.com/user-attachments/files/15875380/optimisation_results.pdf)
 
 ## **Repository Organization**
 
@@ -137,7 +144,7 @@ The publisher script will read the training data from publish it using MQTT, eve
 
 Below is a demonstration of the user interface, showcasing the real-time prediction, explanation, and optimization features integrated into the decision-support framework.
 
-https://github.com/beatrizcoutinho5/ZDM_framework/assets/61502014/13311e22-01d0-4352-b814-8648ba338cbd
+
 
 
 
