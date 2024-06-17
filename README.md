@@ -18,7 +18,7 @@ This repository contains the implementation of a decision-support framework tail
   
 ## Framework Overview and Architecture
 
-The developed framework allows defect prediction, enabling the proactive anticipation of defective products, by applying data-driven Machine Learning (ML) algorithms. Additionally, it incorporates recommendations for adjusting process parameters to mitigate defects and enhance overall process efficiency, using optimization algorithms. Lastly, the framework encompasses defect explanation, clarifying the underlying factors of defects resorting to Explainable Artificial Intelligence (XAI) methods. Besides the preventive and predictive models, the tool incorporates a PostgreSQL database for efficient data storage and graphical user interface (GUI) for the visualization of results. The framework was implemented in Python, with a Flask web application. HTML and JavaScript were used for the graphical components of the interface.
+The developed framework allows defect prediction, enabling the proactive anticipation of defective products, by applying data-driven Machine Learning (ML) algorithms. Additionally, it incorporates recommendations for adjusting process parameters to mitigate defects and enhance overall process efficiency, using optimization algorithms. Lastly, the framework encompasses defect explanation, clarifying the underlying factors of defects resorting to Explainable Artificial Intelligence (XAI) methods. Besides the preventive and predictive models, the tool incorporates a PostgreSQL database for efficient data storage and graphical user interface (GUI) for the visualization of results. The framework was implemented in Python, with a Flask web application. HTML, JavaScript and CSS were used for the graphical components of the interface.
 
 The framework structure is depicted in the figure below:
 
@@ -33,7 +33,7 @@ The prediction, explanation, and optimization features were developed as seperat
 
 The key features of this framework and their respective implementations are briefly describide bellow:
 
-- **Real-time Defect Prediction**: Uses Machine Learning (ML) algorithms to predict defects in real-time, enabling proactive intervention. The implemented algorithms include CatBoost, Support Vector Machine (SVM), XGBoost (XGB), Random Forest (RF), and an Ensemble of RF, XGB, and CatBoost, using the respective Python packages (`scikit-learn`, `XGBoost`, `CatBoost`).
+- **Real-time Defect Prediction**: Uses Machine Learning (ML) algorithms to predict defects in real-time, enabling proactive intervention. The implemented algorithms include CatBoost, XGBoost (XGB), Random Forest (RF), and an Ensemble of RF, XGB, and CatBoost, using the respective Python packages (`scikit-learn`, `XGBoost`, `CatBoost`).
 
 - **Explainability**: Incorporates XAI methods to provide insights into the factors influencing defect occurrence. SHAP and LIME methods are implemented using the `shap` and `lime` Python packages, respectively.
 
@@ -61,9 +61,6 @@ The decision-support framework aims to bring improvements in modern manufacturin
 
 Supervised learning methods were implemented, focusing on classification tasks. The SMOTE algorithm was applied to the training data to deal with imbalanced data. The resuls are presented in the table bellow:
 ![prediction_results](https://github.com/beatrizcoutinho5/ZDM_framework/assets/61502014/875850c8-9901-4587-b918-94d512b67b9c)
-
-
-
 
 ### Optimization
 
@@ -143,6 +140,12 @@ The publisher script will read the training data from publish it using MQTT, eve
 ### **UI Demonstration**
 
 Below is a demonstration of the user interface, showcasing the real-time prediction, explanation, and optimization features integrated into the decision-support framework.
+
+
+https://github.com/beatrizcoutinho5/ZDM_framework/assets/61502014/099ec6f9-804a-48c7-b967-9cce000f3f7e
+
+
+
 
 
 
